@@ -11,8 +11,8 @@ class Profile_User(models.Model):
     def __str__(self):
         return f'{self.user.username} Profile'
     
-    def save(self):
-        super().save()
+    def save(self, *args, **kwargs):
+        super(Profile_User, self).save(*args, **kwargs)
         img = Image.open(self.image.path)
         thumbnail_output_image_size = (300, 300)
         thumbnail_max_size = 300

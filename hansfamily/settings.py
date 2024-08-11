@@ -31,8 +31,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = False
+DEBUG = True
+# DEBUG = False
 
 ALLOWED_HOSTS = ['www.hansfamily.xyz', 'hansfamily.xyz', '172.16.2.55', '61.101.55.157' ]
 
@@ -140,19 +140,24 @@ USE_TZ = True
 
 
 
-# Static files (CSS, JavaScript, Images) # https://docs.djangoproject.com/en/5.1/howto/static-files/
+
+# Live Settings for Static / Media
+# Static 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static')]
-
-# STATIC_ROOT = '/django-project/site/public/static'
-# STATICFILES_DIRS = [
-#     "/django-project/site/public/static",  # /로 시작해야 함
-# ]
-
-# Media files
+STATIC_ROOT = '/django-project/site/public/static'
+# Media 
 MEDIA_URL = '/media/'
-# MEDIA_ROOT = '/django-project/site/public/media'  # /로 시작해야 함.
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/django-project/site/public/media'
+
+
+# Develop Settings for Static / Media
+# static
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static')]
+# STATICFILES_DIRS = ["/django-project/site/public/static", ]
+# Develop
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 
