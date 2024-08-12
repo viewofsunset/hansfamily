@@ -1,0 +1,466 @@
+
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+{% load static %}
+    
+{% block content %}
+
+
+
+
+
+{% include 'hans_ent/actor_profile_modal.html' %}
+{% include 'hans_ent/actor_upload_modal.html' %}
+{% include 'hans_ent/actor_profile_gallery_fullscreen_modal.html' %}
+
+
+<!--
+    메뉴바 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+
+    <div class="row" >
+        <div class="col-md-12">
+            <legend class="border-bottom mb-4">
+                    <br>
+                    <form method="POST" action="{% url 'hans-ent' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% for item in LIST_MENU_HANS_ENT %}
+                            <button type="submit" 
+                            {% if q_mysettings_hansent.menu_selected == item.0 %}
+                                class="btn btn-warning btn-sm" 
+                            {% else %}
+                                class="btn btn-dark btn-sm" 
+                            {% endif %}
+                            name="button-switch-streaming-menu-home" 
+                            value="{{ item.0 }}"
+                            >
+                                {{ item.1 }}
+                            </button>
+                        {% endfor %}
+                    </form>
+            </legend>
+
+        </div>
+        <hr>
+    </div>
+    
+
+<!--
+    컨텐츠 표시창 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+    <div class="row" >
+        <!-- COL 10 (화면 좌측)-->
+        <div class="col-md-10">
+            {% if q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.0.0 %}
+                
+                    {% include 'hans_ent/actor_list.html' %}
+               
+            {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.1.0 %}
+                
+                    {% include 'hans_ent/picture_list.html' %}
+                
+            {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.2.0 %}
+               
+                    {% include 'hans_ent/video_list.html' %}
+               
+            {% else %}
+            04
+            {% endif %}
+        </div>
+
+
+
+        <!-- COL 2 (화면 우측)-->
+        <div class="col-md-2" id="app-streaming" >
+            {% if q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.0.0 %}
+                
+                <button type="submit"class="btn btn-primary btn-sm" value="True" name="button-update-latest-javdatabase">
+                    UPDATE LATEST JAVDATABASE
+                </button>
+                <hr>  
+
+            {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.1.0 %}
+                
+                <button type="button" @click="f_streaming_picture_album_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-streaming-picture-album-upload-modal">
+                    Upload Picture Album
+                </button>
+                <hr>  
+                
+            {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.2.0 %}
+
+                <button type="button" @click="f_streaming_picture_album_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-streaming-picture-album-upload-modal">
+                    Upload Picture Album
+                </button>
+                <hr> 
+                 
+            {% else %}
+            04
+            {% endif %}
+        </div>
+    </div>
+
+
+<!--
+    자바스크립트 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+    <script>
+        
+        var post_streaming = createApp({
+            delimiters: ["[[", "]]"],
+            data() {
+            return {
+                api_url_fixed_local: 'http://localhost:8000', 
+                api_url_fixed: variables.API_URL,
+                api_url_fixed_media: variables.API_URL+'media/',
+                check_error: false,
+                message:'',
+            }
+            },
+            methods: {
+                refreshData() {
+                    axios.get(variables.API_URL+'streaming/')
+                    .then((response) => {
+                        console.log("streaming_get_refresh",response.data[0])
+                    })
+                },
+
+                // 우측 기능 버튼 클릭
+                f_streaming_video_album_upload_modal() {
+                    axios.post(variables.API_URL+'streaming_video_album_upload_modal/', {
+                        'selected_video_album_id': 'null',
+                        'messages': 'hello',
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }})
+                    .then((response) => {
+                        console.log('Video Album Upload 모달창으로 전송시작 ', response.data)
+                        post_streaming_video_album_upload_modal.f_reset_return()
+                        post_streaming_video_album_upload_modal.f_sync_data_to_video_album_upload_modal(response.data);
+                    })
+                    .catch(() => {
+                        console.log('Error! f_streaming_video_album_upload_modal')
+                    })
+                },
+
+                f_streaming_actor_upload_modal() {
+                    axios.post(variables.API_URL+'streaming_actor_upload_modal/', {
+                        'selected_actor_id': 'null',
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }})
+                    .then((response) => {
+                        console.log('############################# 0', response.data)
+                        post_streaming_actor_upload_modal.f_reset_return()
+                        post_streaming_actor_upload_modal.f_sync_data_to_actor_upload_modal(response.data);
+                    })
+                    .catch(() => {
+                        console.log('Error! f_streaming_actor_upload_modal')
+                    })
+                },
+
+                f_streaming_picture_album_upload_modal() {
+                    axios.post(variables.API_URL+'streaming_picture_album_upload_modal/', {
+                        'selected_picture_album_id': 'null',
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }})
+                    .then((response) => {
+                        console.log('############################# 0', response.data)
+                        post_streaming_picture_album_upload_modal.f_reset_return()
+                        post_streaming_picture_album_upload_modal.f_sync_data_to_picture_album_upload_modal(response.data);
+                    })
+                    .catch(() => {
+                        console.log('Error! streaming_picture_album_upload_modal')
+                    })
+                },
+
+
+
+
+
+
+
+                                
+                // f_video_upload_modal_view() {
+                //     axios.post(variables.API_URL+'streaming_video_create_modal/', 
+                //     {'button': 'modal_video_upload_start'},
+                //     { headers: {
+                //         'Content-Type': 'multipart/form-data',
+                //         'X-CSRFToken': "{{ csrf_token }}"
+                //     }}
+                //     )
+                //     .then((response) => {
+                //         this.refreshData();
+                //         post_streaming_video_album_upload_modal.f_reset_return()
+                //     })
+                //     .catch(() => {
+                //         console.log('Error! f_video_upload_modal_view')
+                //     })
+                // },
+
+                // f_streaming_adult_video_album_upload_modal() {
+                //     axios.post(variables.API_URL+'streaming_adult_video_album_upload_modal/', {
+                //     }, {
+                //     headers: {
+                //         'Content-Type': 'multipart/form-data',
+                //         'X-CSRFToken': "{{ csrf_token }}"
+                //     }})
+                //     .then((response) => {
+                //         console.log('Adult Video Album 정보 전송 시작', response.data)
+                //         post_streaming_adult_video_album_upload_modal.f_reset_return()
+                //         post_streaming_adult_video_album_upload_modal.f_sync_data_to_adult_video_album_upload_modal(response.data);
+                //     })
+                //     .catch(() => {
+                //         console.log('Error! f_streaming_adult_actor_profile_modal')
+                //     })
+                // },
+
+                // f_button_adult_album_upload_modal(data) {
+                //     post_streaming_adult_picture_album_upload_modal.f_reset_return()
+                //     post_streaming_adult_picture_album_upload_modal.f_status_set({'status': data})
+                // },
+
+                f_button_adult_album_upload_4kup() {
+                    axios.post(variables.API_URL+'streaming_adult_picture_album_list/', 
+                    {'button': 'album_update_4kup'},
+                    { headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }}
+                    )
+                    .then((response) => {
+                        post_streaming_adult_picture_album_list.refreshData();
+                    })
+                    .catch(() => {
+                        console.log('Error! f_button_adult_album_upload_4kup')
+                    })
+                },
+
+                // f_button_adult_album_to_pickle_file() {
+                //     axios.post(variables.API_URL+'streaming_adult_picture_album_list/', 
+                //     {'button': 'save_album_to_pickle'},
+                //     { headers: {
+                //         'Content-Type': 'multipart/form-data',
+                //         'X-CSRFToken': "{{ csrf_token }}"
+                //     }}
+                //     )
+                //     .then((response) => {
+                //         post_streaming_adult_picture_album_list.refreshData();
+                //     })
+                //     .catch(() => {
+                //         console.log('Error! f_button_adult_album_to_pickle_file')
+                //     })
+                // },
+
+                f_button_adult_album_upload_4kup_pickle() {
+                    console.log('hello')
+                    axios.post(variables.API_URL+'streaming_adult_picture_album_list/', 
+                    {'button': 'album_update_4kup_pickle'},
+                    { headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }}
+                    )
+                    .then((response) => {
+                        post_streaming_adult_picture_album_list.refreshData();
+                    })
+                    .catch(() => {
+                        console.log('Error! f_button_adult_album_upload_4kup_pickle')
+                    })
+                },
+
+                
+
+                // f_button_upload_picture_model () {
+                //     post_streaming_adult_model_upload_modal.f_reset_return()
+                //     console.log('reset modal')
+                // },
+
+                // f_button_model_create_from_album_db() {
+                //     axios.post(variables.API_URL+'streaming_adult_model_upload/', 
+                //     {'button': 'model_update_from_album_db'},
+                //     { headers: {
+                //         'Content-Type': 'multipart/form-data',
+                //         'X-CSRFToken': "{{ csrf_token }}"
+                //     }}
+                //     )
+                //     .then((response) => {
+                //         post_streaming_adult_model_list.refreshData();
+                //     })
+                //     .catch(() => {
+                //         console.log('Error! f_button_model_create_from_album_db')
+                //     })
+                // },
+
+            },
+            mounted: function() {
+                this.refreshData()
+            }
+        }).mount('#app-streaming')
+    
+
+    </script>
+    
+
+
+
+
+    <style scoped>
+        .image-container {
+            position: relative;
+            display: inline-block; /* Or use another display type that suits your layout */
+        }
+        
+        img {
+            display: block; /* Removes bottom space/line */
+            /* width: 100%; /* Adjust this as per your requirement */
+            height: auto; /* Adjust this as per your requirement */
+        }
+        
+        .text-overlay {
+            position: absolute;
+            top: 0; /* Adjust this to place your text */
+            left: 0; /* Adjust this to place your text */
+            width: 100%; /* Adjust this to match your image's width */
+            color: magenta; /* Text color */
+            font-size: 20px; /* Adjust this as per your requirement */
+            text-align: center; /* Aligns the text horizontally */
+            padding: 5px; /* Adjust this as per your requirement */
+        }
+
+        .grid-container {
+        display: grid;
+        gap: 10px; /* Space between boxes */
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Default: fit as many 150px boxes as possible */
+        }
+
+        .box {
+        height: 375px; /* Fixed height for all boxes */
+        background-color: #f0f0f0; /* Example styling */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        }
+
+        @media (max-width: 800px) {
+        .grid-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        }
+
+        @media (min-width: 1200px) and (max-width: 1500px) {
+        .grid-container {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        }
+
+        @media (min-width: 1500px) and (max-width: 1900px) {
+        .grid-container {
+            grid-template-columns: repeat(5, 1fr);
+        }
+        }
+
+        @media (min-width: 1900px) and (max-width: 2100px) {
+        .grid-container {
+            grid-template-columns: repeat(6, 1fr);
+        }
+        }
+
+        @media (min-width: 2100px) and (max-width: 2400px) {
+        .grid-container {
+            grid-template-columns: repeat(7, 1fr);
+        }
+        }
+
+        @media (min-width: 2400px) and (max-width: 2800px) {
+        .grid-container {
+            grid-template-columns: repeat(8, 1fr);
+        }
+        }
+
+        @media (min-width: 2800px) and (max-width: 3200px) {
+        .grid-container {
+            grid-template-columns: repeat(9, 1fr);
+        }
+        }
+
+        @media (min-width: 3200px) {
+        .grid-container {
+            grid-template-columns: repeat(10, 1fr);
+        }
+        }
+
+
+        
+            
+        .gallery-container {
+        display: grid;
+        gap: 10px; /* Space between boxes */
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Default: fit as many 150px boxes as possible */
+        }
+
+        .box {
+        height: 375px; /* Fixed height for all boxes */
+        background-color: #f0f0f0; /* Example styling */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        }
+
+
+        
+        @media (max-width: 800px) {
+        .gallery-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        }
+
+        @media (min-width: 1200px) and (max-width: 1500px) {
+        .gallery-container {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        }
+
+        @media (min-width: 1500px)  {
+        .gallery-container {
+            grid-template-columns: repeat(5, 1fr);
+        }
+        }
+
+            
+        .stillimage-container {
+        display: grid;
+        gap: 10px; /* Space between boxes */
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Default: fit as many 150px boxes as possible */
+        }
+
+        .stillimage-box {
+        height: 75px; /* Fixed height for all boxes */
+        background-color: #f0f0f0; /* Example styling */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        }
+
+        @media (max-width: 1200px) {
+        .stillimage-container {
+            grid-template-columns: repeat(10, 1fr);
+        }
+        }
+
+
+
+    </style>
+
+{% endblock content %}
+
+
+

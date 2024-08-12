@@ -7,6 +7,7 @@ from PIL import Image
 class Profile_User(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE) 
     image = models.ImageField(default='profile_pics/default.jpg', upload_to='profile_pics')
+    check_discard = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.user.username} Profile'
@@ -17,6 +18,7 @@ class Profile_User(models.Model):
         thumbnail_output_image_size = (300, 300)
         thumbnail_max_size = 300
         original_width, original_height = img.size
+        
 
         if original_width > 300 and original_height > 300:
             # Calculate the scaling factor for width and height
@@ -48,10 +50,14 @@ class Profile_User(models.Model):
 
 
 
-list_authorization = ['home', 'calendar', 'study', 'entertainment', 'secret']
+list_authorization = ['home', 'family', 'study', 'entertainment', 'hans_ent', 'secret']
 def default_list_allowed():
-    return ['home', 'calendar']
+    return ['home']
 
 class Authorization(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     list_allowed = models.JSONField(default=default_list_allowed)
+    check_discard = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f'{self.user.username} Authorization'
