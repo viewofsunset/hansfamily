@@ -7,21 +7,40 @@ from django.contrib import messages
 from django.contrib.auth.models import User 
 
 from webui.forms import user_register_form, user_update_form, profile_update_form
-from webui.models import Profile_User
+from webui.models import Profile_User, Authorization
 
 
+
+def f_check_authority(request, page_category):
+    q_user = request.user 
+    list_allowed = q_user.authorization.list_allowed
+    print('list_allowed', list_allowed)
+    if page_category in list_allowed:
+        return True 
+    else:
+        return False
+
+
+@login_required
 def index(request):
-    # return HttpResponse("Hello world. this is hans family root page")
-    # PreprocessingSettings.objects.all().delete()
-    # MySettings.objects.all().delete()
-    # print('deleted!!!')
-
+    page_category = 'home'
     template = 'home.html'
     context={'key1': 'Good!'}
     # create_user_settings(request)
     # create_default_settings(request)
     return render(request, template, context)
 
+
+@login_required
+def about(request):
+    page_category = 'study'
+    check_authority = f_check_authority(request, page_category)
+    if check_authority:
+        template = 'about.html'
+    else:
+        template = 'users/unauthorized.html'
+    context={'key1': 'Good!'}
+    return render(request, template, context)
 
 
 
@@ -33,6 +52,7 @@ def register_user(request):
             q_user = User.objects.last() 
             data = {'user': q_user}
             Profile_User.objects.create(**data)
+            Authorization.objects.create(**data)
 
             messages.success(request, f'Your account has been created! You are now able to log in!')
             return redirect('login')

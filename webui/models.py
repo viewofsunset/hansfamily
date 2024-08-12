@@ -45,3 +45,13 @@ class Profile_User(models.Model):
             # Crop the image
             thumbnail_img = thumbnail_img.crop((left, top, right, bottom))
             thumbnail_img.save(self.image.path)
+
+
+
+list_authorization = ['home', 'calendar', 'study', 'entertainment', 'secret']
+def default_list_allowed():
+    return ['home', 'calendar']
+
+class Authorization(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    list_allowed = models.JSONField(default=default_list_allowed)

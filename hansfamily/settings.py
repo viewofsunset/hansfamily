@@ -52,13 +52,14 @@ INSTALLED_APPS = [
     'hans_ent',
 
     # 3rd party app
-    'bootstrap4',
+    'bootstrap4', # pip install django-bootstrap4
     'crispy_forms', # pip install django-crispy-forms
     'crispy_bootstrap4', # pip install crispy-bootstrap4
 ]
 
 # 리스트 등록하지 않지만 추가로 설치해야 하는것들
 # pip install psycopg2
+# pip install pillow
 
 
 

@@ -1,0 +1,30 @@
+
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+{% load static %}
+    
+{% block content %}
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+
+        <br>
+
+        <div class="content-section">
+            <h2>This is Unauthorized Page</h2>
+                
+            <div class="border-top pt-3">
+                <small class="text-muted">
+                    <a class="ml-2" href="{% url 'home' %}">Go Back to Home</a>
+                </small>
+            </div>
+    
+        </div>
+    </div>
+    <div class="col-md-3"></div>
+</div>
+    
+
+{% endblock content %}
