@@ -49,6 +49,10 @@ INSTALLED_APPS = [
     
     # user app
     'webui',
+    'family',
+    'study',
+    'entertainment',
+    'secret',
     'hans_ent',
 
     # 3rd party app
