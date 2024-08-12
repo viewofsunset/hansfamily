@@ -5,5 +5,5 @@ from hans_ent.views import *
 
 
 urlpatterns = [
-    path("", index, name="hansent-home"),
+    path("", index, name="hans-ent-home"),
 ]

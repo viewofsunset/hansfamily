@@ -85,13 +85,23 @@ def hans_ent(request):
         q_user = request.user
         q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
     else:
+        q_mysettings_hansent = None
         template = 'users/unauthorized.html'
     context={
         'key1': 'Good!',
         'LIST_MENU_HANS_ENT': LIST_MENU_HANS_ENT,
         'q_mysettings_hansent': q_mysettings_hansent,
         }
-    return render(request, template, context)
+    if request.method == 'GET':
+        return render(request, template, context)
+    if request.method == 'POST':
+        menu_selected = request.POST.get('button-switch-hans-ent-home-menu')
+        if menu_selected is not None:
+            data = {
+                'menu_selected': menu_selected
+            }
+            MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
+        return redirect('hans-ent')
 
 @login_required
 def secret(request):
