@@ -59,11 +59,16 @@ INSTALLED_APPS = [
     'bootstrap4', # pip install django-bootstrap4
     'crispy_forms', # pip install django-crispy-forms
     'crispy_bootstrap4', # pip install crispy-bootstrap4
+    'rest_framework',  # pip install djangorestframework
+
 ]
 
 # 리스트 등록하지 않지만 추가로 설치해야 하는것들
 # pip install psycopg2
 # pip install pillow
+# pip install markdown 
+# pip install django-filter  # Filtering support
+
 
 
 
@@ -146,23 +151,27 @@ USE_TZ = True
 
 
 
-# Live Settings for Static / Media
-# Static 
+# # Live Settings for Static / Media
+# # Static 
+# STATIC_URL = '/static/'
+# STATIC_ROOT = '/django-project/site/public/static'
+# # Media 
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = '/django-project/site/public/media'
+
+
+# Develop Settings for Static / Media
+# Static
 STATIC_URL = '/static/'
-STATIC_ROOT = '/django-project/site/public/static'
-# Media 
+STATICFILES_DIRS = ["/django-project/site/public/static", ]
+# Media
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/django-project/site/public/media'
 
 
-# Develop Settings for Static / Media
-# static
 # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static')]
-# STATICFILES_DIRS = ["/django-project/site/public/static", ]
-# Develop
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 

@@ -127,14 +127,36 @@ class Actor_Pic(models.Model):
 
 
 
+LIST_NUM_DISPLAY_IN_PAGE = 100
+LIST_ACTOR_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
+LIST_PICTURE_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
+LIST_VIDEO_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
 
 class MySettings_HansEnt(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True) 
     menu_selected = models.CharField(choices=LIST_MENU_HANS_ENT, default=LIST_MENU_HANS_ENT[0][0], blank=True)
+    # actor
     actor_selected = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
     actor_pic_selected = models.ForeignKey(Actor_Pic, on_delete=models.SET_NULL, null=True, blank=True)
+    selected_field_actor = models.CharField(max_length=50, default=LIST_ACTOR_FIELD[0], blank=True)
+    check_field_ascending_actor = models.BooleanField(default=True)
+    count_page_number_actor = models.IntegerField(default=1)
+    list_searched_actor_id = models.JSONField(null=True, blank=True)
+
+    # picture
+    selected_field_picture = models.CharField(max_length=50, default=LIST_PICTURE_FIELD[0], blank=True)
+    check_field_ascending_picture = models.BooleanField(default=True)
+    count_page_number_picture = models.IntegerField(default=1)
+    list_searched_picture_id = models.JSONField(null=True, blank=True)
+
+    # video
+    selected_field_video = models.CharField(max_length=50, default=LIST_VIDEO_FIELD[0], blank=True)
+    check_field_ascending_video = models.BooleanField(default=True)
+    count_page_number_video = models.IntegerField(default=1)
+    list_searched_video_id = models.JSONField(null=True, blank=True)
+
     check_discard = models.BooleanField(default=False)
-    
+
     def __str__(self):
         return f'{self.user.username} MySettings_HansEnt'
 

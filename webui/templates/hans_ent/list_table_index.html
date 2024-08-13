@@ -1,0 +1,64 @@
+
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+{% load static %}
+    
+
+
+<table class="table">
+    <tr>
+        <!-- Result display -->
+        <td>
+            <b>Total: [[ total_num_registered_item ]]</b>
+        </td>
+        <td>
+            <b>Result : [[ total_num_searched_item ]]</b>
+        </td>
+     
+        <!-- Searching -->
+        <td>
+            <strong>검색 </strong>
+        </td>
+        <td>
+            <input type="text" @keyup.enter="f_search_keyword_update" v-model="inputTextKeyword" class="form-control" placeholder="Hit Enter Key for Search">
+        </td>
+        <td>
+            <button type="button" @click="f_search_keyword_button" class="btn btn-info btn-md">
+                Search
+            </button>
+            &nbsp; 
+            <button type="button" @click="f_reset_search_result_button" class="btn btn-warning btn-md">
+                Reset
+            </button>
+        </td>
+        <!-- Sorting -->
+        <td v-for="item, index in list_field_sorting" :key="index">
+            <button type="button" @click="f_sorting_items(item)"  class="btn btn-link btn-sm">
+                <strong>
+                    [[ item ]]
+                </strong>
+            </button>
+        </td>
+        <!-- Pagination -->
+        <td>
+            <button type="button" @click="f_page_number_min"  class="btn btn-link btn-sm">
+                <strong>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-square-fill" viewBox="0 0 16 16">
+                        <path d="M16 14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2zm-4.5-6.5H5.707l2.147-2.146a.5.5 0 1 0-.708-.708l-3 3a.5.5 0 0 0 0 .708l3 3a.5.5 0 0 0 .708-.708L5.707 8.5H11.5a.5.5 0 0 0 0-1"/>
+                        </svg>
+                        [[ count_display_number_min ]]
+                </strong>
+            </button>
+            &nbsp; 
+            <button type="button" @click="f_page_number_max" class="btn btn-link btn-sm">
+                <strong>
+                    [[ count_display_number_max ]]
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-square-fill" viewBox="0 0 16 16">
+                        <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"/>
+                        </svg>
+                </strong>
+            </button>
+            
+        </td>
+    </tr>
+</table>

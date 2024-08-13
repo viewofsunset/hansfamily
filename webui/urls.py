@@ -10,7 +10,11 @@ urlpatterns = [
     path("family/", family, name="family"),
     path("study/", study, name="study"),
     path("entertainment/", entertainment, name="entertainment"),
+    
     path("hans_ent/", hans_ent, name="hans-ent"),
+    path("hans_ent_actor_list", hans_ent_actor_list_view, name="hans-ent-actor-list"),
+    path("hans_ent_actor_list_search/", hans_ent_actor_list_search_view, name="hans-ent-actor-list-search"),
+
     path("secret/", secret, name="secret"),
 
     path('register/', register_user, name="register-user"),

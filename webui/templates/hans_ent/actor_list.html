@@ -7,6 +7,269 @@
 
 
 
-actor_list
+<div class="row" id="hans-ent-app-actor-list">
+    <div class="col-md-12">
+        <!-- Search Sort and Pagination-->
+        <div>
+            {% include 'list_table_index.html' %}
+        </div>
+        
+        <div class="grid-container">
+            <div v-for="(data_actor, index) in list_serialized_data_actor" :key="index" class="card" >
+                <div class="box">
+                    <div class="card-body">
+                        <div v-if="data_actor.image_cover">
+                            <button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-streaming-actor-profile-modal">
+                                <img :src="api_url_fixed + data_actor.image_thumbnail" width="200">
+                            </button>
+                        </div>
+                        <div v-else>
+                            <button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-streaming-actor-profile-modal">
+                                <img :src="data_actor.cover_image_url" width="200">
+                            </button>
+                        </div>
+                        <div class="text-center">
+                            <strong>
+                                [[ data_actor.name ]]
+                            </strong>
+                            [[ data_actor.id ]]
+                            <br>
+                            <!-- 
+                                Icons  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            --> 
+                            <div class="text-center">
+                                <button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-streaming-actor-profile-modal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
+                                        <path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
+                                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                                    </svg>                            
+                                </button>
+                                &nbsp;
+                                <button @click="f_hans_ent_actor_upload_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-streaming-actor-upload-modal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                        <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                                    </svg>
+                                </button>
+                                &nbsp;
+                            </div> 
+                            
+                            
+                        </div>  
+                    </div>
+                </div>
+            </div>
+        </div>
 
-{% endblock content %}
+
+    </div>
+</div>
+
+
+
+<script>
+    // Adult album        
+    var post_hans_ent_actor_list = createApp({
+        delimiters: ["[[", "]]"],
+        data() {
+        return {
+            // api_url_fixed_local: 'http://localhost:8000', 
+            // api_url_fixed: variables.API_URL,
+            // api_url_fixed_media: 'media/',
+            
+            list_menu_type: [],
+            list_field_sorting: [],
+            list_serialized_data_actor: [],
+
+            selected_actor_id: '',
+            selected_sorting_field: '',
+
+            inputTextKeyword: '',
+            searchData: '',
+
+            total_num_registered_item: '',
+            total_num_searched_item: '',
+            count_page_number_min: '',
+            count_page_number_max: '',
+            count_page_number: '',
+
+            message:'',
+        }
+        },
+        methods: {
+            refreshData() {
+                axios.get('hans_ent_actor_list')
+                .then((response) => {
+                    this.list_field_sorting = response.data['list_field_sorting']
+                    this.list_serialized_data_actor = response.data['list_serialized_data_actor']
+                    this.total_num_registered_item = response.data['total_num_registered_item']
+                    this.total_num_searched_item = response.data['total_num_searched_item']
+                    this.count_page_number_min = response.data['list_count_page_number'][0]
+                    this.count_page_number_max = response.data['list_count_page_number'][1]
+                    this.count_page_number = response.data['list_count_page_number'][2]
+
+                    console.log("hans_ent_actor_list_view")
+                })
+            },
+                
+            f_sorting_items(event) {
+                this.selected_sorting_field = event
+                console.log('initiated f_sorting_items', event)
+                axios.post('hans_ent_actor_list/', {
+                    'button': 'sorting_items',
+                    'sort_by': this.selected_sorting_field
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })
+                .then((response) => {
+                    this.refreshData()
+                    console.log(response)
+                })
+                .catch(() => {
+                    console.log('Error! 1-1')
+                })
+            },
+            
+            f_search_keyword_update(event) {
+                this.inputTextKeyword = event.target.value
+                searchData = this.inputTextKeyword
+                axios.get('hans_ent_actor_list_search/?keyword='+searchData)
+                .then((response) => {
+                    this.refreshData()
+                    console.log(response)
+                })
+                .catch(() => {
+                    console.log('Error! 3')
+                })
+            },
+
+            f_reset_return() {
+                this.selected_sorting_field = ''
+                this.inputTextKeyword = ''
+                this.message =''
+            },
+
+            f_search_keyword_button() {
+                searchData = this.inputTextKeyword
+                axios.get('hans_ent_actor_list_search/?keyword='+searchData)
+                .then((response) => {
+                    this.refreshData()
+                    console.log(response)
+                })
+                .catch(() => {
+                    console.log('Error! 3')
+                })
+            },
+
+            f_reset_search_result_button() {
+                this.f_reset_return()
+                axios.post('hans_ent_actor_list_search/', {
+                    'button': 'reset'
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })
+                .then((response) => {
+                    console.log("response::", response);
+                    this.inputTextKeyword = ''
+                    this.refreshData()
+                })
+                .catch(() => {
+                    console.log('Error! 1-6')
+                })
+            },
+
+            f_page_number_min() {
+                axios.post('hans_ent_actor_list/', {
+                    'button': 'page_number_min',
+                    'count_page_number': this.count_page_number,
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })
+                .then((response) => {
+                    console.log("response::", response);
+                    this.refreshData()
+                })
+                .catch(() => {
+                    console.log('Error!')
+                })
+            },
+
+            f_page_number_max() {
+                axios.post('hans_ent_actor_list/', {
+                    'button': 'page_number_max',
+                    'count_page_number': this.count_page_number,
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })
+                .then((response) => {
+                    console.log("response::", response);
+                    this.refreshData()
+                })
+                .catch(() => {
+                    console.log('Error!')
+                })
+            },
+
+
+            // icon pannel
+            f_hans_ent_actor_profile_modal(event) {
+                this.selected_actor_id = event
+                console.log('############################ from list', this.selected_actor_id)
+                axios.post('hans_ent_actor_profile_modal/', {
+                    'selected_actor_id': this.selected_actor_id,
+                    'modal': 'profile'
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })
+                .then((response) => {
+                    post_hans_ent_actor_profile_modal.f_sync_data_to_actor_profile_modal(response.data);
+                    console.log('0')
+                })
+                .catch(() => {
+                    console.log('Error! f_hans_ent_actor_profile_modal')
+                })
+            },
+
+            // icon pannel
+            f_hans_ent_actor_upload_modal(event) {
+                this.selected_actor_id = event
+                console.log('############################# 1',this.selected_actor_id)
+				axios.post('hans_ent_actor_upload_modal/', {
+                    'selected_actor_id': this.selected_actor_id,
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })  
+                .then((response) => {
+                    post_hans_ent_actor_upload_modal.f_sync_data_to_actor_upload_modal(response.data)
+                })
+                .catch(() => {
+                    console.log('Error! f_hans_ent_actor_upload_modal')
+                })
+            },
+            
+
+
+        },
+        mounted: function() {
+            this.refreshData()
+        }
+    }).mount('#app-hans-ent-actor-list')
+
+</script>

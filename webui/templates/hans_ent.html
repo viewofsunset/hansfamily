@@ -7,18 +7,14 @@
     
 {% block content %}
 
+    {% include 'hans_ent/actor_profile_modal.html' %}
+    {% include 'hans_ent/actor_upload_modal.html' %}
+    {% include 'hans_ent/actor_profile_gallery_fullscreen_modal.html' %}
 
 
-
-
-{% include 'hans_ent/actor_profile_modal.html' %}
-{% include 'hans_ent/actor_upload_modal.html' %}
-{% include 'hans_ent/actor_profile_gallery_fullscreen_modal.html' %}
-
-
-<!--
-    메뉴바 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
--->
+    <!--
+        메뉴바 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
 
     <div class="row" >
         <div class="col-md-12">
@@ -48,9 +44,9 @@
     
     
 
-<!--
-    컨텐츠 표시창 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
--->
+    <!--
+        컨텐츠 표시창 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
     <div class="row" >
         <!-- COL 10 (화면 좌측)-->
         <div class="col-md-10">
@@ -103,9 +99,9 @@
     </div>
 
 
-<!--
-    자바스크립트 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
--->
+    <!--
+        자바스크립트 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
     <script>
         
         var post_streaming = createApp({
@@ -183,52 +179,6 @@
                     })
                 },
 
-
-
-
-
-
-
-                                
-                // f_video_upload_modal_view() {
-                //     axios.post(variables.API_URL+'streaming_video_create_modal/', 
-                //     {'button': 'modal_video_upload_start'},
-                //     { headers: {
-                //         'Content-Type': 'multipart/form-data',
-                //         'X-CSRFToken': "{{ csrf_token }}"
-                //     }}
-                //     )
-                //     .then((response) => {
-                //         this.refreshData();
-                //         post_streaming_video_album_upload_modal.f_reset_return()
-                //     })
-                //     .catch(() => {
-                //         console.log('Error! f_video_upload_modal_view')
-                //     })
-                // },
-
-                // f_streaming_adult_video_album_upload_modal() {
-                //     axios.post(variables.API_URL+'streaming_adult_video_album_upload_modal/', {
-                //     }, {
-                //     headers: {
-                //         'Content-Type': 'multipart/form-data',
-                //         'X-CSRFToken': "{{ csrf_token }}"
-                //     }})
-                //     .then((response) => {
-                //         console.log('Adult Video Album 정보 전송 시작', response.data)
-                //         post_streaming_adult_video_album_upload_modal.f_reset_return()
-                //         post_streaming_adult_video_album_upload_modal.f_sync_data_to_adult_video_album_upload_modal(response.data);
-                //     })
-                //     .catch(() => {
-                //         console.log('Error! f_streaming_adult_actor_profile_modal')
-                //     })
-                // },
-
-                // f_button_adult_album_upload_modal(data) {
-                //     post_streaming_adult_picture_album_upload_modal.f_reset_return()
-                //     post_streaming_adult_picture_album_upload_modal.f_status_set({'status': data})
-                // },
-
                 f_button_adult_album_upload_4kup() {
                     axios.post(variables.API_URL+'streaming_adult_picture_album_list/', 
                     {'button': 'album_update_4kup'},
@@ -244,22 +194,6 @@
                         console.log('Error! f_button_adult_album_upload_4kup')
                     })
                 },
-
-                // f_button_adult_album_to_pickle_file() {
-                //     axios.post(variables.API_URL+'streaming_adult_picture_album_list/', 
-                //     {'button': 'save_album_to_pickle'},
-                //     { headers: {
-                //         'Content-Type': 'multipart/form-data',
-                //         'X-CSRFToken': "{{ csrf_token }}"
-                //     }}
-                //     )
-                //     .then((response) => {
-                //         post_streaming_adult_picture_album_list.refreshData();
-                //     })
-                //     .catch(() => {
-                //         console.log('Error! f_button_adult_album_to_pickle_file')
-                //     })
-                // },
 
                 f_button_adult_album_upload_4kup_pickle() {
                     console.log('hello')
@@ -277,42 +211,15 @@
                         console.log('Error! f_button_adult_album_upload_4kup_pickle')
                     })
                 },
-
                 
-
-                // f_button_upload_picture_model () {
-                //     post_streaming_adult_model_upload_modal.f_reset_return()
-                //     console.log('reset modal')
-                // },
-
-                // f_button_model_create_from_album_db() {
-                //     axios.post(variables.API_URL+'streaming_adult_model_upload/', 
-                //     {'button': 'model_update_from_album_db'},
-                //     { headers: {
-                //         'Content-Type': 'multipart/form-data',
-                //         'X-CSRFToken': "{{ csrf_token }}"
-                //     }}
-                //     )
-                //     .then((response) => {
-                //         post_streaming_adult_model_list.refreshData();
-                //     })
-                //     .catch(() => {
-                //         console.log('Error! f_button_model_create_from_album_db')
-                //     })
-                // },
-
             },
             mounted: function() {
                 this.refreshData()
             }
         }).mount('#app-streaming')
     
-
     </script>
     
-
-
-
 
     <style scoped>
         .image-container {
@@ -456,8 +363,6 @@
             grid-template-columns: repeat(10, 1fr);
         }
         }
-
-
 
     </style>
 
