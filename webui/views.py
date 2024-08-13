@@ -148,8 +148,9 @@ def hans_ent(request):
             MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
         return redirect('hans-ent')
 
-
-def hans_ent_actor_list_view(request):
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_actor_list(request):
     import datetime
     ls_today = datetime.date.today()
     q_user = request.user
@@ -221,7 +222,9 @@ def hans_ent_actor_list_view(request):
         return JsonResponse(jsondata, safe=False)
     
 
-def hans_ent_actor_list_search_view(request):
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_actor_list_search(request):
     q_user = request.user
     q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
 
@@ -245,6 +248,92 @@ def hans_ent_actor_list_search_view(request):
             reset_hans_ent_actor_list(q_mysettings_hansent)
         return redirect('hans-ent-actor-list')
 
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_actor_profile_modal(request):
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
+
+    if request.method == "GET":
+        jsondata = {}   
+        return JsonResponse(jsondata, safe=False)
+    if request.method == "POST":
+        """
+        Actor 관련 정보 + Actor가 참여한 모든 앨범(Picture, Video, Music, Anything) 정보를 표시
+        """
+        print(request.POST,)
+        selected_serialized_data_actor = {}
+        list_serialized_data_video_album = {}
+        list_serialized_data_picture_album = {}
+        
+        # 받아야 하는 정보 수집하기 Actor or Album ##############################################
+        selected_actor_id_str = request.POST.get('selected_actor_id')
+        selected_actor_id_str = None if selected_actor_id_str in LIST_STR_NONE_SERIES else selected_actor_id_str
+        if selected_actor_id_str is not None and selected_actor_id_str != '':
+            selected_actor_id = int(selected_actor_id_str)
+            q_actor = Actor.objects.get(id=selected_actor_id)
+        else:
+            q_actor = None
+        print('selected actor: ', q_actor)
+
+        selected_picture_album_id_str = request.POST.get('selected_picture_album_id')
+        selected_picture_album_id_str = None if selected_picture_album_id_str in LIST_STR_NONE_SERIES else selected_picture_album_id_str
+        if selected_picture_album_id_str is not None and selected_picture_album_id_str != '':
+            selected_picture_album_id = int(selected_picture_album_id_str)
+            q_picture_album = Picture_Album.objects.get(id=selected_picture_album_id)
+            if q_picture_album is not None:
+                q_actor = q_picture_album.main_actor
+        else:
+            q_picture_album = None
+        print('q_picture_album: ', q_picture_album)
+        
+        selected_video_album_id_str = request.POST.get('selected_video_album_id')
+        selected_video_album_id_str = None if selected_video_album_id_str in LIST_STR_NONE_SERIES else selected_video_album_id_str
+        if selected_video_album_id_str is not None and selected_video_album_id_str != '':
+            selected_video_album_id = int(selected_video_album_id_str)
+            q_video_album = Video_Album.objects.get(id=selected_video_album_id)
+            if q_video_album is not None:
+                q_actor = q_video_album.main_actor
+        else:
+            q_video_album = None
+        print('q_video_album: ', q_video_album)
+
+        # 보내야 하는 정보 수집하기 ###############################################################
+        if q_actor is not None:
+            print('보내는 Data 수집')
+            selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
+            qs_video_album = Video_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
+            qs_picture_album = Picture_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
+            print('qs_video_album', qs_video_album)
+            print('qs_picture_album', qs_picture_album)
+            # print('qs_music_album', qs_music_album)
+            if qs_picture_album is not None and len(qs_picture_album) > 0:
+                list_serialized_data_picture_album = Picture_Album_Detail_Serializer(qs_picture_album, many=True).data
+            if qs_video_album is not None and len(qs_video_album) > 0:
+                list_serialized_data_video_album = Video_Album_Detail_Serializer(qs_video_album, many=True).data
+            
+        jsondata = {
+            'selected_serialized_data_actor': selected_serialized_data_actor,
+            'list_serialized_data_picture_album': list_serialized_data_picture_album,
+            'list_serialized_data_video_album': list_serialized_data_video_album,
+        }
+        print('jsondata', jsondata)
+        return JsonResponse(jsondata, safe=False)
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_actor_upload_modal(request):
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
+    
+    if request.method == "GET":
+        jsondata = {}   
+        return JsonResponse(jsondata, safe=False)
+    if request.method == "POST":
+        jsondata = {}
+        return JsonResponse(jsondata, safe=False)
 
 
 #############################################################################################################################################

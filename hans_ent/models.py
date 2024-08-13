@@ -136,6 +136,25 @@ class Actor_Pic(models.Model):
 
 
 
+class Picture_Album(models.Model):
+    main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
+    title = models.CharField(max_length=200, null=True, blank=True)
+    check_discard = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f'{self.title} Picture_Album'
+
+
+
+class Video_Album(models.Model):
+    main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
+    title = models.CharField(max_length=200, null=True, blank=True)
+    check_discard = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.title} Video_Album'
+
+
 
 LIST_NUM_DISPLAY_IN_PAGE = 100
 LIST_ACTOR_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]

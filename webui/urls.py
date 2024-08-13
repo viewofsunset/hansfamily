@@ -11,9 +11,12 @@ urlpatterns = [
     path("study/", study, name="study"),
     path("entertainment/", entertainment, name="entertainment"),
     
+    # hans_ent
     path("hans_ent/", hans_ent, name="hans-ent"),
-    path("hans_ent_actor_list", hans_ent_actor_list_view, name="hans-ent-actor-list"),
-    path("hans_ent_actor_list_search/", hans_ent_actor_list_search_view, name="hans-ent-actor-list-search"),
+    path("hans_ent_actor_list", hans_ent_actor_list, name="hans-ent-actor-list"),
+    path("hans_ent_actor_list_search/", hans_ent_actor_list_search, name="hans-ent-actor-list-search"),
+    path("hans_ent_actor_profile_modal/", hans_ent_actor_profile_modal, name="hans-ent-actor-profile-modal"),
+    path("hans_ent_actor_upload_modal/", hans_ent_actor_upload_modal, name="hans-ent-actor-upload-modal"),
 
     path("secret/", secret, name="secret"),
 

@@ -16,8 +16,7 @@
                 <div v-for="(data_actor, index) in list_serialized_data_actor" :key="index" class="card" >
                     <div class="box">
                         <div class="card-body">
-                                [[ data_actor.image_cover ]]
-                                <button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-streaming-actor-profile-modal">
+                                <button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-profile-modal">
                                     <img :src="data_actor.image_cover" width="200">
                                 </button>
                             
@@ -29,14 +28,14 @@
                                 <br>
                                
                                 <div class="text-center">
-                                    <button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-streaming-actor-profile-modal">
+                                    <button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-profile-modal">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
                                             <path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
                                             <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
                                         </svg>                            
                                     </button>
                                     &nbsp;
-                                    <button @click="f_hans_ent_actor_upload_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-streaming-actor-upload-modal">
+                                    <button @click="f_hans_ent_actor_upload_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-upload-modal">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                             <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                                         </svg>
@@ -60,10 +59,6 @@
             delimiters: ["[[", "]]"],
             data() {
             return {
-                // api_url_fixed_local: 'http://localhost:8000', 
-                // api_url_fixed: variables.API_URL,
-                // api_url_fixed_media: 'media/',
-                
                 list_menu_type: [],
                 list_field_sorting: [],
                 list_serialized_data_actor: [],
@@ -94,7 +89,6 @@
                         this.count_page_number_min = response.data['list_count_page_number'][0]
                         this.count_page_number_max = response.data['list_count_page_number'][1]
                         this.count_page_number = response.data['list_count_page_number'][2]
-
                         console.log("hans_ent_actor_list_view")
                     })
                 },
@@ -102,7 +96,7 @@
                 f_sorting_items(event) {
                     this.selected_sorting_field = event
                     console.log('initiated f_sorting_items', event)
-                    axios.post('hans_ent_actor_list/', {
+                    axios.post('/hans_ent_actor_list/', {
                         'button': 'sorting_items',
                         'sort_by': this.selected_sorting_field
                     }, {
@@ -213,10 +207,9 @@
                 // icon pannel
                 f_hans_ent_actor_profile_modal(event) {
                     this.selected_actor_id = event
-                    console.log('############################ from list', this.selected_actor_id)
+                    console.log('### Send Data to Actor Profile Modal with Selected Actor ID: ', this.selected_actor_id)
                     axios.post('/hans_ent_actor_profile_modal/', {
                         'selected_actor_id': this.selected_actor_id,
-                        'modal': 'profile'
                     }, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -225,7 +218,7 @@
                     })
                     .then((response) => {
                         post_hans_ent_actor_profile_modal.f_sync_data_to_actor_profile_modal(response.data);
-                        console.log('0')
+                        console.log('Actor Profile Modal로 Data 송신완료', data)
                     })
                     .catch(() => {
                         console.log('Error! f_hans_ent_actor_profile_modal')
@@ -251,9 +244,7 @@
                         console.log('Error! f_hans_ent_actor_upload_modal')
                     })
                 },
-                
-
-
+      
             },
             mounted: function() {
                 this.refreshData()
