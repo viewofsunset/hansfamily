@@ -51,7 +51,7 @@
         <!-- COL 10 (화면 좌측)-->
         <div class="col-md-10">
             {% if q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.0.0 %}
-                
+                    
                     {% include 'hans_ent/actor_list.html' %}
                
             {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.1.0 %}
@@ -70,7 +70,7 @@
 
 
         <!-- COL 2 (화면 우측)-->
-        <div class="col-md-2" id="app-streaming" >
+        <div class="col-md-2" id="app-hans_ent" >
             {% if q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.0.0 %}
                 
                 <button type="submit"class="btn btn-primary btn-sm" value="True" name="button-update-latest-javdatabase">
@@ -80,14 +80,14 @@
 
             {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.1.0 %}
                 
-                <button type="button" @click="f_streaming_picture_album_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-streaming-picture-album-upload-modal">
+                <button type="button" @click="f_hans_ent_picture_album_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-hans_ent-picture-album-upload-modal">
                     Upload Picture Album
                 </button>
                 <hr>  
                 
             {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.2.0 %}
 
-                <button type="button" @click="f_streaming_picture_album_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-streaming-picture-album-upload-modal">
+                <button type="button" @click="f_hans_ent_picture_album_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-hans_ent-picture-album-upload-modal">
                     Upload Picture Album
                 </button>
                 <hr> 
@@ -104,28 +104,28 @@
     -->
     <script>
         
-        var post_streaming = createApp({
+        var post_hans_ent = createApp({
             delimiters: ["[[", "]]"],
             data() {
             return {
                 api_url_fixed_local: 'http://localhost:8000', 
                 api_url_fixed: variables.API_URL,
-                api_url_fixed_media: variables.API_URL+'media/',
+                api_url_fixed_media: 'media/',
                 check_error: false,
                 message:'',
             }
             },
             methods: {
                 refreshData() {
-                    axios.get(variables.API_URL+'streaming/')
+                    axios.get('hans_ent/')
                     .then((response) => {
-                        console.log("streaming_get_refresh",response.data[0])
+                        console.log("hans_ent_get_refresh",response.data[0])
                     })
                 },
 
                 // 우측 기능 버튼 클릭
-                f_streaming_video_album_upload_modal() {
-                    axios.post(variables.API_URL+'streaming_video_album_upload_modal/', {
+                f_hans_ent_video_album_upload_modal() {
+                    axios.post('hans_ent_video_album_upload_modal/', {
                         'selected_video_album_id': 'null',
                         'messages': 'hello',
                     }, {
@@ -135,16 +135,16 @@
                     }})
                     .then((response) => {
                         console.log('Video Album Upload 모달창으로 전송시작 ', response.data)
-                        post_streaming_video_album_upload_modal.f_reset_return()
-                        post_streaming_video_album_upload_modal.f_sync_data_to_video_album_upload_modal(response.data);
+                        post_hans_ent_video_album_upload_modal.f_reset_return()
+                        post_hans_ent_video_album_upload_modal.f_sync_data_to_video_album_upload_modal(response.data);
                     })
                     .catch(() => {
-                        console.log('Error! f_streaming_video_album_upload_modal')
+                        console.log('Error! f_hans_ent_video_album_upload_modal')
                     })
                 },
 
-                f_streaming_actor_upload_modal() {
-                    axios.post(variables.API_URL+'streaming_actor_upload_modal/', {
+                f_hans_ent_actor_upload_modal() {
+                    axios.post('hans_ent_actor_upload_modal/', {
                         'selected_actor_id': 'null',
                     }, {
                     headers: {
@@ -153,16 +153,16 @@
                     }})
                     .then((response) => {
                         console.log('############################# 0', response.data)
-                        post_streaming_actor_upload_modal.f_reset_return()
-                        post_streaming_actor_upload_modal.f_sync_data_to_actor_upload_modal(response.data);
+                        post_hans_ent_actor_upload_modal.f_reset_return()
+                        post_hans_ent_actor_upload_modal.f_sync_data_to_actor_upload_modal(response.data);
                     })
                     .catch(() => {
-                        console.log('Error! f_streaming_actor_upload_modal')
+                        console.log('Error! f_hans_ent_actor_upload_modal')
                     })
                 },
 
-                f_streaming_picture_album_upload_modal() {
-                    axios.post(variables.API_URL+'streaming_picture_album_upload_modal/', {
+                f_hans_ent_picture_album_upload_modal() {
+                    axios.post('hans_ent_picture_album_upload_modal/', {
                         'selected_picture_album_id': 'null',
                     }, {
                     headers: {
@@ -171,16 +171,16 @@
                     }})
                     .then((response) => {
                         console.log('############################# 0', response.data)
-                        post_streaming_picture_album_upload_modal.f_reset_return()
-                        post_streaming_picture_album_upload_modal.f_sync_data_to_picture_album_upload_modal(response.data);
+                        post_hans_ent_picture_album_upload_modal.f_reset_return()
+                        post_hans_ent_picture_album_upload_modal.f_sync_data_to_picture_album_upload_modal(response.data);
                     })
                     .catch(() => {
-                        console.log('Error! streaming_picture_album_upload_modal')
+                        console.log('Error! hans_ent_picture_album_upload_modal')
                     })
                 },
 
                 f_button_adult_album_upload_4kup() {
-                    axios.post(variables.API_URL+'streaming_adult_picture_album_list/', 
+                    axios.post('hans_ent_adult_picture_album_list/', 
                     {'button': 'album_update_4kup'},
                     { headers: {
                         'Content-Type': 'multipart/form-data',
@@ -188,7 +188,7 @@
                     }}
                     )
                     .then((response) => {
-                        post_streaming_adult_picture_album_list.refreshData();
+                        post_hans_ent_adult_picture_album_list.refreshData();
                     })
                     .catch(() => {
                         console.log('Error! f_button_adult_album_upload_4kup')
@@ -197,7 +197,7 @@
 
                 f_button_adult_album_upload_4kup_pickle() {
                     console.log('hello')
-                    axios.post(variables.API_URL+'streaming_adult_picture_album_list/', 
+                    axios.post('hans_ent_adult_picture_album_list/', 
                     {'button': 'album_update_4kup_pickle'},
                     { headers: {
                         'Content-Type': 'multipart/form-data',
@@ -205,7 +205,7 @@
                     }}
                     )
                     .then((response) => {
-                        post_streaming_adult_picture_album_list.refreshData();
+                        post_hans_ent_adult_picture_album_list.refreshData();
                     })
                     .catch(() => {
                         console.log('Error! f_button_adult_album_upload_4kup_pickle')
@@ -216,7 +216,7 @@
             mounted: function() {
                 this.refreshData()
             }
-        }).mount('#app-streaming')
+        }).mount('#app-hans_ent')
     
     </script>
     

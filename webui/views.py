@@ -156,7 +156,7 @@ def hans_ent_actor_list_view(request):
     q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
    
     if request.method == 'GET':
-        total_num_registered_item = Actor.count()
+        total_num_registered_item = Actor.objects.count()
         # Searching 결과값 찾기
         list_searched_xxx_id = q_mysettings_hansent.list_searched_actor_id
         if list_searched_xxx_id is not None:

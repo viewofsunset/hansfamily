@@ -1,3 +1,5 @@
+import uuid
+
 from hans_ent.models import *
 
 
@@ -51,6 +53,14 @@ def count_page_number_up(request, q_mysettings_hansent, total_num_registered_ite
     return True
 
 
+
+def hashcode_generator():
+    # Generate a random UUID
+    random_uuid = uuid.uuid4()
+    # Convert it to a string (this will give you a 32-character hexadecimal string)
+    hash_code = str(random_uuid)
+    print("UUID4 Hash:", hash_code)
+    return hash_code
 
 #############################################################################################################################################
 #############################################################################################################################################

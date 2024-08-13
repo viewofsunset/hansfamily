@@ -88,8 +88,10 @@ class Actor(models.Model):
     # properties
     name = models.CharField(max_length=200, null=True, blank=True)
     synonyms = models.JSONField(null=True, blank=True)
+    hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
     # name_eng = models.CharField(max_length=100, null=True, blank=True)
     # name_mother = models.CharField(max_length=100, null=True, blank=True)
+    image_cover = models.ImageField(null=True, blank=True)  # 400px by 500px, 
     age = models.IntegerField(null=True, blank=True)
     date_birth = models.DateField(null=True, blank=True)
     locations = models.CharField(max_length=50, choices=LIST_LOCATIONS, default=LIST_LOCATIONS[0][0], blank=True) # Submenu Switching
@@ -112,6 +114,10 @@ class Actor(models.Model):
     date_created = models.DateField(auto_now_add=True, null=True)
     date_updated = models.DateTimeField(auto_now=True, null=True)
     check_discard = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.name} Actor'
+    
     
 
 # class Picture_Actor_Pic(models.Model):
@@ -119,11 +125,15 @@ class Actor_Pic(models.Model):
     actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=250, null=True, blank=True)
     # name = models.CharField(max_length=250, null=True, blank=True)
-    image_thumbnail = models.ImageField(null=True, blank=True) 
-    # image_cover = models.ImageField(null=True, blank=True) 
-    image_original = models.ImageField(null=True, blank=True) 
+    hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
+    image_thumbnail = models.ImageField(null=True, blank=True) # 130px by 160px
+    image_cover = models.ImageField(null=True, blank=True)  # 400px by 500px
+    image_original = models.ImageField(null=True, blank=True) # original 그대로
     check_discard = models.BooleanField(default=False)
     
+    def __str__(self):
+        return f'{self.actor.name}-{self.id} Actor_Pic'
+
 
 
 

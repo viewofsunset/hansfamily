@@ -151,22 +151,22 @@ USE_TZ = True
 
 
 
-# # Live Settings for Static / Media
-# # Static 
-# STATIC_URL = '/static/'
-# STATIC_ROOT = '/django-project/site/public/static'
-# # Media 
-# MEDIA_URL = '/media/'
-# MEDIA_ROOT = '/django-project/site/public/media'
-
-
-# Develop Settings for Static / Media
-# Static
+# Live Settings for Static / Media
+# Static 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = ["/django-project/site/public/static", ]
-# Media
+STATIC_ROOT = '/django-project/site/public/static'
+# Media 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/django-project/site/public/media'
+
+
+# # Develop Settings for Static / Media
+# # Static
+# STATIC_URL = '/static/'
+# STATICFILES_DIRS = ["/django-project/site/public/static", ]
+# # Media
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = '/django-project/site/public/media'
 
 
 # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
