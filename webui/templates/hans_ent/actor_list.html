@@ -16,9 +16,13 @@
                 <div v-for="(data_actor, index) in list_serialized_data_actor" :key="index" class="card" >
                     <div class="box">
                         <div class="card-body">
-                                <button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-profile-modal">
-                                    <img :src="data_actor.image_cover" width="200">
-                                </button>
+                            <button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-profile-modal">
+                                <div v-for="(dict_profile_album, index) in data_actor.list_dict_profile_album" :key="index" >
+                                    <div v-if="dict_profile_album.active == 'true'">
+                                        <img :src="BASE_DIR_ACTOR+dict_profile_album.cover" width="200">
+                                    </div>
+                                </div>
+                            </button>
                             
                             <div class="text-center">
                                 <strong>
@@ -59,6 +63,7 @@
             delimiters: ["[[", "]]"],
             data() {
             return {
+                BASE_DIR_ACTOR: '',
                 list_menu_type: [],
                 list_field_sorting: [],
                 list_serialized_data_actor: [],
@@ -82,8 +87,11 @@
                 refreshData() {
                     axios.get('/hans_ent_actor_list')
                     .then((response) => {
+                        this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
                         this.list_field_sorting = response.data['list_field_sorting']
                         this.list_serialized_data_actor = response.data['list_serialized_data_actor']
+                        this.list_dict_profile_album = this.list_serialized_data_actor['list_dict_profile_album']
+
                         this.total_num_registered_item = response.data['total_num_registered_item']
                         this.total_num_searched_item = response.data['total_num_searched_item']
                         this.count_page_number_min = response.data['list_count_page_number'][0]
@@ -218,10 +226,10 @@
                     })
                     .then((response) => {
                         post_hans_ent_actor_profile_modal.f_sync_data_to_actor_profile_modal(response.data);
-                        console.log('Actor Profile Modal로 Data 송신완료', data)
+                        console.log('Actor List로부터 Actor Profile Modal로 Data 송신 완료', data)
                     })
                     .catch(() => {
-                        console.log('Error! f_hans_ent_actor_profile_modal')
+                        console.log('Error! Actor List로부터 Actor Profile로 데이터 송신 오류')
                     })
                 },
 
@@ -242,10 +250,15 @@
                         console.log('Actor List로부터 upload로 데이터 송신 완료', this.selected_actor_id)
                     })
                     .catch(() => {
-                        console.log('Error! f_hans_ent_actor_upload_modal')
+                        console.log('Error!  Actor List로부터 Actor Upload로 데이터 송신 오류')
                     })
                 },
       
+            },
+            computed: {
+                active_list_dict_profile_album() {
+                    return this.list_dict_profile_album.filter(item => item.active === "true")
+                }
             },
             mounted: function() {
                 this.refreshData()

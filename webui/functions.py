@@ -75,7 +75,7 @@ def hashcode_generator():
 def reset_hans_ent_actor_list(q_mysettings_hansent):
     data = {
         'actor_selected': None,
-        'actor_pic_selected': None,
+        # 'actor_pic_selected': None,
         'selected_field_actor': LIST_ACTOR_FIELD[0],
         'check_field_ascending_actor': True,
         'count_page_number_actor': 1,

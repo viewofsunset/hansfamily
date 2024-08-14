@@ -186,6 +186,7 @@ def hans_ent_actor_list(request):
         # Data Serialization            
         list_serialized_data_actor = Actor_Serializer(qs_xxx, many=True).data
         jsondata = {
+            'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
             'list_field_sorting': LIST_ACTOR_FIELD,
             'list_serialized_data_actor': list_serialized_data_actor,
             'total_num_registered_item': total_num_registered_item, 
@@ -494,7 +495,9 @@ def hans_ent_actor_upload_modal(request):
             print('q_actor', q_actor)
             selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
         jsondata = {
+            'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
             'selected_serialized_data_actor': selected_serialized_data_actor,
+            
         }
         print('jsondata', jsondata)
         return JsonResponse(jsondata, safe=False)

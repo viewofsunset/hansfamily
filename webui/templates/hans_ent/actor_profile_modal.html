@@ -363,7 +363,6 @@
             LIST_ACTOR_TYPES : [],
 			LIST_ACTOR_SUB_TYPES: [],
 			streaming_menu_selected: null,
-			selected_actor_type: null,
 			selected_actor_sub_type: null, 
 
 
@@ -377,7 +376,6 @@
 			selected_actor_name_mother: '',
             
             actor_info_site_url: null,
-            selected_actor_type: null,
             selected_actor_sub_type: null,
             
             status_profile_gallery_close: false,
@@ -451,8 +449,8 @@
             // icon pannel 배우 프로필 수정 모달창
             f_hans_ent_actor_upload_modal(event) {
                 this.selected_actor_id = event
-                console.log(this.selected_actor_id)
-				axios.post('/hans_ent_actor_upload_modal/', {
+                console.log('############################# 1',this.selected_actor_id)
+                axios.post('/hans_ent_actor_upload_modal/', {
                     'selected_actor_id': this.selected_actor_id,
                 }, {
                 headers: {
@@ -461,11 +459,11 @@
                 }
                 })  
                 .then((response) => {
-                    console.log('모델리스트에서 모델 업로드로 정보 전송 시작', response.data)
-                    post_streaming_actor_upload_modal.f_sync_data_to_actor_upload_modal(response.data)
+                    post_hans_ent_actor_upload_modal.f_sync_data_to_actor_upload_modal(response.data)
+                    console.log('Actor Profile로부터 Actor Upload로 데이터 송신 완료', this.selected_actor_id)
                 })
                 .catch(() => {
-                    console.log('Error! f_hans_ent_actor_upload_modal')
+                    console.log('Error! Actor Profile로부터 Actor Upload로 데이터 송신 오류')
                 })
             },
 

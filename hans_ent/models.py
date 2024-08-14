@@ -60,9 +60,9 @@ from django.core.validators import FileExtensionValidator
 # )
 
 
-BASE_DIR_ACTOR = '/django-project/site/public/media/vault1/actor'
-BASE_DIR_PICTURE = '/django-project/site/public/media/vault1/picture'
-BASE_DIR_VIDEO = '/django-project/site/public/media/vault1/video'
+BASE_DIR_ACTOR = '/media/vault1/actor/'
+BASE_DIR_PICTURE = '/media/vault1/picture/'
+BASE_DIR_VIDEO = '/media/vault1/video/'
 
 LIST_MENU_HANS_ENT = (
     ('01', 'ACTOR'),
@@ -93,7 +93,7 @@ still image: hashcode-s-<order number>.xxx  // size: 65px by 80px
 """
 list_dict_profile_album rule:
 [
-{"id":"0", "thumbnail":"default-t.png", "cover":"default-c.png", "original":"default-o.png", "active":"true"},
+{"id":"0", "thumbnail":"default_actor-t.png", "cover":"default_actor-c.png", "original":"default_actor-o.png", "active":"true"},
 {"id":"1", "thumbnail":"abcd-t-1.png", "cover":"abcd-c-1.png", "original":"abcd-o-1.png", "active":"false"},
 {"id":"2", "thumbnail":"abcd-t-2.png", "cover":"abcd-c-2.png", "original":"abcd-o-2.png", "active":"false"},
 ]
@@ -132,26 +132,27 @@ class Actor(models.Model):
     
 
 
-# class Picture_Actor_Pic(models.Model):
-class Actor_Pic(models.Model):
-    actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
-    title = models.CharField(max_length=250, null=True, blank=True)
-    # name = models.CharField(max_length=250, null=True, blank=True)
-    hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
-    image_thumbnail = models.ImageField(null=True, blank=True) # 260px by 320px
-    image_cover = models.ImageField(null=True, blank=True)  # 520px by 640px
-    image_original = models.ImageField(null=True, blank=True) # original 그대로
-    check_discard = models.BooleanField(default=False)
+# # class Picture_Actor_Pic(models.Model):
+# class Actor_Pic(models.Model):
+#     actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
+#     title = models.CharField(max_length=250, null=True, blank=True)
+#     # name = models.CharField(max_length=250, null=True, blank=True)
+#     hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
+#     image_thumbnail = models.ImageField(null=True, blank=True) # 260px by 320px
+#     image_cover = models.ImageField(null=True, blank=True)  # 520px by 640px
+#     image_original = models.ImageField(null=True, blank=True) # original 그대로
+#     check_discard = models.BooleanField(default=False)
     
-    def __str__(self):
-        return f'{self.actor.name}-{self.id} Actor_Pic'
+#     def __str__(self):
+#         return f'{self.actor.name}-{self.id} Actor_Pic'
 
 
 """
 list_dict_picture_album rule:
 [
-{"thumbnail":"/path/to/abcd-1-t.png", "cover":"/path/to/abcd-1-c.png", "original":"/path/to/abcd-1-o.png"},
-{"thumbnail":"/path/to/abcd-2-t.png", "cover":"/path/to/abcd-2-c.png", "original":"/path/to/abcd-2-o.png"},
+{"id":"0", "thumbnail":"default_picture_album-t.png", "cover":"default_picture_album-c.png", "original":"default_picture_album-o.png", "active":"true"},
+{"id":"1", "thumbnail":"abcd-1-t.png", "cover":"abcd-1-c.png", "original":"abcd-1-o.png", "active":"false"},
+{"id":"2", "thumbnail":"abcd-2-t.png", "cover":"abcd-2-c.png", "original":"abcd-2-o.png", "active":"false"},
 ]
 abcd == hashcode
 """
@@ -169,8 +170,9 @@ class Picture_Album(models.Model):
 """
 list_dict_video_album rule:
 [
-{"video":"/path/to/abcd-1-v.mp4", "thumbnail":"/path/to/abcd-1-t.png", "cover":"/path/to/abcd-1-c.png", "original":"/path/to/abcd-1-o.png", "still":["/path/to/abcd-1-s-1.png", "/path/to/abcd-1-s-2.png"]},
-{"video":"/path/to/abcd-2-v.mp4", "thumbnail":"/path/to/abcd-2-t.png", "cover":"/path/to/abcd-2-c.png", "original":"/path/to/abcd-2-o.png", "still":["/path/to/abcd-2-s-1.png", "/path/to/abcd-2-s-2.png"]},
+{"id":"0", "video":"abcd-1-v.mp4", "thumbnail":"default_video_album-t.png", "cover":"default_video_album-c.png", "original":"default_video_album-o.png", "still":"default_video_album-s.png" "active":"true"},
+{"id":"1", "video":"abcd-1-v.mp4", "thumbnail":"abcd-1-t.png", "cover":"abcd-1-c.png", "original":"abcd-1-o.png", "still":["abcd-1-s-1.png", "abcd-1-s-2.png"], "active":"false"},
+{"id":"2", "video":"abcd-2-v.mp4", "thumbnail":"abcd-2-t.png", "cover":"abcd-2-c.png", "original":"abcd-2-o.png", "still":["abcd-2-s-1.png", "abcd-2-s-2.png"], "active":"false"},
 ]
 abcd == hashcode
 """
@@ -196,7 +198,7 @@ class MySettings_HansEnt(models.Model):
     menu_selected = models.CharField(choices=LIST_MENU_HANS_ENT, default=LIST_MENU_HANS_ENT[0][0], blank=True)
     # actor
     actor_selected = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
-    actor_pic_selected = models.ForeignKey(Actor_Pic, on_delete=models.SET_NULL, null=True, blank=True)
+    # actor_pic_selected = models.ForeignKey(Actor_Pic, on_delete=models.SET_NULL, null=True, blank=True)
     selected_field_actor = models.CharField(max_length=50, default=LIST_ACTOR_FIELD[0], blank=True)
     check_field_ascending_actor = models.BooleanField(default=True)
     count_page_number_actor = models.IntegerField(default=1)
