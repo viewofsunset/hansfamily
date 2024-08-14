@@ -4,67 +4,72 @@ from django.core.validators import FileExtensionValidator
 
 
 
+
+
+# LIST_MENU_VIDEO_TYPES = (
+#     ('01', 'YOUTUBE_STUDY'),
+#     ('02', 'YOUTUBE_ENT'),
+#     ('03', 'MOVIE'),
+#     ('04', 'DRAMA'),
+#     ('05', 'KMODEL'),
+#     ('06', 'KBJ'),
+#     ('07', 'KAMA'),
+#     ('08', 'JPN'),
+#     ('09', 'CHN'),
+#     ('10', 'WEST'),
+#     ('11', 'VR'),
+#     ('12', 'ETC'),
+# )
+# LIST_MENU_PICTURE_TYPES = (
+#     ('01', '4KUP'),
+#     ('02', 'ENT'),
+#     ('03', 'AMA'),
+#     ('04', 'ETC'),
+# )
+# LIST_MENU_MUSIC_TYPES = (
+#     ('01', 'KPOP'),
+#     ('02', 'POP'),
+#     ('03', 'CLASSIC'),
+#     ('04', 'JAZZ'),
+#     ('05', 'ETC'),
+# )
+# LIST_SUB_MENU_VIDEO_TYPES = (
+#     ('01', 'ALBUM'),
+#     ('02', 'ACTOR'),
+#     ('03', 'FAVORITE'),
+#     ('04', 'ETC'),
+# )
+# LIST_SUB_MENU_PICTURE_TYPES = (
+#     ('01', 'ALBUM'),
+#     ('02', 'ACTOR'),
+#     ('03', 'FAVORITE'),
+#     ('04', 'ETC'),
+# )
+# LIST_SUB_MENU_MUSIC_TYPES = (
+#     ('01', 'ALBUM'),
+#     ('02', 'ACTOR'),
+#     ('03', 'FAVORITE'),
+#     ('04', 'ETC'),
+# )
+# LIST_RATING_SCORES = (
+#     ('01', 'A'),
+#     ('02', 'AA'),
+#     ('03', 'AAA'),
+#     ('04', 'AAAA'),
+#     ('05', 'AAAAA'),
+# )
+
+
+BASE_DIR_ACTOR = '/django-project/site/public/media/vault1/actor'
+BASE_DIR_PICTURE = '/django-project/site/public/media/vault1/picture'
+BASE_DIR_VIDEO = '/django-project/site/public/media/vault1/video'
+
 LIST_MENU_HANS_ENT = (
     ('01', 'ACTOR'),
     ('02', 'PICTURE'),
     ('03', 'VIDEO'),
 )
-
-
-
-
-LIST_MENU_VIDEO_TYPES = (
-    ('01', 'YOUTUBE_STUDY'),
-    ('02', 'YOUTUBE_ENT'),
-    ('03', 'MOVIE'),
-    ('04', 'DRAMA'),
-    ('05', 'KMODEL'),
-    ('06', 'KBJ'),
-    ('07', 'KAMA'),
-    ('08', 'JPN'),
-    ('09', 'CHN'),
-    ('10', 'WEST'),
-    ('11', 'VR'),
-    ('12', 'ETC'),
-)
-LIST_MENU_PICTURE_TYPES = (
-    ('01', '4KUP'),
-    ('02', 'ENT'),
-    ('03', 'AMA'),
-    ('04', 'ETC'),
-)
-LIST_MENU_MUSIC_TYPES = (
-    ('01', 'KPOP'),
-    ('02', 'POP'),
-    ('03', 'CLASSIC'),
-    ('04', 'JAZZ'),
-    ('05', 'ETC'),
-)
-LIST_SUB_MENU_VIDEO_TYPES = (
-    ('01', 'ALBUM'),
-    ('02', 'ACTOR'),
-    ('03', 'FAVORITE'),
-    ('04', 'ETC'),
-)
-LIST_SUB_MENU_PICTURE_TYPES = (
-    ('01', 'ALBUM'),
-    ('02', 'ACTOR'),
-    ('03', 'FAVORITE'),
-    ('04', 'ETC'),
-)
-LIST_SUB_MENU_MUSIC_TYPES = (
-    ('01', 'ALBUM'),
-    ('02', 'ACTOR'),
-    ('03', 'FAVORITE'),
-    ('04', 'ETC'),
-)
-LIST_RATING_SCORES = (
-    ('01', 'A'),
-    ('02', 'AA'),
-    ('03', 'AAA'),
-    ('04', 'AAAA'),
-    ('05', 'AAAAA'),
-)
+LIST_ACTOR_TAGS = ["JAV", "BJ", "Model", "Actress","Idol", "Amature", "Gravure", "Onlyfans", "Tweeter", "Instagram", "Porn_Actor", "Youtuber"]
 LIST_LOCATIONS = (
     ('01', 'KOREA'),
     ('02', 'JAPAN'),
@@ -77,7 +82,23 @@ LIST_LOCATIONS = (
     ('09', 'ETC'),
 )
 
+"""
+image naming $ size rules
+thumbnail image: hashcode-t.xxx  // size: 260px by 320px
+cover image: hashcode-c.xxx  // size: 520px by 640px
+original image: hashcode-o.xxx  // size: 그대로
+still image: hashcode-s-<order number>.xxx  // size: 65px by 80px
+"""    
 
+"""
+list_dict_profile_album rule:
+[
+{"id":"0", "thumbnail":"default-t.png", "cover":"default-c.png", "original":"default-o.png", "active":"true"},
+{"id":"1", "thumbnail":"abcd-t-1.png", "cover":"abcd-c-1.png", "original":"abcd-o-1.png", "active":"false"},
+{"id":"2", "thumbnail":"abcd-t-2.png", "cover":"abcd-c-2.png", "original":"abcd-o-2.png", "active":"false"},
+]
+abcd == hashcode
+"""
 class Actor(models.Model):
     # classification
     # types = models.CharField(max_length=50, choices=LIST_MENU_STREAMING, default=LIST_MENU_STREAMING[0][0], blank=True) # Submenu Switching
@@ -89,27 +110,18 @@ class Actor(models.Model):
     name = models.CharField(max_length=200, null=True, blank=True)
     synonyms = models.JSONField(null=True, blank=True)
     hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
-    # name_eng = models.CharField(max_length=100, null=True, blank=True)
-    # name_mother = models.CharField(max_length=100, null=True, blank=True)
     image_cover = models.ImageField(null=True, blank=True)  # 400px by 500px, 
     age = models.IntegerField(null=True, blank=True)
     date_birth = models.DateField(null=True, blank=True)
     locations = models.CharField(max_length=50, choices=LIST_LOCATIONS, default=LIST_LOCATIONS[0][0], blank=True) # Submenu Switching
-    # score = models.CharField(max_length=50, choices=LIST_RATING_SCORES, default=LIST_RATING_SCORES[0][0], blank=True) # Submenu Switching
+    height = models.IntegerField(null=True, blank=True)
+    tags = models.JSONField(null=True, blank=True) # Collect tags from LIST_ACTOR_TAGS
     evaluation = models.FloatField(default=0)
     # URL info
-    list_dict_info_url =  models.TextField(null=True, blank=True) # {'imdb': 'https://www.imbd.com/xxx',  }
+    list_dict_info_url =  models.JSONField(null=True, blank=True) # [{"name":'imdb', "site":'https://www.imbd.com/xxx'}, {}]
     list_actor_picture_id = models.JSONField(null=True, blank=True)
+    list_dict_profile_album = models.JSONField(null=True, blank=True) # list_dict_profile_album rule 참고
 
-    # detail_info_url =  models.TextField(null=True, blank=True) # data from https://www.javdatabase.com/
-    # cover_image_url =  models.TextField(null=True, blank=True) # data from https://www.javdatabase.com/
-    # actor_info_site_url = models.TextField(null=True, blank=True)
-    # actor_additional_site_url = models.TextField(null=True, blank=True)
-    # code_movie_url = models.JSONField(null=True, blank=True)
-    # code_moviecover_url = models.JSONField(null=True, blank=True)
-    # list_actor_picture_id = models.JSONField(null=True, blank=True)
-    # DB images
-    # image_cover = models.ImageField(null=True, blank=True) # uploads/actor_images/cover_images /{{ q_actor.id }}/{{ file_name }}
     # system
     date_created = models.DateField(auto_now_add=True, null=True)
     date_updated = models.DateTimeField(auto_now=True, null=True)
@@ -118,7 +130,7 @@ class Actor(models.Model):
     def __str__(self):
         return f'{self.name} Actor'
     
-    
+
 
 # class Picture_Actor_Pic(models.Model):
 class Actor_Pic(models.Model):
@@ -126,8 +138,8 @@ class Actor_Pic(models.Model):
     title = models.CharField(max_length=250, null=True, blank=True)
     # name = models.CharField(max_length=250, null=True, blank=True)
     hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
-    image_thumbnail = models.ImageField(null=True, blank=True) # 130px by 160px
-    image_cover = models.ImageField(null=True, blank=True)  # 400px by 500px
+    image_thumbnail = models.ImageField(null=True, blank=True) # 260px by 320px
+    image_cover = models.ImageField(null=True, blank=True)  # 520px by 640px
     image_original = models.ImageField(null=True, blank=True) # original 그대로
     check_discard = models.BooleanField(default=False)
     
@@ -135,20 +147,38 @@ class Actor_Pic(models.Model):
         return f'{self.actor.name}-{self.id} Actor_Pic'
 
 
-
+"""
+list_dict_picture_album rule:
+[
+{"thumbnail":"/path/to/abcd-1-t.png", "cover":"/path/to/abcd-1-c.png", "original":"/path/to/abcd-1-o.png"},
+{"thumbnail":"/path/to/abcd-2-t.png", "cover":"/path/to/abcd-2-c.png", "original":"/path/to/abcd-2-o.png"},
+]
+abcd == hashcode
+"""
 class Picture_Album(models.Model):
     main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=200, null=True, blank=True)
+    hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
+    list_dict_picture_album = models.JSONField(null=True, blank=True)
     check_discard = models.BooleanField(default=False)
     
     def __str__(self):
         return f'{self.title} Picture_Album'
 
 
-
+"""
+list_dict_video_album rule:
+[
+{"video":"/path/to/abcd-1-v.mp4", "thumbnail":"/path/to/abcd-1-t.png", "cover":"/path/to/abcd-1-c.png", "original":"/path/to/abcd-1-o.png", "still":["/path/to/abcd-1-s-1.png", "/path/to/abcd-1-s-2.png"]},
+{"video":"/path/to/abcd-2-v.mp4", "thumbnail":"/path/to/abcd-2-t.png", "cover":"/path/to/abcd-2-c.png", "original":"/path/to/abcd-2-o.png", "still":["/path/to/abcd-2-s-1.png", "/path/to/abcd-2-s-2.png"]},
+]
+abcd == hashcode
+"""
 class Video_Album(models.Model):
     main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=200, null=True, blank=True)
+    hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
+    list_dict_video_album = models.JSONField(null=True, blank=True)
     check_discard = models.BooleanField(default=False)
 
     def __str__(self):

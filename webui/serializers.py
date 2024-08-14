@@ -13,11 +13,14 @@ class Actor_Serializer(serializers.ModelSerializer):
             'synonyms',
             'image_cover',
             'age',
+            'height',
             'date_birth',
             'locations',
+            'tags',
             'evaluation',
             'list_dict_info_url',
             'list_actor_picture_id',
+            'list_dict_profile_album',
         ]
 
 

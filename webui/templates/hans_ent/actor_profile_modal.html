@@ -41,8 +41,8 @@
 						<!-- 문서 Title -->
 						<tr>
 							<td rowspan="6" width="30%">
-                                <div v-if="data_actor.image_thumbnail">
-                                    <img :src="data_actor.image_thumbnail" width="200">
+                                <div v-if="data_actor.image_cover">
+                                    <img :src="data_actor.image_cover" width="200">
                                 </div>
                                 <div v-else-if="data_actor.cover_image_url">
                                     <img :src="data_actor.cover_image_url" width="200">
@@ -53,66 +53,63 @@
 							</td>
 						
 
-							<th style="background-color:rgb(240,240,240,0.5)">
+							<th width="15%" style="background-color:rgb(240,240,240,0.5)">
 								이름
 							</th>
-							<td >
+							<td  width="20%">
 								<div>
 									[[ data_actor.name ]]
 								</div>
 							</td>
-                            <th style="background-color:rgb(240,240,240,0.5)">
+                            <th  width="15%" style="background-color:rgb(240,240,240,0.5)">
 								나이 (생일)
 							</th>
-							<td >
+							<td  width="20%">
 								<div>
 									[[ data_actor.age ]] ([[ data_actor.date_birth ]])
 								</div>
 							</td>
 						</tr>
-						
 
-						<!-- 타입선택 -->
+                        <!-- 사이트 -->
 						<tr>
 							<th style="background-color:rgb(240,240,240,0.5)">
-								메인 타입
+								다른이름
 							</th>
 							<td style="background-color:rgb(255,255,255,0.05)">
-                                Main Type:
-                                <div v-for="(item, index) in LIST_ACTOR_TYPES" :key="index" >
-									<div v-if="selected_actor_type==item[0]">
-										[[ item[1] ]]
-									</div>
-								</div>
+                                <div v-for="item in data_actor.synonyms" >
+                                    [[ item ]]
+                                </div>
 							</td>
                             <th style="background-color:rgb(240,240,240,0.5)">
-								하위 타입
+								키
 							</th>
-							<td style="background-color:rgb(255,255,255,0.05)">
-								Sub Type:
-                                <div v-for="(item, index) in LIST_ACTOR_SUB_TYPES" :key="index" >
-									<div v-if="selected_actor_sub_type==item[0]">
-										[[ item[1] ]]
-									</div>
-								</div>
-							</td>
-
+                            <td style="background-color:rgb(255,255,255,0.05)">
+                                [[ data_actor.height ]]
+                            </td>
 						</tr>
 
+						
 						<!-- 사이트 -->
 						<tr>
 							<th style="background-color:rgb(240,240,240,0.5)">
-								관련 사이트 이름
+								관련 사이트
 							</th>
-							<td colspan="3" style="background-color:rgb(255,255,255,0.05)">
-								<div v-if="actor_info_site_url != null">
-									<div v-for="(key, index) in data_actor.actor_info_site_url" :key="key" class="card" >
-										<a :href="[[key]]" target="_blank">
-											[[ index ]]
-										</a>
-									</div>
-								</div>
+							<td style="background-color:rgb(255,255,255,0.05)">
+                                <div v-for="item in data_actor.list_dict_info_url" class="card" >
+                                    <a :href="[[ item.url ]]" target="_blank">
+                                        [[ item.name ]]
+                                    </a>
+                                </div>
 							</td>
+                            <th style="background-color:rgb(240,240,240,0.5)">
+								Tag
+							</th>
+                            <td style="background-color:rgb(255,255,255,0.05)">
+                                <div v-for="item in data_actor.tags" class="card" >
+                                    [[ item ]]
+                                </div>
+                            </td>
 						</tr>
 
 					</table>
@@ -297,6 +294,7 @@
                         <td></td>
                     </tr>
                 </table>
+
                 <div v-if="status_video_gallery_close == false">
                     <div class="gallery-container">
                         <div v-for="(data_video_album, index) in list_data_video_album" :key="index"class="card" >
@@ -332,10 +330,7 @@
                         </div>
                     </div>
                 </div>
-
-
-                 
-            
+                <hr>
             </div>
 
 			<div class="modal-footer">
@@ -356,8 +351,8 @@
 		data() {
 		return {
 			title : '',
-            
             data_actor: {},
+
             dict_actor_key_fullsize_value_thumbnail_image_path: {},
             list_actor_picture_id: {},
             list_data_video_album: {},
@@ -388,7 +383,6 @@
             status_profile_gallery_close: false,
             status_picture_gallery_close: false,
             status_video_gallery_close: false,
-            status_music_gallery_close: false,
 
 			message:'',
 		}

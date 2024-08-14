@@ -6,6 +6,8 @@ from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.models import User 
 
+from datetime import time, timedelta, datetime 
+
 from webui.forms import user_register_form, user_update_form, profile_update_form
 from webui.models import *
 from webui.serializers import *
@@ -332,7 +334,169 @@ def hans_ent_actor_upload_modal(request):
         jsondata = {}   
         return JsonResponse(jsondata, safe=False)
     if request.method == "POST":
-        jsondata = {}
+        print(request.POST,)
+        # Request 정보 획득
+        selected_actor_id_str = request.POST.get('selected_actor_id') # 기 선택되어 있는 배우, Merge시 사라지는 모델
+        sacrificial_actor_id_str = request.POST.get('sacrificial_actor_id') # 새로 선택한 배우, Merge 하고 나서 살아남는 모델
+        input_model_name_str = request.POST.get('input_text_name')
+        input_date_birthday_str = request.POST.get('input_date_birthday')
+        selected_actor_type_str = request.POST.get('selected_actor_type')
+        selected_actor_sub_type_str = request.POST.get('selected_actor_sub_type')
+        
+        # Request 정보 필터링 String화
+        selected_actor_id_str = None if selected_actor_id_str in LIST_STR_NONE_SERIES else selected_actor_id_str
+        sacrificial_actor_id_str = None if sacrificial_actor_id_str in LIST_STR_NONE_SERIES else sacrificial_actor_id_str
+        input_model_name_str = None if input_model_name_str in LIST_STR_NONE_SERIES else input_model_name_str
+        input_date_birthday_str = None if input_date_birthday_str in LIST_STR_NONE_SERIES else input_date_birthday_str
+        selected_actor_type_str = None if selected_actor_type_str in LIST_STR_NONE_SERIES else selected_actor_type_str
+        selected_actor_sub_type_str = None if selected_actor_sub_type_str in LIST_STR_NONE_SERIES else selected_actor_sub_type_str
+        
+        # 선택된 배우 쿼리 찾기
+        if selected_actor_id_str is not None and selected_actor_id_str != '':
+            selected_actor_id = int(selected_actor_id_str)
+            q_actor = Actor.objects.get(id=selected_actor_id)
+        else:
+            q_actor = None 
+        
+        # Merge 위해 새로 선택한 모델 정보 획득
+        if sacrificial_actor_id_str is not None and sacrificial_actor_id_str != '':
+            if q_actor is None:
+                q_actor = create_actor()
+            sacrificial_actor_id = int(sacrificial_actor_id_str)
+            q_actor_s = Actor.objects.get(id=sacrificial_actor_id)
+        else:
+            q_actor_s = None 
+        
+        # 업로드 모델이름 저장하기
+        if input_model_name_str is not None and input_model_name_str != '':
+            if q_actor is None:
+                q_actor = create_actor()
+            data = {
+                'name': input_model_name_str,
+            }
+            Actor.objects.filter(id=q_actor.id).update(**data)
+            q_actor.refresh_from_db()
+        
+        # 생일 정보 저장하기
+        if input_date_birthday_str is not None and input_date_birthday_str != '':
+            if q_actor is None:
+                q_actor = create_actor()
+            print('# 생일 정보 저장하기', input_date_birthday_str, type(input_date_birthday_str))
+            date_string = str(input_date_birthday_str)
+            date_format = '%Y-%m-%d'
+            date_object = datetime.strptime(date_string, date_format).date()
+            data = {
+                'date_birth': date_object,
+            }
+            Actor.objects.filter(id=q_actor.id).update(**data)
+            q_actor.refresh_from_db()
+        
+        # Website 등록
+        if request.POST.get('button') == 'website_url':
+            if q_actor is None:
+                q_actor = create_actor()
+            input_actor_info_site_name = request.POST.get('input_actor_info_site_name')
+            input_actor_info_site_url = request.POST.get('input_actor_info_site_url')
+            list_dict_info_url = q_actor.list_dict_info_url
+            if list_dict_info_url is None:
+                list_dict_info_url = []
+            list_dict_info_url.append({"name":input_actor_info_site_name, "site":input_actor_info_site_url})
+            data = {
+                'list_dict_info_url': list_dict_info_url,
+            }
+            Actor.objects.filter(id=q_actor.id).update(**data)
+            q_actor.refresh_from_db()
+        
+        # Merge 하기, 선택된 모델에 검색된 모델을 합치기(선택된 모델이 살아남는다.)
+        if request.POST.get('button') == 'select_to_merge':
+            print('# 기존등록모델 선택 q_actor', q_actor)
+            if q_actor is None:
+                q_actor = create_actor()
+            q_actor = merge_two_actor_into_one(q_actor, q_actor_s)
+            # 기존 모델의 엘범 Main actor 변경하기
+            qs_album_picture_s = Picture_Album.objects.filter(main_actor=q_actor_s)
+            if qs_album_picture_s is not None and len(qs_album_picture_s) > 0:
+                for q_album_picture_s in qs_album_picture_s:
+                    data = {'main_actor': q_actor,}
+                    Picture_Album.objects.filter(id=q_album_picture_s.id).update(**data)
+            qs_album_video_s = Video_Album.objects.filter(main_actor=q_actor_s)
+            if qs_album_video_s is not None and len(qs_album_video_s) > 0:
+                for q_album_video_s in qs_album_video_s:
+                    data = {'main_actor': q_actor,}
+                    Video_Album.objects.filter(id=q_album_video_s.id).update(**data)
+            # 기존 모델 삭제하기
+            data = {"check_discard": True}
+            Actor.objects.filter(id=q_actor_s.id).update(**data)
+            q_actor_s.refresh_from_db()
+        
+        # Actor 커버 이미지 삭제하기 == default를 active 시키고 나머지는 inactive 시키기
+        if request.POST.get('button') == 'remove_cover_image':
+            if q_actor is None:
+                q_actor = create_actor()
+            if q_actor is not None:
+                list_dict_profile_album = q_actor.list_dict_profile_album
+                for dict_profile_album in list_dict_profile_album:
+                    if dict_profile_album["id"] == "0":
+                        dict_profile_album["active"] = "true"
+                    else:
+                        dict_profile_album["active"] = "false"
+                data = {
+                    'list_dict_profile_album': list_dict_profile_album,
+                }
+                Actor.objects.filter(id=q_actor.id).update(**data)
+                q_actor.refresh_from_db() 
+            
+        # Actor 커버 이미지 & 갤러리 이미지 업로드 저장하기
+        if request.FILES:
+            if q_actor is None:
+                q_actor = create_actor()
+            if request.POST.get('image_type') == 'image_cover':
+                # 앨범 커버 이미지 저장하기
+                print('cover image', q_actor)
+                image_cover = request.FILES.get('image_cover')
+                if image_cover is not None:
+                    q_actor = save_image_file_to_original_cover_and_thumbnail_images(q_actor, image_cover)
+
+            if request.POST.get('image_type') == 'gallery_image':
+                # 앨범 갤러이 이미지 저장하기
+                print('gallery image')
+                images = request.FILES.getlist('images')
+                list_actor_picture_id = q_actor.list_actor_picture_id
+                if list_actor_picture_id is None:
+                    list_actor_picture_id = []
+                if images is not None and len(images) > 0:
+                    list_actor_picture_id_new = save_actor_gallery_images_and_thumbnail_to_db(q_actor, images)
+                    if len(list_actor_picture_id_new) > 0:
+                        for actor_picture_id_new in list_actor_picture_id_new:
+                            if actor_picture_id_new not in list_actor_picture_id:
+                                list_actor_picture_id.append(actor_picture_id_new)
+                data = {
+                    'list_actor_picture_id': list_actor_picture_id,
+                }
+                Actor.objects.filter(id=q_actor.id).update(**data)
+                q_actor.refresh_from_db()
+
+        # 선택 모델 삭제하기
+        if request.POST.get('modal') == 'actor_delete':
+            if q_actor is not None:
+                data = {'check_discard':True}
+                Actor.objects.filter(id=q_actor.id).update(**data)
+            data = {
+                'actor_selected': None,
+            }
+            StreamingSettings.objects.filter(id=q_streamingsettings.id).update(**data)
+            q_streamingsettings.refresh_from_db() 
+            q_actor = None
+            return redirect('streaming-adult-actor-upload-modal-view')
+
+        # Data Serialize 하기
+        if q_actor is not None:
+            print('q_actor', q_actor)
+            selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
+        jsondata = {
+            'selected_serialized_data_actor': selected_serialized_data_actor,
+        }
+        print('jsondata', jsondata)
         return JsonResponse(jsondata, safe=False)
 
 

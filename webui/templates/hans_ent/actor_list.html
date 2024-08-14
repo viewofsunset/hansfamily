@@ -239,6 +239,7 @@
                     })  
                     .then((response) => {
                         post_hans_ent_actor_upload_modal.f_sync_data_to_actor_upload_modal(response.data)
+                        console.log('Actor List로부터 upload로 데이터 송신 완료', this.selected_actor_id)
                     })
                     .catch(() => {
                         console.log('Error! f_hans_ent_actor_upload_modal')
