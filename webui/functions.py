@@ -1,10 +1,11 @@
 import uuid
 import os
+import io
 from pathlib import Path
-
+from PIL import Image
+from django.core.files.base import ContentFile
+from django.conf import settings
 from hans_ent.models import *
-
-
 
 
 
@@ -192,91 +193,172 @@ def merge_two_actor_into_one(q_actor, q_actor_s):
     
 
 
+""" 
+입력값은 PIL object. 그러면 알아서 커버이미지, 썸네일이미지 두가지 모두 출력
+    PIL image, 
+    커버이미지 == Landscape 비율
+    썸네일이미지 == Portrait 비율
+            
+    Width	Height	Name
+    640	    360	    nHD
+    854	    480	    FWVGA
+    960	    540	    qHD
+    1024	576	    WSVGA
+    1280	720	    HD
+    1366	768	    FWXGA
+    1600	900	    HD+
+    1920	1080	Full HD
+    2560	1440	QHD
+    3200	1800	QHD+
+    3840	2160	4K UHD
+    5120	2880	5K
+    7680	4320	8K UHD
+"""
+
+"""
+    image naming $ size rules
+    thumbnail image: hashcode-t.xxx  // size: 260px by 320px
+    cover image: hashcode-c.xxx  // size: 520px by 640px
+    original image: hashcode-o.xxx  // size: 그대로
+    still image: hashcode-s-<order number>.xxx  // size: 65px by 80px
+"""    
+
+def resize_with_padding(image, target_width, target_height):
+    # Resize the image while maintaining aspect ratio
+    color=(255, 255, 255)
+    image.thumbnail((target_width, target_height))
+    # Calculate padding
+    width, height = image.size
+    pad_width = (target_width - width) // 2
+    pad_height = (target_height - height) // 2
+
+    # Create a new image with the target size and specified background color
+    new_image = Image.new("RGB", (target_width, target_height), color)
+
+    # Paste the resized image onto the new image, centered
+    new_image.paste(image, (pad_width, pad_height))
+    return new_image
+
+def resize_pil_image_for_cover_and_thumbnail_pil(img):
+    
+    resized_image_c = resize_with_padding(img, 520, 640)  # Target size: 300x300 with white background
+    resized_image_t = resize_with_padding(img, 260, 320)  # Target size: 300x300 with white background
+
+    # Get the original dimensions
+    # original_width, original_height = img.size
+    # original_max_size = max(original_width, original_height)
+    # cover_output_image_size = (520, 640)
+    # cover_max_size = 640
+    # thumbnail_output_image_size = (260, 320)
+    # thumbnail_max_size = 320
+   
+
+
+    # cover_img = img.resize((cover_new_width, cover_new_height), Image.Resampling.LANCZOS)
+    # thumbnail_img = img.resize((thumbnail_new_width, thumbnail_new_height), Image.Resampling.LANCZOS)
+
+    # # Calculate the scaling factor for width and height
+    # cover_width_scale = cover_max_size / original_width
+    # cover_height_scale = cover_max_size / original_height
+    # thumbnail_width_scale = thumbnail_max_size / original_width
+    # thumbnail_height_scale = thumbnail_max_size / original_height
+    # # Choose the smaller of the two scales to maintain aspect ratio
+    # cover_scale = min(cover_width_scale, cover_height_scale)
+    # thumbnail_scale = min(thumbnail_width_scale, thumbnail_height_scale)
+    # # Calculate the new dimensions
+    # cover_new_width = int(original_width * cover_scale)
+    # cover_new_height = int(original_height * cover_scale)
+    # thumbnail_new_width = int(original_width * thumbnail_scale)
+    # thumbnail_new_height = int(original_height * thumbnail_scale)
+    # # Resize the image
+    # cover_img = img.resize((cover_new_width, cover_new_height), Image.Resampling.LANCZOS)
+    # thumbnail_img = img.resize((thumbnail_new_width, thumbnail_new_height), Image.Resampling.LANCZOS)
+
+    # thumbnail_img_width, thumbnail_img_heigh = thumbnail_img.size
+    # thumb_center_x = thumbnail_img_width / 2
+    # thumb_center_y = thumbnail_img_heigh / 2
+    # center_x = cover_output_image_size[0] / 2
+    # center_y = cover_output_image_size[1] / 2
+    # # Calculate cropping box coordinates for cover image
+    # left = center_x - cover_output_image_size[0] / 2
+    # top = center_y - cover_output_image_size[1] / 2
+    # right = center_x + cover_output_image_size[0] / 2
+    # bottom = center_y + cover_output_image_size[1] / 2
+    # # Crop the image
+    # cover_img = cover_img.crop((left, top, right, bottom))
+    # # Calculate cropping box coordinates for thumbnail
+    # left = thumb_center_x - thumbnail_output_image_size[0] / 2
+    # top = thumb_center_y - thumbnail_output_image_size[1] / 2
+    # right = thumb_center_x + thumbnail_output_image_size[0] / 2
+    # bottom = thumb_center_y + thumbnail_output_image_size[1] / 2
+    # # Crop the image
+    # thumbnail_img = thumbnail_img.crop((left, top, right, bottom))
+    return resized_image_c, resized_image_t
 
     
-# Album Image file => Original / Cover / Thumbnail 저장하기
-def save_image_file_to_original_cover_and_thumbnail_images(q_xxx, image_file):
+# 배우 갤러리 이미지/썸네일 저장하기
+def save_actor_profile_images(q_actor, images):
     """
-    이미지를 PIL 객체로 변환한 뒤
-    편집을 수행
-    원본사이즈 이미지 저장 
-    사이즈 조정
-    썸네일 저장
+        이미지를 PIL 객체로 변환한 뒤
+        편집을 수행
+        원본사이즈 이미지 저장 
+        사이즈 조정
+        썸네일 저장
     """
-    print('# Album Image file => Original / Cover / Thumbnail 저장하기')
-    print('q_xxx', q_xxx, type(q_xxx))
-    print('image_file', image_file, type(image_file))
-        
-    if image_file is not None:
+    relative_path = 'vault1/actor/'
+    # reset active to false
+    list_dict_profile_album = q_actor.list_dict_profile_album
+    if list_dict_profile_album is not None and len(list_dict_profile_album) > 0:
+        for dict_profile_album in list_dict_profile_album:
+            dict_profile_album["active"] = "false"
+        data = {
+                'list_dict_profile_album': list_dict_profile_album,
+        }
+        Actor.objects.filter(id=q_actor.id).update(**data)
+        q_actor.refresh_from_db()
+    else:
+        list_dict_profile_album = []
+    num_profile_image = len(list_dict_profile_album)
+    # get base info
+    hashcode = q_actor.hashcode
+    total_image_number = len(images)
+    i = 0
+    for image_file in images:   
         image_file_name = image_file.name
-        image_file_name_cleaned = file_name_cleaner(image_file_name)
-        image_file.name = image_file_name_cleaned
-
-        q_xxx_id_str = str(q_xxx.id)
-
-        # PIL 객체 변환 및 편집
+        file_extension = image_file_name.split('.')[-1]
+        print('file_extension', file_extension)
+        # convert file to PIL object
         image_pil = Image.open(image_file)
         # Remove Alpah channel befor saving
         image_pil = image_pil.convert('RGB')
-
-        # PIL 객체로부터 Thumbnail, Cover 사이즈 PIL 객체 확보
-        cover_pil, thumbnail_pil = resize_pil_image_for_cover_and_thumbnail_pil(image_pil)
-
         # 원본 이미지 저장
-        image_io = io.BytesIO()
-        image_pil.save(image_io, format='JPEG')
-        image_name_original = f'{q_xxx_id_str}-original-{image_file_name_cleaned}'
-        q_xxx.image_original.save(image_name_original, ContentFile(image_io.getvalue()), save=True)
-
-        # 커버이미지 저장
-        image_io = io.BytesIO()
-        cover_pil.save(image_io, format='JPEG')
-        image_name_cover = f'{q_xxx_id_str}-cover-{image_file_name_cleaned}'
-        q_xxx.image_cover.save(image_name_cover, ContentFile(image_io.getvalue()), save=True)
+        image_name_original = f'{hashcode}-o-{num_profile_image}.{file_extension}'
+        file_path = os.path.join(settings.MEDIA_ROOT, relative_path, image_name_original)
+        image_pil.save(file_path)
         
+        # Get Thumbnail, Cover size PIL objects
+        cover_pil, thumbnail_pil = resize_pil_image_for_cover_and_thumbnail_pil(image_pil)
+        # 커버이미지 저장
+        image_name_cover = f'{hashcode}-c-{num_profile_image}.{file_extension}'
+        file_path = os.path.join(settings.MEDIA_ROOT, relative_path, image_name_cover)
+        cover_pil.save(file_path)
         # 썸네일 이미지 저장
-        image_io = io.BytesIO()
-        thumbnail_pil.save(image_io, format='JPEG')
-        image_name_thumbnail = f'{q_xxx_id_str}-thumbnail-{image_file_name_cleaned}'
-        q_xxx.image_thumbnail.save(image_name_thumbnail, ContentFile(image_io.getvalue()), save=True)
-
-        q_xxx.refresh_from_db()
-    return q_xxx
-
-
-
-# 배우 갤러리 이미지/썸네일 저장하기
-def save_actor_gallery_images_and_thumbnail_to_db(q_actor, images):
-    print('gallery image 저장하기')
-    BASE_DIR = settings.MEDIA_ROOT
-    BASE_UPLOAD_DIR = os.path.join(BASE_DIR, "uploads") 
-    DESTINATION_DIR = os.path.join(BASE_UPLOAD_DIR, "actor_images") 
-    # 폴더 내 파일 이름 리스트화 및 동일파일이름 체크
-    list_album_file_name = []
-    file_names = os.listdir(DESTINATION_DIR)
-    for file_name in file_names:
-        list_album_file_name.append(file_name)
-    
-    list_actor_picture_id = q_actor.list_actor_picture_id
-    if list_actor_picture_id is None:
-        list_actor_picture_id = []
-    name = q_actor.name
-    i = len(list_actor_picture_id) + 1
-    for image_file in images:    
-        image_file_name = image_file.name
-        image_file_name_cleaned = file_name_cleaner(image_file_name)
-        actor_id_str = str(q_actor.id)
-        image_file.name = f'{actor_id_str}-{image_file_name_cleaned}'
-        title = f'model_album_{name}-({i})'
-        if image_file_name_cleaned not in list_album_file_name:
-            q_pic = Picture_Actor_Pic.objects.create(
-                actor=q_actor,
-                # image=image,
-                title=title,
-                name=name
-            )
-            print('q_pic', q_pic)
-            list_actor_picture_id.append(q_pic.id)
-            save_image_file_to_original_cover_and_thumbnail_images(q_pic, image_file)
+        image_name_thumbnail = f'{hashcode}-t-{num_profile_image}.{file_extension}'
+        file_path = os.path.join(settings.MEDIA_ROOT, relative_path, image_name_thumbnail)
+        thumbnail_pil.save(file_path)
+        # List 업데이트
+        if total_image_number == i + 1:
+            list_dict_profile_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"true"})
+        else:
+            list_dict_profile_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"false"})
         i = i + 1
-    return list_actor_picture_id
+        num_profile_image = num_profile_image + 1
+     
+    # db save and refresh  
+    data = {
+        'list_dict_profile_album': list_dict_profile_album,
+    }
+    Actor.objects.filter(id=q_actor.id).update(**data)
+    q_actor.refresh_from_db()
+    return list_dict_profile_album
+    # return True

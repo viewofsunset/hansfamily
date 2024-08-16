@@ -45,14 +45,10 @@
 								</div>
 
 								<div v-for="item in active_list_dict_profile_album" :key="item.id">
-                                    <img :src="BASE_DIR_ACTOR+item.cover" width="200">
+									<a :href="BASE_DIR_ACTOR+item.original" target="_blank">
+										<img :src="BASE_DIR_ACTOR+item.cover" width="200">
+									</a>
                                 </div>
-									
-								<div>
-                                    <input type="file" @change="f_file_actor_cover_selected" class="form-control" id="id_upolad_actor_cover_image_to_db">
-									<button type="button" class="btn btn-dark btn-sm"  @click="f_upload_cover_image" >Upload</button>
-                                </div>		
-									
 							</td>
 						
 							<!--
@@ -158,10 +154,10 @@
 								<button type="button" class="btn btn-dark btn-sm"  @click="f_upload_actor_website_url" >Upload</button>
 							</td>
 							<td style="background-color:rgb(255,255,255,0.05)">
-								<div v-if="actor_info_site_url != null">
-									<div v-for="(key, index) in data_actor.actor_info_site_url" :key="key" class="card" >
-										<a :href="[[key]]" target="_blank">
-											[[ index ]]
+								<div v-if="list_dict_info_url != null">
+									<div v-for="item, in data_actor.list_dict_info_url" class="card" >
+										<a :href="[[ item.url ]]" target="_blank">
+											[[ item.name ]]
 										</a>
 									</div>
 								</div>
@@ -253,7 +249,9 @@
 		return {
             BASE_DIR_ACTOR : '',
 			data_actor : {},
-            list_dict_profile_album: [],
+            list_dict_info_url: [],
+			list_dict_profile_album: [],
+
 			
 			input_text_name: '',
 			input_actor_info_site_name: '',
@@ -294,6 +292,7 @@
 			f_sync_data_to_actor_upload_modal(data) {
                 this.BASE_DIR_ACTOR = data['BASE_DIR_ACTOR']
 				this.data_actor = data['selected_serialized_data_actor']
+				this.list_dict_info_url = this.data_actor['list_dict_info_url']
                 this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
 				this.selected_actor_id = this.data_actor['id']
 				console.log('Actor List로부터 upload로 데이터 수신 완료', this.selected_actor_id)
@@ -325,6 +324,8 @@
 				$('#id_upolad_actor_cover_image_to_db').val("");
 				$('#id_upload_actor_search_by_name').val("");
 				$('#id_upolad_actor_gallery_image_to_db').val("");
+				$('#id_upload_actor_info_site_name').val("");
+				$('#id_upload_actor_info_site_url').val("");
 			},
 
 			f_remove_registered_actor_cover_image(event) {
@@ -345,6 +346,7 @@
 						console.log(response.data)
 						this.data_actor = response.data['selected_serialized_data_actor']
                         this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+						this.refreshData()
 					})
 					.catch(() => {
 						console.log('Error! f_hans_ent_actor_profile_modal')
@@ -355,46 +357,12 @@
 				
 			},
 
-			async f_upload_cover_image() {
-				let formData = new FormData();
-				console.log('upload files!')
-				formData.append('image_type', 'image_cover');
-				formData.append('image_cover', this.image_cover)
-				formData.append('selected_actor_id', this.selected_actor_id)
-				this.show_progress = true;
-				try {
-					await axios.post('/hans_ent_actor_upload_modal/', formData, {
-					headers: {
-						'Content-Type': 'multipart/form-data',
-						'X-CSRFToken': "{{ csrf_token }}"
-					},
-					onUploadProgress: progressEvent => {
-					this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
-					})
-					.then((response) => {
-						$('#id_upolad_actor_cover_image_to_db').val("");
-						this.show_progress = false;
-						this.progress_value = 0
-						this.data_actor = response.data['selected_serialized_data_actor']
-						this.list_actor_picture_id = this.data_actor['list_actor_picture_id']
-						this.input_text_name = this.data_actor['name']
-						this.selected_actor_id = this.data_actor['id']
-						this.status_cover_image_upload = false
-						console.log('커버이미지 업로드, selected_actor_id', this.selected_actor_id)
-                    })
-					// alert('Upload successful');
-				} catch (error) {
-					console.error('Error uploading images:', error);
-				}
-			},
-
 			async f_upload_form() {
 				let formData = new FormData();
 				if (this.images != null) {
 					for (let i = 0; i < this.images.length; i++) {
 						formData.append('images', this.images[i]);
 				}}
-				formData.append('image_type', 'gallery_image');
 				formData.append('selected_actor_id', this.selected_actor_id);
 				formData.append('input_text_name', this.input_text_name)
 				formData.append('input_date_birthday', this.input_date_birthday)
@@ -415,12 +383,8 @@
 					.then((response) => {
 						$('#id_upolad_actor_gallery_image_to_db').val("");
 						this.data_actor = response.data['selected_serialized_data_actor']
-						this.selected_actor_id = this.data_actor['id']
-						this.selected_actor_name = this.data_actor['name']
-						this.input_date_birthday = this.data_actor['date_birth']
-						this.selected_actor_type = this.data_actor['types']
-						this.list_actor_picture_id = this.data_actor['list_actor_picture_id']
-						this.dict_actor_key_fullsize_value_thumbnail_image_path = response.data['dict_actor_key_fullsize_value_thumbnail_image_path']
+                        this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+						this.refreshData()
 						this.show_progress = false;
 						this.progress_value = 0
 						
@@ -495,7 +459,7 @@
 						
 					}) 
 				} else {
-					alert("삭제가 취소되었습니다.ㄴ");
+					alert("삭제가 취소되었습니다.");
 				}
 			},
 
@@ -556,8 +520,6 @@
                 .then((response) => {
 					console.log(response.data)
 					this.data_actor = response.data['selected_serialized_data_actor']
-					this.actor_info_site_url = this.data_actor
-					this.dict_actor_key_fullsize_value_thumbnail_image_path = response.data['dict_actor_key_fullsize_value_thumbnail_image_path']
 					$('#id_upload_actor_info_site_name').val("");
 					$('#id_upload_actor_info_site_url').val("");
                 })
