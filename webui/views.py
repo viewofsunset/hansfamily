@@ -755,6 +755,8 @@ def hans_ent_picture_album_upload_modal(request):
         if selected_picture_album_id_str is not None and selected_picture_album_id_str != '' :
             selected_picture_album_id = int(selected_picture_album_id_str)
             q_picture_album_selected = Picture_Album.objects.get(id=selected_picture_album_id)
+            if q_picture_album_selected is not None:
+                q_actor = q_picture_album_selected.main_actor
         else:
             q_picture_album_selected = None 
         print('q_picture_album_selected', q_picture_album_selected)
@@ -895,12 +897,7 @@ def hans_ent_picture_album_upload_modal(request):
             print('q_actor', q_actor)
             if q_actor is None:
                 q_actor = q_picture_album_selected.main_actor
-            data = {
-                'main_actor': q_actor,
-            }
-            Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
-            q_picture_album_selected.refresh_from_db()
-
+               
             # Settings에 선택된 Album 쿼리 등록
             print('세팅에 현재 앨범 등록하기', q_mysettings_hansent)
             data = {
@@ -918,6 +915,7 @@ def hans_ent_picture_album_upload_modal(request):
                 
         jsondata = {
             'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
+            'BASE_DIR_PICTURE': BASE_DIR_PICTURE,
             'selected_serialized_data_picture_album': selected_serialized_data_picture_album,
             'selected_serialized_data_actor': selected_serialized_data_actor,
         }

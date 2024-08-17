@@ -9,8 +9,7 @@
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h1 class="modal-title fs-4" id="exampleModalLabel"> Upload Picture Album : [[ data_actor.name ]] [[ data_picture_album.title ]] </h1>
-				
+				<h1 class="modal-title fs-4" id="exampleModalLabel">   Upload Picture Album : [[ data_actor.name ]] [[ data_picture_album.title ]] </h1>
 				&nbsp; 
 				<div class="text-center">
 					<button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-profile-modal">
@@ -37,6 +36,11 @@
 			</div>
 
 			<div class="modal-body">
+				<hr>
+				[[ data_actor ]]
+				<hr>
+				[[ data_picture_album ]]
+				<hr>
 				<div>
 					<table class="table">
 						<tr>
@@ -45,6 +49,7 @@
 							-->
 							<td rowspan="4" width="30%">
 								<div class="text-end">
+									
 									앨범 사진 등록 / 사진 등록 취소 
 									<button @click="f_remove_registered_actor_cover_image(data_picture_album.id)" class="btn" >
 										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
@@ -52,28 +57,6 @@
 											<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
 										</svg>
 									</button>
-								</div>
-								<div v-if="status_cover_image_upload == false">
-									<div v-if="selected_picture_album_id != null">
-										<div v-if="data_picture_album.image_thumbnail">
-											<img :src="api_url_fixed+data_picture_album.image_thumbnail" width="200">
-										</div>
-										<div v-else-if="data_picture_album.cover_image_url">
-											<img :src="data_picture_album.cover_image_url" width="200">
-										</div>
-										<div v-else>
-											<input type="file" @change="f_file_album_cover_selected" class="form-control" id="id_upload_album_cover_image_to_db">
-											<button type="button" class="btn btn-dark btn-sm"  @click="f_upload_cover_image" >Upload</button>
-										</div>
-									</div>
-									<div v-else>
-										<input type="file" @change="f_file_album_cover_selected" class="form-control" id="id_upload_album_cover_image_to_db">
-										<button type="button" class="btn btn-dark btn-sm"  @click="f_upload_cover_image" >Upload</button>
-									</div>
-								</div>
-								<div v-else>
-									<input type="file" @change="f_file_album_cover_selected" class="form-control" id="id_upload_album_cover_image_to_db">
-									<button type="button" class="btn btn-dark btn-sm"  @click="f_upload_cover_image" >Upload</button>
 								</div>
 								
 							</td>
@@ -216,7 +199,7 @@
 					Actor 등록을 위한 검색 결과 표시 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				-->
 				<!-- 검색결과 매칭되는 모델 리스트 표시 -->
-				<div v-if="Object.keys(list_serialized_data_actor).length != 0">
+				<div v-if="Object.keys(list_serialized_data_actor).length !== 0">
 					<div class="text-end">
 						<button @click="f_fold_searched_actor_list()" class="btn" >
 							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
@@ -291,16 +274,13 @@
 					앨범에 등록한 이미지 표시 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				-->
 				<!-- Registered Images -->
-				<div v-if="Object.keys(list_dict_picture_album).length != 0">
-					<div class="grid-container-picture-album-picture">
-						<div v-for="(dict_picture_album, index) in list_dict_picture_album" :key="index">
-							<div class="box-picture-album-picture">
-								<a :href="BASE_DIR_PICTURE+dict_picture_album.original" target="_blank">
-									<img :src="BASE_DIR_PICTURE+dict_picture_album.thumbnail" >
-									<div class="text-overlay">[[ index ]]</div>
-								</a>
-							</div>
-							
+				<div v-if="data_picture_album.list_dict_picture_album != null">
+					<div class="gallery-container">
+						<div v-for="(key, index) in Object.keys(dict_album_key_fullsize_value_thumbnail_image_path)" :key="key" class="card" >
+							<a :href="api_url_fixed_media+key" target="_blank">
+								<img v-bind:src="api_url_fixed_media+dict_album_key_fullsize_value_thumbnail_image_path[key]" >
+								<div class="text-overlay">[[ index ]]</div>
+							</a>
 						</div>
 					</div>
 				</div>
@@ -329,6 +309,7 @@
 		return {
 			LIST_ACTOR_SUB_TYPES: [],
 
+			BASE_DIR_ACTOR: '',
 			BASE_DIR_PICTURE: '',
 			data_actor: {},
 			data_picture_album: {},
@@ -338,9 +319,9 @@
 			selected_serialized_data_picture_album: [],
 			selected_serialized_data_actor: [],
 			
-			selected_picture_album_id: '',
-			selected_actor_id: '',
-			selected_picture_sub_type: '',
+			selected_picture_album_id: null,
+			selected_actor_id: null,
+			selected_picture_sub_type: null,
 			title : '',
 			
 			input_text_title: '',
@@ -357,7 +338,6 @@
 			show_progress: false,
 
 			status_new: true,
-			check_under_uploading: false,
 			status_cover_image_upload: false,
 			
 		}
@@ -368,29 +348,47 @@
 				axios.get('/hans_ent_picture_album_upload_modal/')
 				.then((response) => {
 					this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
+					this.BASE_DIR_PICTURE = response.data['BASE_DIR_PICTURE']
 					this.data_actor = response.data['selected_serialized_data_actor']
-					this.selected_actor_id = this.data_actor['id']
 					this.data_picture_album = response.data['selected_serialized_data_picture_album']
-					this.selected_picture_album_id = this.data_picture_album['id']
+					
 					this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
 				})
 			},
 
 			f_sync_data_to_picture_album_upload_modal(data) {
 				this.BASE_DIR_ACTOR = data['BASE_DIR_ACTOR']
+				this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
 				this.data_actor = data['selected_serialized_data_actor']
-				this.selected_actor_id = this.data_actor['id']
 				this.data_picture_album = data['selected_serialized_data_picture_album']
-				this.selected_picture_album_id = this.data_picture_album['id']
+				
 				this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
 				console.log('앨범 업로드 모달창으로 전송 완료', data)
 			},
 			
 			f_reset_return() {
-				this.data_actor = {},
+				this.data_actor = {}
 				this.data_picture_album = {}
-				this.list_serialized_data_actor = []
-				this.selected_actor_id = ''
+				this.list_serialized_data_actor = null,
+				this.selected_serialized_data_picture_album = null,
+				this.selected_serialized_data_actor = null,
+				this.selected_picture_album_id = null
+				this.selected_actor_id = null,
+				this.selected_picture_sub_type = null,
+				this.title = ''
+				this.input_text_title = ''
+				this.input_text_name = ''
+				this.input_text_studio = ''
+				this.image_cover = ''
+				this.dict_album_key_fullsize_value_thumbnail_image_path = {}
+				this.status_new = true,
+				this.status_cover_image_upload = false
+				this.progress_value = 0
+				this.progress_max = 100
+				this.progress_min = 0
+				this.show_progress = false
+				$("#id_upload_album_cover_image_to_db").val("");
+				$("#id_upload_album_image_to_db").val("");
 			},
 			
 			////////////////////////////////////////////////////////////////////////
@@ -430,10 +428,7 @@
 					this.input_text_name = '';
 					$('#id_input_text_search_actor_select').val("");
 					console.log(response.data)
-					this.data_picture_album = response.data['selected_serialized_data_picture_album']
-					this.selected_picture_album_id = this.data_picture_album['id']
 					this.data_actor = response.data['selected_serialized_data_actor']
-					this.selected_actor_id = this.data_actor['id']
                 })
                 .catch(() => {
                     console.log('Error! f_actor_select_for_album_upload')
@@ -448,7 +443,6 @@
 			// 선택한 Actor 선택해제
 			f_deselect_selected_actor(event) {
 				this.data_actor = {}
-				this.selected_actor_id = '';
 			},
 
 			
@@ -456,7 +450,21 @@
 			////////////////////////////////////////////////////////////////////////
 			// Picture Album 정보 저장하기
 			////////////////////////////////////////////////////////////////////////
-
+			
+			f_file_album_cover_selected(event) {
+				this.image_cover = event.target.files[0]
+				console.log(this.image_cover)
+			},
+			
+			f_input_text_studio(event) {
+				this.input_text_studio = event.target.value
+			},
+			f_input_text_title(event) {
+				this.input_text_title = event.target.value
+			},
+			f_input_date_released(event) {
+				this.input_date_released = event.target.value
+			},
 						
 			f_file_album_images_select(event) {
 			this.images = event.target.files;
@@ -470,8 +478,9 @@
 					for (let i = 0; i < this.images.length; i++) {
 						formData.append('images', this.images[i]);
 				}}
+				formData.append('image_type', 'gallery_image');
 				formData.append('selected_picture_album_id', this.selected_picture_album_id);
-				formData.append('selected_actor_id', this.selected_actor_id);
+				formData.append('selected_actor_id', this.data_actor['id']);
 				formData.append('input_text_title', this.input_text_title);
 				formData.append('input_text_name', this.input_text_name);
 				formData.append('input_text_studio', this.input_text_studio);
@@ -493,9 +502,9 @@
 					})
 					.then((response) => {
 						$("#id_upload_album_image_to_db").val("");
+						this.data_actor = response.data['selected_serialized_data_actor']
 						this.data_picture_album = response.data['selected_serialized_data_picture_album']
-						this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
-						this.check_under_uploading = this.data_picture_album['check_under_uploading']
+						this.selected_picture_album_id = this.data_picture_album['id']
 						this.show_progress = false;
 						this.progress_value = 0
                     })
@@ -504,6 +513,13 @@
 					console.error('Error uploading images:', error);
 				}
 			},
+
+			
+			// 모달창 닫기
+			f_modal_close() {
+				post_hans_ent_picture_album_list.refreshData()
+		        console.log('모달창 닫힘버튼 눌렀음!')
+			}, 
 
 		},
 		mounted: function() {
@@ -514,31 +530,31 @@
 </script>
 
 <style>
-.grid-container-picture-album-actor{
-        display: grid;
-        gap: 10px; /* Space between boxes */
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Default: fit as many 150px boxes as possible */
-}
-
-.box-picture-album-actor{
-	height: 220px; /* Fixed height for all boxes */
-	background-color: #f0f0f0; /* Example styling */
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-
-.grid-container-picture-album-picture{
-        display: grid;
-        gap: 10px; /* Space between boxes */
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Default: fit as many 150px boxes as possible */
-}
-
-.box-picture-album-picture{
-	height: 220px; /* Fixed height for all boxes */
-	background-color: #f0f0f0; /* Example styling */
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-</style>
+	.grid-container-picture-album-actor{
+			display: grid;
+			gap: 10px; /* Space between boxes */
+			grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Default: fit as many 150px boxes as possible */
+	}
+	
+	.box-picture-album-actor{
+		height: 220px; /* Fixed height for all boxes */
+		background-color: #f0f0f0; /* Example styling */
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	
+	.grid-container-picture-album-picture{
+			display: grid;
+			gap: 10px; /* Space between boxes */
+			grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Default: fit as many 150px boxes as possible */
+	}
+	
+	.box-picture-album-picture{
+		height: 220px; /* Fixed height for all boxes */
+		background-color: #f0f0f0; /* Example styling */
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	</style>
