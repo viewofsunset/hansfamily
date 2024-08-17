@@ -64,6 +64,10 @@ BASE_DIR_ACTOR = '/media/vault1/actor/'
 BASE_DIR_PICTURE = '/media/vault1/picture/'
 BASE_DIR_VIDEO = '/media/vault1/video/'
 
+RELATIVE_PATH_ACTOR = 'vault1/actor/'
+RELATIVE_PATH_PICTURE = 'vault1/picture/'
+RELATIVE_PATH_VIDEO = 'vault1/video/'
+
 LIST_MENU_HANS_ENT = (
     ('01', 'ACTOR'),
     ('02', 'PICTURE'),
@@ -82,6 +86,12 @@ LIST_LOCATIONS = (
     ('09', 'ETC'),
 )
 
+LIST_NUM_DISPLAY_IN_PAGE = 100
+LIST_ACTOR_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
+LIST_PICTURE_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
+LIST_VIDEO_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
+
+
 """
 image naming $ size rules
 thumbnail image: hashcode-t.xxx  // size: 260px by 320px
@@ -99,6 +109,8 @@ list_dict_profile_album rule:
 ]
 abcd == hashcode
 """
+DEFAULT_LIST_DICT_ACTOR_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true"}]
+
 class Actor(models.Model):
     # classification
     # types = models.CharField(max_length=50, choices=LIST_MENU_STREAMING, default=LIST_MENU_STREAMING[0][0], blank=True) # Submenu Switching
@@ -117,9 +129,8 @@ class Actor(models.Model):
     height = models.IntegerField(null=True, blank=True)
     tags = models.JSONField(null=True, blank=True) # Collect tags from LIST_ACTOR_TAGS
     evaluation = models.FloatField(default=0)
-    # URL info
+    # 
     list_dict_info_url =  models.JSONField(null=True, blank=True) # [{"name":'imdb', "site":'https://www.imbd.com/xxx'}, {}]
-    list_actor_picture_id = models.JSONField(null=True, blank=True)
     list_dict_profile_album = models.JSONField(null=True, blank=True) # list_dict_profile_album rule 참고
 
     # system
@@ -132,21 +143,6 @@ class Actor(models.Model):
     
 
 
-# # class Picture_Actor_Pic(models.Model):
-# class Actor_Pic(models.Model):
-#     actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
-#     title = models.CharField(max_length=250, null=True, blank=True)
-#     # name = models.CharField(max_length=250, null=True, blank=True)
-#     hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
-#     image_thumbnail = models.ImageField(null=True, blank=True) # 260px by 320px
-#     image_cover = models.ImageField(null=True, blank=True)  # 520px by 640px
-#     image_original = models.ImageField(null=True, blank=True) # original 그대로
-#     check_discard = models.BooleanField(default=False)
-    
-#     def __str__(self):
-#         return f'{self.actor.name}-{self.id} Actor_Pic'
-
-
 """
 list_dict_picture_album rule:
 [
@@ -156,11 +152,18 @@ list_dict_picture_album rule:
 ]
 abcd == hashcode
 """
+DEFAULT_LIST_DICT_PICTURE_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true"}]
+
 class Picture_Album(models.Model):
     main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
     list_dict_picture_album = models.JSONField(null=True, blank=True)
+    code = models.CharField(max_length=250, null=True, blank=True)
+    studio = models.CharField(max_length=250, null=True, blank=True)
+    score = models.FloatField(default=0)
+    tags = models.JSONField(null=True, blank=True) # Collect tags from LIST_ACTOR_TAGS
+    date_released = models.DateTimeField(auto_now=True, null=True)
     check_discard = models.BooleanField(default=False)
     
     def __str__(self):
@@ -176,11 +179,18 @@ list_dict_video_album rule:
 ]
 abcd == hashcode
 """
+DEFAULT_LIST_DICT_VIDEO_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true"}]
+
 class Video_Album(models.Model):
     main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
     list_dict_video_album = models.JSONField(null=True, blank=True)
+    code = models.CharField(max_length=250, null=True, blank=True)
+    studio = models.CharField(max_length=250, null=True, blank=True)
+    score = models.FloatField(default=0)
+    tags = models.JSONField(null=True, blank=True) # Collect tags from LIST_ACTOR_TAGS
+    date_released = models.DateTimeField(auto_now=True, null=True)
     check_discard = models.BooleanField(default=False)
 
     def __str__(self):
@@ -188,38 +198,35 @@ class Video_Album(models.Model):
 
 
 
-LIST_NUM_DISPLAY_IN_PAGE = 100
-LIST_ACTOR_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
-LIST_PICTURE_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
-LIST_VIDEO_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
+
 
 class MySettings_HansEnt(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True) 
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     menu_selected = models.CharField(choices=LIST_MENU_HANS_ENT, default=LIST_MENU_HANS_ENT[0][0], blank=True)
     # actor
     actor_selected = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
-    # actor_pic_selected = models.ForeignKey(Actor_Pic, on_delete=models.SET_NULL, null=True, blank=True)
     selected_field_actor = models.CharField(max_length=50, default=LIST_ACTOR_FIELD[0], blank=True)
     check_field_ascending_actor = models.BooleanField(default=True)
     count_page_number_actor = models.IntegerField(default=1)
     list_searched_actor_id = models.JSONField(null=True, blank=True)
-
     # picture
+    picture_album_selected = models.ForeignKey(Picture_Album, on_delete=models.SET_NULL, null=True, blank=True)
     selected_field_picture = models.CharField(max_length=50, default=LIST_PICTURE_FIELD[0], blank=True)
     check_field_ascending_picture = models.BooleanField(default=True)
     count_page_number_picture = models.IntegerField(default=1)
     list_searched_picture_id = models.JSONField(null=True, blank=True)
-
     # video
+    video_album_selected = models.ForeignKey(Video_Album, on_delete=models.SET_NULL, null=True, blank=True)
     selected_field_video = models.CharField(max_length=50, default=LIST_VIDEO_FIELD[0], blank=True)
     check_field_ascending_video = models.BooleanField(default=True)
     count_page_number_video = models.IntegerField(default=1)
     list_searched_video_id = models.JSONField(null=True, blank=True)
-
+    # system
     check_discard = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.user.username} MySettings_HansEnt'
+
 
 
 

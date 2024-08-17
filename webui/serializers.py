@@ -19,25 +19,38 @@ class Actor_Serializer(serializers.ModelSerializer):
             'tags',
             'evaluation',
             'list_dict_info_url',
-            'list_actor_picture_id',
             'list_dict_profile_album',
         ]
 
 
-class Picture_Album_Detail_Serializer(serializers.ModelSerializer):
+class Picture_Album_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Picture_Album
         fields = [
             'id',
+            # 'main_actor__id',
             'title',
+            'list_dict_picture_album',
+            'code',
+            'studio',
+            'score',
+            'tags',
+            'date_released',
         ]
 
 
 
-class Video_Album_Detail_Serializer(serializers.ModelSerializer):
+class Video_Album_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Video_Album
         fields = [
             'id',
+            # 'main_actor__id',
             'title',
+            'list_dict_video_album',
+            'code',
+            'studio',
+            'score',
+            'tags',
+            'date_released',
         ]

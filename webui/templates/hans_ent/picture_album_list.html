@@ -5,7 +5,7 @@
     
 {% block content %}
 
-    <div class="row" id="app-hans-ent-picture-list">
+    <div class="row" id="app-hans-ent-picture-album-list">
         <div class="col-md-12">
             
             <div>
@@ -16,16 +16,14 @@
                 <div v-for="(data_picture_album, index) in list_serialized_data_picture_album" :key="index" class="card" >
                     <div class="box">
                         <div class="card-body">
-                            <div v-if="data_picture_album.image_thumbnail">
-                                <button @click="f_hans_ent_picture_album_gallery_modal(data_picture_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-gallery-modal">
-                                    <div v-for="(dict_profile_album, index) in data_picture_album.list_dict_profile_album" :key="index" >
-                                        <div v-if="dict_profile_album.active == 'true'">
-                                            <img :src="BASE_DIR_ACTOR+dict_profile_album.cover" width="200">
-                                        </div>
+                            <button @click="f_hans_ent_picture_album_gallery_modal(data_picture_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-gallery-modal">
+                                <div v-for="(dict_picture_album, index) in data_picture_album.list_dict_picture_album" :key="index" >
+                                    <div v-if="dict_picture_album.active == 'true'">
+                                        <img :src="BASE_DIR_PICTURE+dict_picture_album.cover" width="200">
                                     </div>
-                                </button>
-                            </div>
-                            
+                                </div>
+                            </button>
+
                             <div class="text-center">
                                 <strong>
                                     [[ data_picture_album.title ]]
@@ -41,7 +39,7 @@
                                         </svg>                            
                                     </button>
                                     &nbsp;
-                                    <button @click="f_hans_ent_picture_upload_modal(data_picture_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-upload-modal">
+                                    <button @click="f_hans_ent_picture_album_upload_modal(data_picture_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album_upload-modal">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                             <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                                         </svg>
@@ -60,11 +58,11 @@
 
      
     <script>
-        var post_hans_ent_picture_list = createApp({
+        var post_hans_ent_picture_album_list = createApp({
             delimiters: ["[[", "]]"],
             data() {
             return {
-                BASE_DIR_ACTOR: '',
+                BASE_DIR_PICTURE: '',
                 list_menu_type: [],
                 list_field_sorting: [],
                 list_serialized_data_picture_album: [],
@@ -86,9 +84,9 @@
             },
             methods: {
                 refreshData() {
-                    axios.get('/hans_ent_picture_list')
+                    axios.get('/hans_ent_picture_album_list')
                     .then((response) => {
-                        this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
+                        this.BASE_DIR_PICTURE = response.data['BASE_DIR_PICTURE']
                         this.list_field_sorting = response.data['list_field_sorting']
                         this.list_serialized_data_picture_album = response.data['list_serialized_data_picture_album']
                         this.list_dict_profile_album = this.list_serialized_data_picture_album['list_dict_profile_album']
@@ -126,7 +124,7 @@
                 f_search_keyword_update(event) {
                     this.inputTextKeyword = event.target.value
                     searchData = this.inputTextKeyword
-                    axios.get('/hans_ent_picture_list_search/?keyword='+searchData)
+                    axios.get('/hans_ent_picture_album_list_search/?keyword='+searchData)
                     .then((response) => {
                         this.refreshData()
                         console.log(response)
@@ -144,7 +142,7 @@
 
                 f_search_keyword_button() {
                     searchData = this.inputTextKeyword
-                    axios.get('/hans_ent_picture_list_search/?keyword='+searchData)
+                    axios.get('/hans_ent_picture_album_list_search/?keyword='+searchData)
                     .then((response) => {
                         this.refreshData()
                         console.log(response)
@@ -156,7 +154,7 @@
 
                 f_reset_search_result_button() {
                     this.f_reset_return()
-                    axios.post('/hans_ent_picture_list_search/', {
+                    axios.post('/hans_ent_picture_album_list_search/', {
                         'button': 'reset'
                     }, {
                     headers: {
@@ -175,7 +173,7 @@
                 },
 
                 f_page_number_min() {
-                    axios.post('/hans_ent_picture_list/', {
+                    axios.post('/hans_ent_picture_album_list/', {
                         'button': 'page_number_min',
                         'count_page_number': this.count_page_number,
                     }, {
@@ -194,7 +192,7 @@
                 },
 
                 f_page_number_max() {
-                    axios.post('/hans_ent_picture_list/', {
+                    axios.post('/hans_ent_picture_album_list/', {
                         'button': 'page_number_max',
                         'count_page_number': this.count_page_number,
                     }, {
@@ -261,10 +259,10 @@
                 },
 
                 // icon pannel
-                f_hans_ent_picture_upload_modal(event) {
+                f_hans_ent_picture_album_upload_modal(event) {
                     this.selected_picture_id = event
                     console.log('############################# 1',this.selected_picture_id)
-                    axios.post('/hans_ent_picture_upload_modal/', {
+                    axios.post('/hans_ent_picture_album_upload_modal/', {
                         'selected_picture_id': this.selected_picture_id,
                     }, {
                     headers: {
@@ -273,11 +271,11 @@
                     }
                     })  
                     .then((response) => {
-                        post_hans_ent_picture_upload_modal.f_sync_data_to_picture_upload_modal(response.data)
-                        console.log('Actor List로부터 upload로 데이터 송신 완료', this.selected_picture_id)
+                        post_hans_ent_picture_album_upload_modal.f_sync_data_to_picture_album_upload_modal(response.data)
+                        console.log('Picture Album List로부터 Picture Album Upload Modal로 데이터 송신 완료', this.selected_picture_id)
                     })
                     .catch(() => {
-                        console.log('Error!  Actor List로부터 Actor Upload로 데이터 송신 오류')
+                        console.log('Error!  Picture Album List로부터 Picture Album Upload Modal로 데이터 송신 오류')
                     })
                 },
       
@@ -290,7 +288,7 @@
             mounted: function() {
                 this.refreshData()
             }
-        }).mount('#app-hans-ent-picture-list')
+        }).mount('#app-hans-ent-picture-album-list')
 
     </script> 
 

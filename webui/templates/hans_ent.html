@@ -10,6 +10,8 @@
     {% include 'hans_ent/actor_profile_modal.html' %}
     {% include 'hans_ent/actor_upload_modal.html' %}
     {% include 'hans_ent/actor_profile_gallery_fullscreen_modal.html' %}
+    
+    {% include 'hans_ent/picture_album_upload_modal.html' %}
 
 
     <!--
@@ -56,11 +58,11 @@
                
             {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.1.0 %}
                 
-                    {% include 'hans_ent/picture_list.html' %}
+                    {% include 'hans_ent/picture_album_list.html' %}
                 
             {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.2.0 %}
                
-                    {% include 'hans_ent/video_list.html' %}
+                    {% include 'hans_ent/video_album_list.html' %}
                
             {% else %}
             04
@@ -74,21 +76,24 @@
             {% if q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.0.0 %}
                 
                 <button type="submit"class="btn btn-primary btn-sm" value="True" name="button-update-latest-javdatabase">
-                    UPDATE LATEST JAVDATABASE
+                    database update Actor
                 </button>
                 <hr>  
+                <button type="button" @click="f_hans_ent_actor_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-upload-modal">
+                    Create Actor
+                </button>
 
             {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.1.0 %}
                 
-                <button type="button" @click="f_hans_ent_picture_album_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-hans_ent-picture-album-upload-modal">
-                    Upload Picture Album
+                <button type="button" @click="f_hans_ent_picture_album_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-upload-modal">
+                    Create Picture Album
                 </button>
                 <hr>  
                 
             {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.2.0 %}
 
-                <button type="button" @click="f_hans_ent_picture_album_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-hans_ent-picture-album-upload-modal">
-                    Upload Picture Album
+                <button type="button" @click="f_hans_ent_video_album_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-hans-ent-video-album-upload-modal">
+                    Create Video Album
                 </button>
                 <hr> 
 
@@ -108,9 +113,6 @@
             delimiters: ["[[", "]]"],
             data() {
             return {
-                api_url_fixed_local: 'http://localhost:8000', 
-                api_url_fixed: variables.API_URL,
-                api_url_fixed_media: 'media/',
                 check_error: false,
                 message:'',
             }
@@ -125,7 +127,7 @@
 
                 // 우측 기능 버튼 클릭
                 f_hans_ent_video_album_upload_modal() {
-                    axios.post('hans_ent_video_album_upload_modal/', {
+                    axios.post('/hans_ent_video_album_upload_modal/', {
                         'selected_video_album_id': 'null',
                         'messages': 'hello',
                     }, {
@@ -144,25 +146,28 @@
                 },
 
                 f_hans_ent_actor_upload_modal() {
-                    axios.post('hans_ent_actor_upload_modal/', {
+                    this.selected_actor_id = event
+                    console.log('############################# 1',this.selected_actor_id)
+                    axios.post('/hans_ent_actor_upload_modal/', {
                         'selected_actor_id': 'null',
                     }, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'X-CSRFToken': "{{ csrf_token }}"
-                    }})
+                    }
+                    })  
                     .then((response) => {
-                        console.log('############################# 0', response.data)
-                        post_hans_ent_actor_upload_modal.f_reset_return()
-                        post_hans_ent_actor_upload_modal.f_sync_data_to_actor_upload_modal(response.data);
+                        post_hans_ent_actor_upload_modal.f_sync_data_to_actor_upload_modal(response.data)
+                        console.log('Actor Create Button 데이터 송신 완료' )
                     })
                     .catch(() => {
-                        console.log('Error! f_hans_ent_actor_upload_modal')
+                        console.log('Error!  Actor List로부터 Actor Upload로 데이터 송신 오류')
                     })
                 },
-
+                
+                // Upload Picture Album Modal
                 f_hans_ent_picture_album_upload_modal() {
-                    axios.post('hans_ent_picture_album_upload_modal/', {
+                    axios.post('/hans_ent_picture_album_upload_modal/', {
                         'selected_picture_album_id': 'null',
                     }, {
                     headers: {
@@ -170,9 +175,9 @@
                         'X-CSRFToken': "{{ csrf_token }}"
                     }})
                     .then((response) => {
-                        console.log('############################# 0', response.data)
                         post_hans_ent_picture_album_upload_modal.f_reset_return()
                         post_hans_ent_picture_album_upload_modal.f_sync_data_to_picture_album_upload_modal(response.data);
+                        console.log('### Create Picture Album Button 정보 송신 완료', response.data)
                     })
                     .catch(() => {
                         console.log('Error! hans_ent_picture_album_upload_modal')

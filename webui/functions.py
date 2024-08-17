@@ -86,13 +86,50 @@ def reset_hans_ent_actor_list(q_mysettings_hansent):
     return True
 
 
+def reset_hans_ent_picture_album_list(q_mysettings_hansent):
+    data = {
+        'picture_album_selected': None,
+        'selected_field_picture': LIST_PICTURE_FIELD[0],
+        'check_field_ascending_picture': True,
+        'count_page_number_picture': 1,
+        'list_searched_picture_id': None,
+    }
+    MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
+    return True
+
+
+def reset_hans_ent_video_album_list(q_mysettings_hansent):
+    data = {
+        'video_album_selected': None,
+        'selected_field_video': LIST_VIDEO_FIELD[0],
+        'check_field_ascending_video': True,
+        'count_page_number_video': 1,
+        'list_searched_video_id': None,
+    }
+    MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
+    return True
+
 # Default 배우 쿼리 생성
 def create_actor():
-    data = {}
+    hashcode = hashcode_generator()
+    data = {
+        'hashcode': hashcode,
+        'list_dict_actor_album':DEFAULT_LIST_DICT_ACTOR_ALBUM,
+    }
     q_actor = Actor.objects.create(**data)
     print('Actor 신규 생성!', q_actor)
     return q_actor
 
+# Default Picture Album 쿼리 생성
+def create_picture_album():
+    hashcode = hashcode_generator()
+    data = {
+        'hashcode': hashcode,
+        'list_dict_picture_album':DEFAULT_LIST_DICT_PICTURE_ALBUM,
+    }
+    q_picture_album = Picture_Album.objects.create(**data)
+    print('Picture Album 신규 생성!', q_picture_album)
+    return q_picture_album
 
 # 두 배우 합치기
 def merge_two_actor_into_one(q_actor, q_actor_s):
@@ -305,7 +342,6 @@ def save_actor_profile_images(q_actor, images):
         사이즈 조정
         썸네일 저장
     """
-    relative_path = 'vault1/actor/'
     # reset active to false
     list_dict_profile_album = q_actor.list_dict_profile_album
     if list_dict_profile_album is not None and len(list_dict_profile_album) > 0:
@@ -333,18 +369,18 @@ def save_actor_profile_images(q_actor, images):
         image_pil = image_pil.convert('RGB')
         # 원본 이미지 저장
         image_name_original = f'{hashcode}-o-{num_profile_image}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, relative_path, image_name_original)
+        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_original)
         image_pil.save(file_path)
         
         # Get Thumbnail, Cover size PIL objects
         cover_pil, thumbnail_pil = resize_pil_image_for_cover_and_thumbnail_pil(image_pil)
         # 커버이미지 저장
         image_name_cover = f'{hashcode}-c-{num_profile_image}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, relative_path, image_name_cover)
+        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_cover)
         cover_pil.save(file_path)
         # 썸네일 이미지 저장
         image_name_thumbnail = f'{hashcode}-t-{num_profile_image}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, relative_path, image_name_thumbnail)
+        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_thumbnail)
         thumbnail_pil.save(file_path)
         # List 업데이트
         if total_image_number == i + 1:
@@ -361,4 +397,72 @@ def save_actor_profile_images(q_actor, images):
     Actor.objects.filter(id=q_actor.id).update(**data)
     q_actor.refresh_from_db()
     return list_dict_profile_album
+    
+
+
+
+# Picture Album 이미지/썸네일 저장하기
+def save_picture_album_images(q_picture_album_selected, images):
+    """
+        이미지를 PIL 객체로 변환한 뒤
+        편집을 수행
+        원본사이즈 이미지 저장 
+        사이즈 조정
+        썸네일 저장
+    """
+    # reset active to false
+    list_dict_picture_album = q_picture_album_selected.list_dict_picture_album
+    if list_dict_picture_album is not None and len(list_dict_picture_album) > 0:
+        for dict_picture_album in list_dict_picture_album:
+            dict_picture_album["active"] = "false"
+        data = {
+                'list_dict_picture_album': list_dict_picture_album,
+        }
+        Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
+        q_picture_album_selected.refresh_from_db()
+    else:
+        list_dict_picture_album = []
+    num_picture_album_image = len(list_dict_picture_album)
+    # get base info
+    hashcode = q_picture_album_selected.hashcode
+    total_image_number = len(images)
+    i = 0
+    for image_file in images:   
+        image_file_name = image_file.name
+        file_extension = image_file_name.split('.')[-1]
+        print('file_extension', file_extension)
+        # convert file to PIL object
+        image_pil = Image.open(image_file)
+        # Remove Alpah channel befor saving
+        image_pil = image_pil.convert('RGB')
+        # 원본 이미지 저장
+        image_name_original = f'{hashcode}-o-{num_picture_album_image}.{file_extension}'
+        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_original)
+        image_pil.save(file_path)
+        
+        # Get Thumbnail, Cover size PIL objects
+        cover_pil, thumbnail_pil = resize_pil_image_for_cover_and_thumbnail_pil(image_pil)
+        # 커버이미지 저장
+        image_name_cover = f'{hashcode}-c-{num_picture_album_image}.{file_extension}'
+        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_cover)
+        cover_pil.save(file_path)
+        # 썸네일 이미지 저장
+        image_name_thumbnail = f'{hashcode}-t-{num_picture_album_image}.{file_extension}'
+        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_thumbnail)
+        thumbnail_pil.save(file_path)
+        # List 업데이트
+        if total_image_number == i + 1:
+            list_dict_picture_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"true"})
+        else:
+            list_dict_picture_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"false"})
+        i = i + 1
+        num_profile_image = num_profile_image + 1
+     
+    # db save and refresh  
+    data = {
+        'list_dict_picture_album': list_dict_picture_album,
+    }
+    Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
+    q_picture_album_selected.refresh_from_db()
+    return list_dict_picture_album
     # return True

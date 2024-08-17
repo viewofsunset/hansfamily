@@ -354,7 +354,6 @@
             data_actor: {},
 
             dict_actor_key_fullsize_value_thumbnail_image_path: {},
-            list_actor_picture_id: {},
             list_data_video_album: {},
             list_data_picture_album: {},
             list_data_music_album: {},
@@ -526,11 +525,11 @@
                 }
                 })
                 .then((response) => {
-                    console.log('######################## 사진 앨범 업로드 모달창으로 전송', this.selected_actor_id)
-                    post_streaming_picture_album_upload_modal.f_sync_data_to_picture_album_upload_modal(response.data);
+                    post_hans_ent_picture_album_upload_modal.f_sync_data_to_picture_album_upload_modal(response.data);
+                    console.log('### Actor Profile 창에서 사진 앨범 업로드 모달창으로 송신 완료', this.selected_actor_id)
                 })
                 .catch(() => {
-                    console.log('Error! f_hans_ent_picture_album_upload_modal_by_actor_id')
+                    console.log('Error! ### Actor Profile 창에서 사진 앨범 업로드 모달창으로 송신 오류')
                 })
             },
 
@@ -607,10 +606,35 @@
             
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // to Music Album 
+            // Actor 삭제
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             f_select_actor_to_delete() {
-                console.log('Actor 삭제 버튼 눌렀음!')
+                console.log('delete actor id', event)
+				console.log(event)
+				const isConfirmed = window.confirm("정말 모델 정보를 삭제하시겠습니까?");
+				if (isConfirmed) {
+					alert("모델 삭제를 승인하였습니다.");
+					axios.post('/hans_ent_actor_upload_modal/', {
+						'selected_actor_id': event,
+						'button': 'actor_delete',
+						'list_serialized_data_actor': this.list_serialized_data_actor
+					}, {
+					headers: {
+						'Content-Type': 'multipart/form-data',
+						'X-CSRFToken': "{{ csrf_token }}"
+					}
+					})
+					.then((response) => {
+						this.data_actor = response.data['list_serialized_data_actor']
+						// this.refreshData()
+					})
+					.catch(() => {
+						console.log('Error! f_select_actor_to_delete')
+						
+					}) 
+				} else {
+					alert("삭제가 취소되었습니다.");
+				}
             },
 
             f_modal_close() {

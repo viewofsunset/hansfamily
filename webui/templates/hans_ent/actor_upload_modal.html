@@ -83,7 +83,7 @@
 								</div>
 							</td>
 							<td style="background-color:rgb(255,255,255,0.05)">
-								<input type="file" @change="f_file_actor_images_select" multiple class="form-control" id="id_upolad_actor_gallery_image_to_db">
+								<input type="file" @change="f_file_actor_images_select" multiple class="form-control" id="id_upload_actor_gallery_image_to_db">
 							</td>
 						</tr>
 
@@ -213,7 +213,6 @@
 				<!--
 					등록된 사진 표시 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				-->
-				<div v-if="list_actor_picture_id != null">
 					<div v-if="dict_actor_key_fullsize_value_thumbnail_image_path != null">
 					<hr>
 						<div class="gallery-container">
@@ -225,7 +224,7 @@
 							</div>
 						</div>
 					</div>
-				</div>
+				
 				
 			
 			</div>
@@ -263,7 +262,6 @@
 			list_serialized_data_actor: null,
 
 			total_num_registered_item: null,
-			list_actor_picture_id: null,
 			selected_actor_id: null,
 			selected_actor_name: null,
 			image_cover: '',
@@ -314,16 +312,15 @@
 				this.selected_actor_sub_type = null
 				this.image_cover =''
 				this.images =''
-				this.list_actor_picture_id = null
 				this.dict_actor_key_fullsize_value_thumbnail_image_path = null
 				this.status_cover_image_upload = false
 				this.progress_value = 0
 				this.progress_max = 100
 				this.progress_min = 0
 				this.show_progress = false
-				$('#id_upolad_actor_cover_image_to_db').val("");
+				$('#id_upload_actor_cover_image_to_db').val("");
 				$('#id_upload_actor_search_by_name').val("");
-				$('#id_upolad_actor_gallery_image_to_db').val("");
+				$('#id_upload_actor_gallery_image_to_db').val("");
 				$('#id_upload_actor_info_site_name').val("");
 				$('#id_upload_actor_info_site_url').val("");
 			},
@@ -381,7 +378,7 @@
 					this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
 					})
 					.then((response) => {
-						$('#id_upolad_actor_gallery_image_to_db').val("");
+						$('#id_upload_actor_gallery_image_to_db').val("");
 						this.data_actor = response.data['selected_serialized_data_actor']
                         this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
 						this.refreshData()
@@ -416,7 +413,6 @@
 						
 						this.selected_actor_id = this.data_actor['id']
 						this.selected_actor_name = this.data_actor['name']
-						this.list_actor_picture_id = this.data_actor['list_actor_picture_id']
 						this.input_text_name = this.selected_actor_name
 						this.dict_actor_key_fullsize_value_thumbnail_image_path = response.data['dict_actor_key_fullsize_value_thumbnail_image_path']
 					})
@@ -442,7 +438,7 @@
 					alert("모델 삭제를 승인하였습니다.");
 					axios.post('/hans_ent_actor_upload_modal/', {
 						'selected_actor_id': event,
-						'modal': 'actor_delete',
+						'button': 'actor_delete',
 						'list_serialized_data_actor': this.list_serialized_data_actor
 					}, {
 					headers: {
@@ -451,7 +447,7 @@
 					}
 					})
 					.then((response) => {
-						this.list_serialized_data_actor = response.data['list_serialized_data_actor']
+						this.data_actor = response.data['list_serialized_data_actor']
 						// this.refreshData()
 					})
 					.catch(() => {

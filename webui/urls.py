@@ -29,6 +29,8 @@ urlpatterns = [
     path("hans_ent_picture_album_list_search/", hans_ent_picture_album_list_search, name="hans-ent-picture-album-list-search"),
     path("hans_ent_picture_album_gallery_modal/", hans_ent_picture_album_gallery_modal, name="hans-ent-picture-album-gallery-modal"),
     path("hans_ent_picture_album_upload_modal/", hans_ent_picture_album_upload_modal, name="hans-ent-picture-album-upload-modal"),
+    path("hans_ent_picture_album_upload_modal_actor_search/", hans_ent_picture_album_upload_modal_actor_search, name="hans-ent-picture-album-upload-modal-actor-search"),
+    
 
     #--------------------------------------------------------------------------------------------------------------------------------------
     # secret
