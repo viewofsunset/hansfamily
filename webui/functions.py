@@ -404,20 +404,19 @@ def save_actor_profile_images(q_actor, images):
 # Picture Album 이미지/썸네일 저장하기
 def save_picture_album_images(q_picture_album_selected, images):
     """
-        이미지를 PIL 객체로 변환한 뒤
-        편집을 수행
-        원본사이즈 이미지 저장 
-        사이즈 조정
-        썸네일 저장
+        Picture Album은
+        active: true 이면 대문(커버) 이미지로 할당한다는 의미
+        discard: true 이면 삭제한다는 의미
+        id == number of items로 표시, 
+        item 삭제시 파일은 삭제하고 리스트에서는 discard=true만 설정하고 item을 삭제하지는 않는다. ID 변경되지 않게 하려고
     """
+    print('num of images', len(images))
     # reset active to false
     list_dict_picture_album = q_picture_album_selected.list_dict_picture_album
     if list_dict_picture_album is not None and len(list_dict_picture_album) > 0:
         for dict_picture_album in list_dict_picture_album:
             dict_picture_album["active"] = "false"
-        data = {
-                'list_dict_picture_album': list_dict_picture_album,
-        }
+        data = {'list_dict_picture_album': list_dict_picture_album,}
         Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
         q_picture_album_selected.refresh_from_db()
     else:
@@ -425,6 +424,11 @@ def save_picture_album_images(q_picture_album_selected, images):
     num_picture_album_image = len(list_dict_picture_album)
     # get base info
     hashcode = q_picture_album_selected.hashcode
+    if hashcode is None:
+        hashcode = hashcode_generator()
+        data = {'hashcode': hashcode}
+        Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
+        q_picture_album_selected.refresh_from_db()
     total_image_number = len(images)
     i = 0
     for image_file in images:   
@@ -452,12 +456,16 @@ def save_picture_album_images(q_picture_album_selected, images):
         thumbnail_pil.save(file_path)
         # List 업데이트
         if total_image_number == i + 1:
-            list_dict_picture_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"true"})
+            list_dict_picture_album.append({"id": num_picture_album_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"true", "discard":"false"})
         else:
-            list_dict_picture_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"false"})
+            list_dict_picture_album.append({"id": num_picture_album_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"false", "discard":"false"})
         i = i + 1
-        num_profile_image = num_profile_image + 1
-     
+        num_picture_album_image = num_picture_album_image + 1
+    # default 이미지 discard 하기
+    for dict_picture_album in list_dict_picture_album:
+        if dict_picture_album["id"] == 0:
+            dict_picture_album["active"] = 'false'
+            dict_picture_album["discard"] = 'true'
     # db save and refresh  
     data = {
         'list_dict_picture_album': list_dict_picture_album,

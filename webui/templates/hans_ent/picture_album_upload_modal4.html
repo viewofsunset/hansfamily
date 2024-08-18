@@ -404,7 +404,6 @@
 				searchData = this.input_text_name
                 axios.get('/hans_ent_picture_album_upload_modal_actor_search/?keyword='+searchData)
                 .then((response) => {
-					this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
                     this.list_serialized_data_actor = response.data['list_serialized_data_actor']
                 })
                 .catch(() => {

@@ -618,8 +618,6 @@ def hans_ent_picture_album_list_search(request):
         return redirect('hans-ent-picture-album-list')
    
 
-
-
 #--------------------------------------------------------------------------------------------------------------------------------------
 @login_required
 def hans_ent_picture_album_gallery_modal(request):
@@ -713,6 +711,7 @@ def hans_ent_picture_album_upload_modal(request):
         # Jsondata
         jsondata = {
             'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
+            'BASE_DIR_PICTURE': BASE_DIR_PICTURE,
             'selected_serialized_data_actor': selected_serialized_data_actor,
             'selected_serialized_data_picture_album': selected_serialized_data_picture_album,
         }
@@ -727,6 +726,7 @@ def hans_ent_picture_album_upload_modal(request):
         selected_serialized_data_actor = {}
                 
         selected_picture_album_id_str = str(request.POST.get('selected_picture_album_id'))
+        selected_picture_album_picture_id_str = str(request.POST.get('selected_picture_album_picture_id'))
         selected_actor_id_str = request.POST.get('selected_actor_id')
         input_text_title_str = request.POST.get('input_text_title')
         input_text_name_str = request.POST.get('input_text_name')
@@ -735,6 +735,7 @@ def hans_ent_picture_album_upload_modal(request):
         selected_picture_sub_type_str = request.POST.get('selected_picture_sub_type')
         
         selected_picture_album_id_str = None if selected_picture_album_id_str in LIST_STR_NONE_SERIES else selected_picture_album_id_str
+        selected_picture_album_picture_id_str = None if selected_picture_album_picture_id_str in LIST_STR_NONE_SERIES else selected_picture_album_picture_id_str
         selected_actor_id_str = None if selected_actor_id_str in LIST_STR_NONE_SERIES else selected_actor_id_str
         input_text_title_str = None if input_text_title_str in LIST_STR_NONE_SERIES else input_text_title_str
         input_text_name_str = None if input_text_name_str in LIST_STR_NONE_SERIES else input_text_name_str
@@ -743,62 +744,138 @@ def hans_ent_picture_album_upload_modal(request):
         selected_picture_sub_type_str = None if selected_picture_sub_type_str in LIST_STR_NONE_SERIES else selected_picture_sub_type_str
         
         print('selected_actor_id_str', selected_actor_id_str)
+        print('selected_picture_album_id_str', selected_picture_album_id_str)
+
         # 선택된 모델 정보 획득
         if selected_actor_id_str is not None and selected_actor_id_str != '':
             selected_actor_id = int(selected_actor_id_str)
             q_actor = Actor.objects.get(id=selected_actor_id)
         else:
             q_actor = None
-        print('q_actor', q_actor)
-
+        
         # 선택된 앨범 정보 획득
         if selected_picture_album_id_str is not None and selected_picture_album_id_str != '' :
             selected_picture_album_id = int(selected_picture_album_id_str)
             q_picture_album_selected = Picture_Album.objects.get(id=selected_picture_album_id)
             if q_picture_album_selected is not None:
-                q_actor = q_picture_album_selected.main_actor
+                if q_actor is None:
+                    q_actor = q_picture_album_selected.main_actor
         else:
             q_picture_album_selected = None 
-        print('q_picture_album_selected', q_picture_album_selected)
+        
+        # 앨범 통으로 삭제하기
+        if request.POST.get('button') == 'picture_album_delete':
+            print('# 앨범 통으로 삭제하기', q_picture_album_selected)
+            if q_picture_album_selected is not None:
+                list_dict_picture_album = q_picture_album_selected.list_dict_picture_album
+                if list_dict_picture_album is not None and len(list_dict_picture_album) > 1:
+                    # 앨범에 등록된 Picture 삭제하기
+                    for dict_picture_album in list_dict_picture_album:
+                        # 서버어서 이미지 삭제하기
+                        if dict_picture_album["id"] != 0:
+                            # Default 이미지가 아닌 경우 삭제가능
+                            image_name_original = dict_picture_album["original"]
+                            image_name_cover = dict_picture_album["cover"]
+                            image_name_thumbnail = dict_picture_album["thumbnail"]
+                            file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_original)
+                            file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_cover)
+                            file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_thumbnail)
+                            print('file_path_o', file_path_o)
+                            if os.path.exists(file_path_o):
+                                try:
+                                    os.remove(file_path_o)
+                                except:
+                                    pass
+                            if os.path.exists(file_path_c):
+                                try:
+                                    os.remove(file_path_c)
+                                except:
+                                    pass
+                            if os.path.exists(file_path_t):
+                                try:
+                                    os.remove(file_path_t)
+                                except:
+                                    pass
+                            # 리스트에서 discard 처리하기
+                            dict_picture_album['active'] = 'false'
+                            dict_picture_album['discard'] = 'true'
+                # Query 저장 프로세스
+                data = {
+                    'list_dict_picture_album': list_dict_picture_album,
+                    'check_discard': True,
+                    }
+                Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
+                q_picture_album_selected.refresh_from_db()
+                    
+            return redirect('hans-ent-picture-album-list')
 
-        # 앨범 커버 이미지 삭제하기
-        if request.POST.get('button') == 'remove_cover_image':
-            print('# 앨범 커버 이미지 삭제하기')
-            list_dict_picture_album = q_picture_album_selected.list_dict_picture_album
-            # remove files from directory and item in the list
-            list_find_last_img = []
-            for dict_picture_album in list_dict_picture_album:
-                list_find_last_img.append(dict_picture_album["id"])
-                if dict_picture_album["active"] == "true":
-                    if dict_picture_album["id"] != 0:
-                        delete_id = dict_picture_album["id"]
-                        image_name_original = dict_picture_album["original"]
-                        image_name_cover = dict_picture_album["cover"]
-                        image_name_thumbnail = dict_picture_album["thumbnail"]
-                        file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_original)
-                        file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_cover)
-                        file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_thumbnail)
-                        print('file_path_o', file_path_o)
-                        if os.path.exists(file_path_o):
-                            os.remove(file_path_o)
-                        if os.path.exists(file_path_c):
-                            os.remove(file_path_c)
-                        if os.path.exists(file_path_t):
-                            os.remove(file_path_t)
-                        list_dict_picture_album.remove(dict_picture_album)
-            # Activate last ID
-            list_find_last_img.remove(delete_id)
-            max_id = max(list_find_last_img)
-            for dict_picture_album in list_dict_picture_album:
-                if dict_picture_album["id"] == max_id:
-                    dict_picture_album["active"] = "true"
-                else:
-                    dict_picture_album["active"] = "false"
-            data = {
-                'list_dict_picture_album': list_dict_picture_album,
-            }
-            Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
-            q_picture_album_selected.refresh_from_db() 
+        # 앨범 커버 이미지 변경하기
+        if request.POST.get('button') == 'change_picture_album_cover_image':
+            if selected_picture_album_picture_id_str is not None and selected_picture_album_picture_id_str != '':
+                selected_picture_album_picture_id = int(selected_picture_album_picture_id_str)
+                if q_picture_album_selected is not None:
+                    list_dict_picture_album = q_picture_album_selected.list_dict_picture_album
+                    # acitve 모두 false 변경
+                    for dict_picture_album in list_dict_picture_album:
+                        dict_picture_album['active'] = 'false'
+                        if dict_picture_album['id'] == selected_picture_album_picture_id:
+                            dict_picture_album['active'] = 'true'
+                    data = {'list_dict_picture_album': list_dict_picture_album}
+                    Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
+                    q_picture_album_selected.refresh_from_db()
+        
+        # 앨범 이미지 삭제하기
+        if request.POST.get('button') == 'remove_picture_album_picture':
+            print('# 앨범 이미지 삭제하기')
+            if selected_picture_album_picture_id_str is not None and selected_picture_album_picture_id_str != '':
+                selected_picture_album_picture_id = int(selected_picture_album_picture_id_str)
+                if q_picture_album_selected is not None:
+                    list_dict_picture_album = q_picture_album_selected.list_dict_picture_album
+                    # 이미지 삭제 프로세스
+                    check_discard_active_picture = False
+                    for dict_picture_album in list_dict_picture_album:
+                        if dict_picture_album["id"] == selected_picture_album_picture_id:
+                            # 커버이미지를 삭제하는 경우이면 Default를 커버로 지정하기 위해 플래그 올린다.
+                            if dict_picture_album["active"] == 'true':
+                                check_discard_active_picture = True
+                            # 서버어서 이미지 삭제하기
+                            if dict_picture_album["id"] != 0:
+                                # Default 이미지가 아닌 경우 삭제가능
+                                image_name_original = dict_picture_album["original"]
+                                image_name_cover = dict_picture_album["cover"]
+                                image_name_thumbnail = dict_picture_album["thumbnail"]
+                                file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_original)
+                                file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_cover)
+                                file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_thumbnail)
+                                print('file_path_o', file_path_o)
+                                if os.path.exists(file_path_o):
+                                    try:
+                                        os.remove(file_path_o)
+                                    except:
+                                        pass
+                                if os.path.exists(file_path_c):
+                                    try:
+                                        os.remove(file_path_c)
+                                    except:
+                                        pass
+                                if os.path.exists(file_path_t):
+                                    try:
+                                        os.remove(file_path_t)
+                                    except:
+                                        pass
+                                # 리스트에서 discard 처리하기
+                                dict_picture_album['active'] = 'false'
+                                dict_picture_album['discard'] = 'true'
+                    # Active true(커버이미지)를 삭제한 경우 Default이미지를 커버로 다시 등장시킨다.
+                    if check_discard_active_picture == True:
+                        for dict_picture_album in list_dict_picture_album:
+                            if dict_picture_album["id"] == 0:
+                                dict_picture_album["active"] = 'true'
+                                dict_picture_album["discard"] = 'false'
+                    # Query 저장 프로세스
+                    data = {'list_dict_picture_album': list_dict_picture_album}
+                    Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
+                    q_picture_album_selected.refresh_from_db() 
 
         # 업로드 타이틀 정보 저장하기
         if input_text_title_str is not None and input_text_title_str != '':
@@ -856,19 +933,17 @@ def hans_ent_picture_album_upload_modal(request):
             Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
             q_picture_album_selected.refresh_from_db()
         
-        # # 모델 선택하기
-        # if request.POST.get('button') == 'actor_select':
-        #     if q_picture_album_selected is None:
-        #         q_picture_album_selected = create_picture_album()
-        #     print('# 모델 선택하기')
-        #     if q_picture_album_selected is not None and q_actor is not None:
-        #         print('선택된 모델', q_actor)
-        #         data = {
-        #             'main_actor': q_actor,
-        #             'check_under_uploading': True,
-        #         }
-        #         Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
-        #         q_picture_album_selected.refresh_from_db()
+        # 모델 선택하기
+        if request.POST.get('button') == 'actor_select':
+            if q_picture_album_selected is None:
+                q_picture_album_selected = create_picture_album()
+            if q_picture_album_selected is not None and q_actor is not None:
+                print('선택된 모델', q_actor)
+                data = {
+                    'main_actor': q_actor,
+                }
+                Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
+                q_picture_album_selected.refresh_from_db()
 
         # 모델 선택해제하기
         if request.POST.get('button') == 'actor_select_reset':

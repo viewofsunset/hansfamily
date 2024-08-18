@@ -109,7 +109,7 @@ list_dict_profile_album rule:
 ]
 abcd == hashcode
 """
-DEFAULT_LIST_DICT_ACTOR_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true"}]
+DEFAULT_LIST_DICT_ACTOR_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true", "discard":"false"}]
 
 class Actor(models.Model):
     # classification
@@ -146,13 +146,13 @@ class Actor(models.Model):
 """
 list_dict_picture_album rule:
 [
-{"id":"0", "thumbnail":"default_picture_album-t.png", "cover":"default_picture_album-c.png", "original":"default_picture_album-o.png", "active":"true"},
-{"id":"1", "thumbnail":"abcd-1-t.png", "cover":"abcd-1-c.png", "original":"abcd-1-o.png", "active":"false"},
-{"id":"2", "thumbnail":"abcd-2-t.png", "cover":"abcd-2-c.png", "original":"abcd-2-o.png", "active":"false"},
+{"id":"0", "thumbnail":"default_picture_album-t.png", "cover":"default_picture_album-c.png", "original":"default_picture_album-o.png", "active":"true", "discard":"false"},
+{"id":"1", "thumbnail":"abcd-1-t.png", "cover":"abcd-1-c.png", "original":"abcd-1-o.png", "active":"false", "discard":"false"},
+{"id":"2", "thumbnail":"abcd-2-t.png", "cover":"abcd-2-c.png", "original":"abcd-2-o.png", "active":"false", "discard":"false"},
 ]
 abcd == hashcode
 """
-DEFAULT_LIST_DICT_PICTURE_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true"}]
+DEFAULT_LIST_DICT_PICTURE_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true", "discard":"false"}]
 
 class Picture_Album(models.Model):
     main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
@@ -163,7 +163,7 @@ class Picture_Album(models.Model):
     studio = models.CharField(max_length=250, null=True, blank=True)
     score = models.FloatField(default=0)
     tags = models.JSONField(null=True, blank=True) # Collect tags from LIST_ACTOR_TAGS
-    date_released = models.DateTimeField(auto_now=True, null=True)
+    date_released = models.DateField(null=True, blank=True)
     check_discard = models.BooleanField(default=False)
     
     def __str__(self):
@@ -179,7 +179,7 @@ list_dict_video_album rule:
 ]
 abcd == hashcode
 """
-DEFAULT_LIST_DICT_VIDEO_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true"}]
+DEFAULT_LIST_DICT_VIDEO_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true", "discard":"false"}]
 
 class Video_Album(models.Model):
     main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
@@ -190,7 +190,7 @@ class Video_Album(models.Model):
     studio = models.CharField(max_length=250, null=True, blank=True)
     score = models.FloatField(default=0)
     tags = models.JSONField(null=True, blank=True) # Collect tags from LIST_ACTOR_TAGS
-    date_released = models.DateTimeField(auto_now=True, null=True)
+    date_released = models.DateField(null=True, blank=True)
     check_discard = models.BooleanField(default=False)
 
     def __str__(self):

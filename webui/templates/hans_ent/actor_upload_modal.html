@@ -613,7 +613,7 @@
 		},
 		computed: {
             active_list_dict_profile_album() {
-                return this.list_dict_profile_album.filter(item => item.active === "true")
+                return this.list_dict_profile_album.filter(item => item.active === "true" && item.discard === "false")
             }
         },
         mounted: function() {
