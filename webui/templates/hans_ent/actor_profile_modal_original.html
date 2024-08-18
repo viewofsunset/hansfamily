@@ -203,14 +203,16 @@
                         <div v-for="(data_picture_album, index) in list_data_picture_album" :key="index"class="card" >
                             <div class="box" id="picture-picture_album-box">
                                 <div class="card-body">
-
-                                    <div v-for="(dict_picture_album, index) in data_picture_album.list_dict_picture_album" :key="index">
-                                        <div v-if="dict_picture_album.active == 'true'">
-                                            <button @click="f_hans_ent_picture_album_gallery_modal(data_picture_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-gallery-modal">
-                                                <img :src="BASE_DIR_PICTURE+dict_picture_album.thumbnail" width="140">
-                                            </button>
+                                    
+                                    <button @click="f_hans_ent_picture_album_gallery_modal(data_picture_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-gallery-modal">
+                                        <div v-if="data_picture_album.image_thumbnail">
+                                            <img :src="api_url_fixed+data_picture_album.image_thumbnail" width="200">
                                         </div>
-                                    </div>
+                                        <div v-else>
+                                            <img :src="[[ data_picture_album.cover_image_url ]]" width="200">
+                                        </div>
+                                        
+                                    </button>
                                             
                                     <div class="text-overlay">[[ data_picture_album.id ]]</div>
                                     <div class="text-center">
@@ -348,8 +350,6 @@
 		delimiters: ["[[", "]]"],
 		data() {
 		return {
-            BASE_DIR_PICTURE: '',
-
 			title : '',
             data_actor: {},
 
@@ -394,7 +394,6 @@
 			},
 
 			f_sync_data_to_actor_profile_modal(data) {
-                this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
                 this.data_actor = data['selected_serialized_data_actor']
                 this.list_data_picture_album = data['list_serialized_data_picture_album']
                 this.list_data_video_album = data['list_serialized_data_video_album']
@@ -491,10 +490,10 @@
 
             
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // 정보 전송
+            // to Picture Album 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             
-            // 사진 앨범 업로드 모달창으로 (Picture Album ID 가지고)
+            // icon pannel 사진 앨범 업로드 모달창으로 (Picture Album ID 가지고)
             f_hans_ent_picture_album_upload_modal(event) {
                 this.selected_picture_album_id = event
                 axios.post('/hans_ent_picture_album_upload_modal/', {
@@ -515,7 +514,7 @@
                 })
             },
             
-            // 사진 앨범 업로드 모달창으로 (Actor Id 가지고)
+            // Icon pannel 사진 앨범 업로드 모달창으로 (Actor Id 가지고)
             f_hans_ent_picture_album_upload_modal_by_actor_id(event) {
                 this.selected_actor_id = event
                 axios.post('/hans_ent_picture_album_upload_modal/', {
@@ -535,11 +534,12 @@
                 })
             },
 
-            // 사진 앨범 갤리러 모달창으로 
+            // icon pannel 사진 앨범 갤리러 모달창으로 
             f_hans_ent_picture_album_gallery_modal(event) {
                 this.selected_picture_album_id = event
                 axios.post('/hans_ent_picture_album_gallery_modal/', {
                     'selected_picture_album_id': this.selected_picture_album_id,
+                    'selected_actor_id': this.selected_actor_id,
                 }, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -548,7 +548,7 @@
                 })
                 .then((response) => {
                     console.log('######################## 사진 앨범 갤러리 모달창으로 전송', this.selected_actor_id)
-                    post_hans_ent_picture_album_gallery_modal.f_sync_data_to_picture_album_gallery_modal(response.data);
+                    post_streaming_picture_album_gallery_modal.f_sync_data_to_picture_album_gallery_modal(response.data);
                 })
                 .catch(() => {
                     console.log('Error! f_hans_ent_picture_album_upload_modal_by_actor_id')

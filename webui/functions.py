@@ -114,7 +114,7 @@ def create_actor():
     hashcode = hashcode_generator()
     data = {
         'hashcode': hashcode,
-        'list_dict_actor_album':DEFAULT_LIST_DICT_ACTOR_ALBUM,
+        'list_dict_profile_album':DEFAULT_LIST_DICT_PROFILE_ALBUM,
     }
     q_actor = Actor.objects.create(**data)
     print('Actor 신규 생성!', q_actor)
@@ -384,9 +384,9 @@ def save_actor_profile_images(q_actor, images):
         thumbnail_pil.save(file_path)
         # List 업데이트
         if total_image_number == i + 1:
-            list_dict_profile_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"true"})
+            list_dict_profile_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"true", "discard":"false"})
         else:
-            list_dict_profile_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"false"})
+            list_dict_profile_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"false", "discard":"false"})
         i = i + 1
         num_profile_image = num_profile_image + 1
      

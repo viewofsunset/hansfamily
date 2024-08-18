@@ -63,10 +63,12 @@ from django.core.validators import FileExtensionValidator
 BASE_DIR_ACTOR = '/media/vault1/actor/'
 BASE_DIR_PICTURE = '/media/vault1/picture/'
 BASE_DIR_VIDEO = '/media/vault1/video/'
+BASE_DIR_MUSIC = '/media/vault1/music/'
 
 RELATIVE_PATH_ACTOR = 'vault1/actor/'
 RELATIVE_PATH_PICTURE = 'vault1/picture/'
 RELATIVE_PATH_VIDEO = 'vault1/video/'
+RELATIVE_PATH_MUSIC = 'vault1/music/'
 
 LIST_MENU_HANS_ENT = (
     ('01', 'ACTOR'),
@@ -109,7 +111,7 @@ list_dict_profile_album rule:
 ]
 abcd == hashcode
 """
-DEFAULT_LIST_DICT_ACTOR_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true", "discard":"false"}]
+DEFAULT_LIST_DICT_PROFILE_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true", "discard":"false"}]
 
 class Actor(models.Model):
     # classification

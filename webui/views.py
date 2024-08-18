@@ -322,6 +322,10 @@ def hans_ent_actor_profile_modal(request):
                 list_serialized_data_video_album = Video_Album_Detail_Serializer(qs_video_album, many=True).data
             
         jsondata = {
+            'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
+            'BASE_DIR_PICTURE': BASE_DIR_PICTURE,
+            'BASE_DIR_VIDEO': BASE_DIR_VIDEO,
+            'BASE_DIR_MUSIC': BASE_DIR_MUSIC,
             'selected_serialized_data_actor': selected_serialized_data_actor,
             'list_serialized_data_picture_album': list_serialized_data_picture_album,
             'list_serialized_data_video_album': list_serialized_data_video_album,
@@ -621,10 +625,8 @@ def hans_ent_picture_album_list_search(request):
 #--------------------------------------------------------------------------------------------------------------------------------------
 @login_required
 def hans_ent_picture_album_gallery_modal(request):
-    q_mysettings_hansent = MySettings_HansEnt.objects.last()
-    if q_mysettings_hansent is None: 
-        create_default_settings(request)
-        q_mysettings_hansent = MySettings_HansEnt.objects.last()
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
 
     if request.method == 'GET':
         q_picture_album_selected = q_mysettings_hansent.picture_album_selected
@@ -642,7 +644,11 @@ def hans_ent_picture_album_gallery_modal(request):
 
         # 받아야 하는 정보 수집하기 Actor or Album ##############################################
         selected_actor_id_str = request.POST.get('selected_actor_id')
+        selected_picture_album_id_str = request.POST.get('selected_picture_album_id')
+
         selected_actor_id_str = None if selected_actor_id_str in LIST_STR_NONE_SERIES else selected_actor_id_str
+        selected_picture_album_id_str = None if selected_picture_album_id_str in LIST_STR_NONE_SERIES else selected_picture_album_id_str
+        
         if selected_actor_id_str is not None and selected_actor_id_str != '':
             selected_actor_id = int(selected_actor_id_str)
             q_actor = Actor.objects.get(id=selected_actor_id)
@@ -650,8 +656,6 @@ def hans_ent_picture_album_gallery_modal(request):
             q_actor = None
         print('selected actor ', q_actor)
 
-        selected_picture_album_id_str = request.POST.get('selected_picture_album_id')
-        selected_picture_album_id_str = None if selected_picture_album_id_str in LIST_STR_NONE_SERIES else selected_picture_album_id_str
         if selected_picture_album_id_str is not None and selected_picture_album_id_str != '':
             selected_picture_album_id = int(selected_picture_album_id_str)
             q_picture_album = Picture_Album.objects.get(id=selected_picture_album_id)
@@ -661,24 +665,17 @@ def hans_ent_picture_album_gallery_modal(request):
         
         # Data Serialization
         if q_picture_album is not None: 
-            q_actor = q_picture_album.main_actor
-            list_album_picture_id = q_picture_album.list_album_picture_id    
-            # 앨범에 등록된 이미지 표시정보(Path) 획득하기
-            if list_album_picture_id is not None and len(list_album_picture_id) > 0:
-                dict_album_key_fullsize_value_thumbnail_image_path = get_dict_album_key_fullsize_value_thumbnail_image_path(q_picture_album)
-            else:
-                list_album_thumbnail_url = get_list_thumbnial_url(q_picture_album)
+            if q_actor is None:
+                q_actor = q_picture_album.main_actor
             selected_serialized_data_picture_album = Picture_Album_Serializer(q_picture_album, many=False).data
         if q_actor is not None:
             print('q_actor', q_actor)
             selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
 
         jsondata = {
+            'BASE_DIR_PICTURE': BASE_DIR_PICTURE,
             'selected_serialized_data_actor': selected_serialized_data_actor,
             'selected_serialized_data_picture_album': selected_serialized_data_picture_album,
-            'dict_album_key_fullsize_value_thumbnail_image_path': dict_album_key_fullsize_value_thumbnail_image_path,
-            'list_album_thumbnail_url': list_album_thumbnail_url,
-            'LIST_MENU_PICTURE_TYPES': LIST_MENU_PICTURE_TYPES,
         }
         # print('jsondata', jsondata)
         print('======================================================================================================= 3')
@@ -965,8 +962,15 @@ def hans_ent_picture_album_upload_modal(request):
             images = request.FILES.getlist('images')
             if images is not None and len(images) > 0:
                 save_picture_album_images(q_picture_album_selected, images)
-                    
-        # 앨범이 등록되어 있다면 추가정보 수행
+
+        # 신규 Picture Album 생성
+        if request.POST.get('button') == 'create_picture_album':
+            q_actor = None 
+            q_picture_album_selected = None
+            print('good luck~!')
+            pass
+
+        # Data Serialization
         if q_picture_album_selected is not None:
             print('# 앨범이 등록되어 있다면', q_picture_album_selected)
             print('q_actor', q_actor)
@@ -987,7 +991,9 @@ def hans_ent_picture_album_upload_modal(request):
         
         if q_actor is not None:
             selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
-                
+
+        
+
         jsondata = {
             'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
             'BASE_DIR_PICTURE': BASE_DIR_PICTURE,

@@ -10,8 +10,10 @@
     {% include 'hans_ent/actor_profile_modal.html' %}
     {% include 'hans_ent/actor_upload_modal.html' %}
     {% include 'hans_ent/actor_profile_gallery_fullscreen_modal.html' %}
-    
+
     {% include 'hans_ent/picture_album_upload_modal.html' %}
+    {% include 'hans_ent/picture_album_gallery_modal.html' %}
+    {% include 'hans_ent/picture_album_gallery_fullscreen_modal.html' %}
 
 
     <!--
@@ -165,10 +167,10 @@
                     })
                 },
                 
-                // Upload Picture Album Modal
+                // Picture Album 생성하기 버튼
                 f_hans_ent_picture_album_upload_modal() {
                     axios.post('/hans_ent_picture_album_upload_modal/', {
-                        'selected_picture_album_id': 'null',
+                        'button': 'create_picture_album'
                     }, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -372,6 +374,7 @@
     </style>
 
 {% endblock content %}
+
 
 
 

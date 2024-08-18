@@ -162,7 +162,7 @@
                 <!--
                     등록된 사진 앨범  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 -->
-                <!-- Registered Picture Albums -->
+                <!-- 사진앨범 버튼들 -->
                 <hr>
                 <table class="table">
                     <tr>
@@ -198,21 +198,23 @@
                     </tr>
                 </table>
 
+                <!-- 사진앨범 갤러리 -->
                 <div v-if="status_picture_gallery_close == false">
                     <div class="gallery-container">
-                        <div v-for="(data_picture_album, index) in list_data_picture_album" :key="index"class="card" >
+
+                        <div v-for="(data_picture_album, index) in list_serialized_data_picture_album" :key="index"class="card" >
                             <div class="box" id="picture-picture_album-box">
                                 <div class="card-body">
+                                    <button @click="f_hans_ent_picture_album_gallery_modal(data_picture_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-gallery-modal">
 
-                                    <div v-for="(dict_picture_album, index) in data_picture_album.list_dict_picture_album" :key="index">
-                                        <div v-if="dict_picture_album.active == 'true'">
-                                            <button @click="f_hans_ent_picture_album_gallery_modal(data_picture_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-gallery-modal">
+                                        <div v-for="(dict_picture_album, index) in data_picture_album.list_dict_picture_album" :key="index" >
+                                            <div v-if="dict_picture_album.active =='true'">
                                                 <img :src="BASE_DIR_PICTURE+dict_picture_album.thumbnail" width="140">
-                                            </button>
+                                            </div>
                                         </div>
-                                    </div>
+                                        
+                                    </button>
                                             
-                                    <div class="text-overlay">[[ data_picture_album.id ]]</div>
                                     <div class="text-center">
                                         <strong>
                                             [[ data_picture_album.title ]]
@@ -295,7 +297,7 @@
 
                 <div v-if="status_video_gallery_close == false">
                     <div class="gallery-container">
-                        <div v-for="(data_video_album, index) in list_data_video_album" :key="index"class="card" >
+                        <div v-for="(data_video_album, index) in list_serialized_data_video_album" :key="index"class="card" >
                             <div class="box" id="picture-video_album-box">
                                 <div class="card-body">
                                     
@@ -348,29 +350,25 @@
 		delimiters: ["[[", "]]"],
 		data() {
 		return {
-            BASE_DIR_PICTURE: '',
+            BASE_DIR_ACTOR: '',
+			BASE_DIR_PICTURE: '', 
+            BASE_DIR_VIDEO: '', 
+            BASE_DIR_MUSIC: '', 
 
-			title : '',
             data_actor: {},
-
-            dict_actor_key_fullsize_value_thumbnail_image_path: {},
-            list_actor_picture_id: {},
-            list_data_video_album: {},
-            list_data_picture_album: {},
-            list_data_music_album: {},
-            
-            
-            LIST_ACTOR_TYPES : [],
-			LIST_ACTOR_SUB_TYPES: [],
-			streaming_menu_selected: null,
+            list_serialized_data_picture_album: [],
+            list_serialized_data_video_album: [],
+            list_serialized_data_music_album: [],
+                        
+            streaming_menu_selected: null,
 			selected_actor_sub_type: null, 
 
-
-			selected_actor_id: '',
+            selected_actor_id: '',
             selected_video_album_id: '',
             selected_picture_album_id: '',
             selected_music_album_id: '',
 			
+            title : '',
 			selected_actor_name: '',
 			selected_actor_name_eng: '',
 			selected_actor_name_mother: '',
@@ -390,14 +388,25 @@
 				axios.get('/hans_ent_actor_profile_modal/')
 				.then((response) => {
 					console.log("0",response.data)
+                    this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
+                    this.BASE_DIR_PICTURE = response.data['BASE_DIR_PICTURE']
+                    this.BASE_DIR_VIDEO = response.data['BASE_DIR_VIDEO']
+                    this.BASE_DIR_MUSIC = response.data['BASE_DIR_MUSIC']
+                    
 				})
 			},
 
 			f_sync_data_to_actor_profile_modal(data) {
+                this.BASE_DIR_ACTOR = data['BASE_DIR_ACTOR']
                 this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
+                this.BASE_DIR_VIDEO = data['BASE_DIR_VIDEO']
+                this.BASE_DIR_MUSIC = data['BASE_DIR_MUSIC']
+
                 this.data_actor = data['selected_serialized_data_actor']
-                this.list_data_picture_album = data['list_serialized_data_picture_album']
-                this.list_data_video_album = data['list_serialized_data_video_album']
+                this.list_serialized_data_picture_album = data['list_serialized_data_picture_album']
+                this.list_serialized_data_video_album = data['list_serialized_data_video_album']
+
+                this.selected_actor_id = this.data_actor['id']
                 console.log('Actor Profile Modal로 Data 수신완료', data)
 			},
             
@@ -405,7 +414,9 @@
 				// this.data_video_album = {}
 				this.selected_video_album_id = ''
 				this.title = ''
-				this.list_data_video_album = {}
+                this.list_serialized_data_picture_album = []
+				this.list_serialized_data_video_album = []
+                this.list_serialized_data_music_album = []
 				this.data_actor = {}
 				this.selected_actor_id = ''
 				this.selected_actor_name = ''
@@ -491,10 +502,10 @@
 
             
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // 정보 전송
+            // to Picture Album 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             
-            // 사진 앨범 업로드 모달창으로 (Picture Album ID 가지고)
+            // icon pannel 사진 앨범 업로드 모달창으로 (Picture Album ID 가지고)
             f_hans_ent_picture_album_upload_modal(event) {
                 this.selected_picture_album_id = event
                 axios.post('/hans_ent_picture_album_upload_modal/', {
@@ -515,7 +526,7 @@
                 })
             },
             
-            // 사진 앨범 업로드 모달창으로 (Actor Id 가지고)
+            // Icon pannel 사진 앨범 업로드 모달창으로 (Actor Id 가지고)
             f_hans_ent_picture_album_upload_modal_by_actor_id(event) {
                 this.selected_actor_id = event
                 axios.post('/hans_ent_picture_album_upload_modal/', {
@@ -535,11 +546,12 @@
                 })
             },
 
-            // 사진 앨범 갤리러 모달창으로 
+            // icon pannel 사진 앨범 갤리러 모달창으로 
             f_hans_ent_picture_album_gallery_modal(event) {
                 this.selected_picture_album_id = event
                 axios.post('/hans_ent_picture_album_gallery_modal/', {
                     'selected_picture_album_id': this.selected_picture_album_id,
+                    'selected_actor_id': this.selected_actor_id,
                 }, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -548,7 +560,7 @@
                 })
                 .then((response) => {
                     console.log('######################## 사진 앨범 갤러리 모달창으로 전송', this.selected_actor_id)
-                    post_hans_ent_picture_album_gallery_modal.f_sync_data_to_picture_album_gallery_modal(response.data);
+                    post_streaming_picture_album_gallery_modal.f_sync_data_to_picture_album_gallery_modal(response.data);
                 })
                 .catch(() => {
                     console.log('Error! f_hans_ent_picture_album_upload_modal_by_actor_id')
@@ -610,7 +622,32 @@
             // Actor 삭제
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             f_select_actor_to_delete() {
-                console.log('Actor 삭제 버튼 눌렀음!')
+                console.log('delete actor id', event)
+				console.log(event)
+				const isConfirmed = window.confirm("정말 모델 정보를 삭제하시겠습니까?");
+				if (isConfirmed) {
+					alert("모델 삭제를 승인하였습니다.");
+					axios.post('/hans_ent_actor_upload_modal/', {
+						'selected_actor_id': event,
+						'button': 'actor_delete',
+						'list_serialized_data_actor': this.list_serialized_data_actor
+					}, {
+					headers: {
+						'Content-Type': 'multipart/form-data',
+						'X-CSRFToken': "{{ csrf_token }}"
+					}
+					})
+					.then((response) => {
+						this.data_actor = response.data['list_serialized_data_actor']
+						// this.refreshData()
+					})
+					.catch(() => {
+						console.log('Error! f_select_actor_to_delete')
+						
+					}) 
+				} else {
+					alert("삭제가 취소되었습니다.");
+				}
             },
 
             f_modal_close() {
@@ -619,6 +656,8 @@
             },
 		},
 		computed:{
+           
+
 		},
 
 		mounted: function() {
