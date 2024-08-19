@@ -15,6 +15,14 @@
     {% include 'hans_ent/picture_album_gallery_modal.html' %}
     {% include 'hans_ent/picture_album_gallery_fullscreen_modal.html' %}
 
+    {% include 'hans_ent/video_album_upload_modal.html' %}
+    {% include 'hans_ent/video_album_gallery_modal.html' %}
+    {% include 'hans_ent/video_album_gallery_fullscreen_modal.html' %}
+
+    {% include 'hans_ent/music_album_upload_modal.html' %}
+    {% include 'hans_ent/music_album_gallery_modal.html' %}
+    {% include 'hans_ent/music_album_gallery_fullscreen_modal.html' %}
+
 
     <!--
         메뉴바 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +73,10 @@
             {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.2.0 %}
                
                     {% include 'hans_ent/video_album_list.html' %}
+            
+            {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.3.0 %}
+               
+                    {% include 'hans_ent/music_album_list.html' %}
                
             {% else %}
             04
@@ -96,6 +108,13 @@
 
                 <button type="button" @click="f_hans_ent_video_album_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-hans-ent-video-album-upload-modal">
                     Create Video Album
+                </button>
+                <hr> 
+
+            {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.3.0 %}
+
+                <button type="button" @click="f_hans_ent_video_album_upload_modal()" class="btn btn-primary btn-sm" value="True" data-bs-toggle="modal" data-bs-target="#app-hans-ent-music-album-upload-modal">
+                    Create Music Album
                 </button>
                 <hr> 
 
@@ -190,6 +209,29 @@
                         console.log('Error! f_hans_ent_video_album_upload_modal')
                     })
                 },
+
+                // Music Album 생성하기 버튼
+                f_hans_ent_music_album_upload_modal() {
+                    axios.post('/hans_ent_music_album_upload_modal/', {
+                        'selected_music_album_id': 'null',
+                        'messages': 'hello',
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }})
+                    .then((response) => {
+                        console.log('Music Album Upload 모달창으로 전송시작 ', response.data)
+                        post_hans_ent_music_album_upload_modal.f_sync_data_to_music_album_upload_modal(response.data);
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_music_album_upload_modal')
+                    })
+                },
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // 버튼 클릭 기능 수행
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 f_button_adult_album_upload_4kup() {
                     axios.post('hans_ent_adult_picture_album_list/', 

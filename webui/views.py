@@ -1124,9 +1124,1080 @@ def hans_ent_picture_album_upload_modal_actor_search(request):
         return JsonResponse(jsondata, safe=False)
 
 
+
 #############################################################################################################################################
 # Video Album  
 #############################################################################################################################################
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_video_album_list(request):
+    import datetime
+    ls_today = datetime.date.today()
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
+   
+    if request.method == 'GET':
+        total_num_registered_item = Video_Album.objects.count()
+        # Searching 결과값 찾기
+        list_searched_xxx_id = q_mysettings_hansent.list_searched_video_album_id
+        if list_searched_xxx_id is not None:
+            total_num_searched_item = len(list_searched_xxx_id)
+        else:
+            total_num_searched_item = 0
+        # Sorting Submenu 조건
+        selected_field_sorting_str = q_mysettings_hansent.selected_field_video
+        # Acending or Decending?
+        field_ascending_str = q_mysettings_hansent.check_field_ascending_video
+        if field_ascending_str == False:
+            selected_field_sorting = f'-{selected_field_sorting_str}'
+        else:
+            selected_field_sorting = selected_field_sorting_str
+        # 화면에 표시할 아이템 개수 지정
+        count_page_number = q_mysettings_hansent.count_page_number_video
+        count_page_number_min = (count_page_number - 1) * LIST_NUM_DISPLAY_IN_PAGE
+        count_page_number_max = count_page_number * LIST_NUM_DISPLAY_IN_PAGE
+        # 쿼리 필터링
+        if list_searched_xxx_id is not None and len(list_searched_xxx_id) > 0:
+            qs_xxx = Video_Album.objects.filter(Q(check_discard=False) & Q(id__in=list_searched_xxx_id)).order_by(selected_field_sorting)[count_page_number_min:count_page_number_max]
+        else:
+            qs_xxx = Video_Album.objects.filter(Q(check_discard=False)).order_by(selected_field_sorting)[count_page_number_min:count_page_number_max]
+        print('qs_xxx', qs_xxx)
+        # Data Serialization            
+        list_serialized_data_video_album = Video_Album_Serializer(qs_xxx, many=True).data
+        
+        jsondata = {
+            'BASE_DIR_VIDEO': BASE_DIR_VIDEO,
+            'list_field_sorting': LIST_VIDEO_FIELD,
+            'list_serialized_data_video_album': list_serialized_data_video_album,
+            'total_num_registered_item': total_num_registered_item,
+            'total_num_searched_item': total_num_searched_item,
+            'list_count_page_number': [count_page_number_min, count_page_number_max, count_page_number],
+        }
+        print('jsondata', jsondata)
+        return JsonResponse(jsondata, safe=False)
+   
+    if request.method == 'POST':
+        # print(request.POST)
+        if request.POST.get('button') == 'sorting_items':
+            selected_sorting_field_str = request.POST.get('sort_by')
+            selected_field_video = q_mysettings_hansent.selected_field_video
+            check_field_ascending_video = q_mysettings_hansent.check_field_ascending_video
+            if selected_sorting_field_str == selected_field_video:
+                if check_field_ascending_video == True:
+                    check_field_ascending_video = False
+                else:
+                    check_field_ascending_video = True
+            data = {
+                'selected_field_video':selected_sorting_field_str,
+                'check_field_ascending_video': check_field_ascending_video,
+            }
+            MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
+            print('Sorting 조건 확정 및 저장')
+            return redirect('hans-ent-actor-list')
+       
+        if request.POST.get('button') == 'page_number_min':
+            count_page_number_down(request, q_mysettings_hansent)
+            return redirect('hans-ent-actor-list')
+        if request.POST.get('button') == 'page_number_max':
+            count_page_number_up(request, q_mysettings_hansent, total_num_registered_item)
+            return redirect('hans-ent-actor-list')
+        jsondata = {}
+        return JsonResponse(jsondata, safe=False)
+    
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_video_album_list_search(request):
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
+   
+    if request.method == 'GET':
+        print(request.GET,)
+        keyword_str = request.GET.get('keyword')
+        qs_xxx = Video_Album.objects.filter(Q(check_discard=False) & (Q(title__icontains=keyword_str) | Q(main_actor__name__icontains=keyword_str) | Q(main_actor__synonyms__icontains=keyword_str)))
+        list_searched_video_album_id = []
+        if qs_xxx is not None and len(qs_xxx) > 0:
+            for q_xxx in qs_xxx:
+                list_searched_video_album_id.append(q_xxx.id)
+        data = {
+            'list_searched_video_album_id': list_searched_video_album_id,
+        }
+        MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
+        return redirect('hans-ent-actor-list')
+   
+    if request.method == 'POST':
+        keyword_str = request.POST.get('button')
+        if keyword_str == 'reset':
+            reset_hans_ent_video_album_list(q_mysettings_hansent)
+        return redirect('hans-ent-video-album-list')
+   
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_video_album_gallery_modal(request):
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
+
+    if request.method == 'GET':
+        q_video_album_selected = q_mysettings_hansent.video_album_selected
+        jsondata = {}
+        return JsonResponse(jsondata, safe=False)
+    
+    if request.method == 'POST':
+        print('streaming_video_album_gallery_modal_view POST ======================================================= 1')
+        print(request.POST,)
+        print('======================================================================================================= 2')
+        selected_serialized_data_actor = {}
+        selected_serialized_data_video_album = {}
+        dict_album_key_fullsize_value_thumbnail_image_path = {}
+        list_album_thumbnail_url = []
+
+        # 받아야 하는 정보 수집하기 Actor or Album ##############################################
+        selected_actor_id_str = request.POST.get('selected_actor_id')
+        selected_video_album_id_str = request.POST.get('selected_video_album_id')
+
+        selected_actor_id_str = None if selected_actor_id_str in LIST_STR_NONE_SERIES else selected_actor_id_str
+        selected_video_album_id_str = None if selected_video_album_id_str in LIST_STR_NONE_SERIES else selected_video_album_id_str
+        
+        if selected_actor_id_str is not None and selected_actor_id_str != '':
+            selected_actor_id = int(selected_actor_id_str)
+            q_actor = Actor.objects.get(id=selected_actor_id)
+        else:
+            q_actor = None
+        print('selected actor ', q_actor)
+
+        if selected_video_album_id_str is not None and selected_video_album_id_str != '':
+            selected_video_album_id = int(selected_video_album_id_str)
+            q_video_album = Video_Album.objects.get(id=selected_video_album_id)
+        else:
+            q_video_album = None
+        print('q_video_album: ', q_video_album)
+        
+        # Data Serialization
+        if q_video_album is not None: 
+            if q_actor is None:
+                q_actor = q_video_album.main_actor
+            selected_serialized_data_video_album = Video_Album_Serializer(q_video_album, many=False).data
+        if q_actor is not None:
+            print('q_actor', q_actor)
+            selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
+
+        jsondata = {
+            'BASE_DIR_VIDEO': BASE_DIR_VIDEO,
+            'selected_serialized_data_actor': selected_serialized_data_actor,
+            'selected_serialized_data_video_album': selected_serialized_data_video_album,
+        }
+        # print('jsondata', jsondata)
+        print('======================================================================================================= 3')
+        return JsonResponse(jsondata, safe=False)
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_video_album_upload_modal(request):
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
+    
+    if request.method == "GET":
+        jsondata = {}   
+        return JsonResponse(jsondata, safe=False)
+    
+    if request.method == 'GET':
+        selected_serialized_data_actor = {}
+        selected_serialized_data_video_album = {}
+        q_video_album_selected = q_mysettings_hansent.video_album_selected
+        # Get selected_serialized_data
+        if q_video_album_selected is not None:
+            selected_serialized_data_video_album = Video_Album_Serializer(q_video_album_selected, many=False).data
+            if q_video_album_selected.main_actor:
+                selected_serialized_data_actor = Actor_Serializer(q_video_album_selected.main_actor, many=False).data
+            else:
+                q_actor = q_mysettings_hansent.actor_selected
+                if q_actor is not None:
+                    selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
+        # Jsondata
+        jsondata = {
+            'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
+            'BASE_DIR_VIDEO': BASE_DIR_VIDEO,
+            'selected_serialized_data_actor': selected_serialized_data_actor,
+            'selected_serialized_data_video_album': selected_serialized_data_video_album,
+        }
+        return JsonResponse(jsondata, safe=False)
+    
+    if request.method == 'POST':
+        print('streaming_video_album_upload_modal_view POST ========================================================== 1')
+        print(request.POST,)
+        print('======================================================================================================= 2')
+        
+        selected_serialized_data_video_album = {}
+        selected_serialized_data_actor = {}
+                
+        selected_video_album_id_str = str(request.POST.get('selected_video_album_id'))
+        selected_video_album_video_id_str = str(request.POST.get('selected_video_album_video_id'))
+        selected_actor_id_str = request.POST.get('selected_actor_id')
+        input_text_title_str = request.POST.get('input_text_title')
+        input_text_name_str = request.POST.get('input_text_name')
+        input_text_studio_str = request.POST.get('input_text_studio')
+        input_date_released_str = request.POST.get('input_date_released')
+        input_text_tag_str = request.POST.get('input_text_tag')
+        selected_video_sub_type_str = request.POST.get('selected_video_sub_type')
+        
+        selected_video_album_id_str = None if selected_video_album_id_str in LIST_STR_NONE_SERIES else selected_video_album_id_str
+        selected_video_album_video_id_str = None if selected_video_album_video_id_str in LIST_STR_NONE_SERIES else selected_video_album_video_id_str
+        selected_actor_id_str = None if selected_actor_id_str in LIST_STR_NONE_SERIES else selected_actor_id_str
+        input_text_title_str = None if input_text_title_str in LIST_STR_NONE_SERIES else input_text_title_str
+        input_text_name_str = None if input_text_name_str in LIST_STR_NONE_SERIES else input_text_name_str
+        input_text_studio_str = None if input_text_studio_str in LIST_STR_NONE_SERIES else input_text_studio_str
+        input_date_released_str = None if input_date_released_str in LIST_STR_NONE_SERIES else input_date_released_str
+        selected_video_sub_type_str = None if selected_video_sub_type_str in LIST_STR_NONE_SERIES else selected_video_sub_type_str
+        
+        print('selected_actor_id_str', selected_actor_id_str)
+        print('selected_video_album_id_str', selected_video_album_id_str)
+
+        # 선택된 모델 정보 획득
+        if selected_actor_id_str is not None and selected_actor_id_str != '':
+            selected_actor_id = int(selected_actor_id_str)
+            q_actor = Actor.objects.get(id=selected_actor_id)
+        else:
+            q_actor = None
+        
+        # 선택된 앨범 정보 획득
+        if selected_video_album_id_str is not None and selected_video_album_id_str != '' :
+            selected_video_album_id = int(selected_video_album_id_str)
+            q_video_album_selected = Video_Album.objects.get(id=selected_video_album_id)
+            if q_video_album_selected is not None:
+                if q_actor is None:
+                    q_actor = q_video_album_selected.main_actor
+        else:
+            q_video_album_selected = None 
+        
+        # 앨범 통으로 삭제하기
+        if request.POST.get('button') == 'video_album_delete':
+            print('# 앨범 통으로 삭제하기', q_video_album_selected)
+            if q_video_album_selected is not None:
+                list_dict_video_album = q_video_album_selected.list_dict_video_album
+                if list_dict_video_album is not None and len(list_dict_video_album) > 1:
+                    # 앨범에 등록된 Video 삭제하기
+                    for dict_video_album in list_dict_video_album:
+                        # 서버어서 이미지 삭제하기
+                        if dict_video_album["id"] != 0:
+                            # Default 이미지가 아닌 경우 삭제가능
+                            image_name_original = dict_video_album["original"]
+                            image_name_cover = dict_video_album["cover"]
+                            image_name_thumbnail = dict_video_album["thumbnail"]
+                            file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_original)
+                            file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_cover)
+                            file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_thumbnail)
+                            print('file_path_o', file_path_o)
+                            if os.path.exists(file_path_o):
+                                try:
+                                    os.remove(file_path_o)
+                                except:
+                                    pass
+                            if os.path.exists(file_path_c):
+                                try:
+                                    os.remove(file_path_c)
+                                except:
+                                    pass
+                            if os.path.exists(file_path_t):
+                                try:
+                                    os.remove(file_path_t)
+                                except:
+                                    pass
+                            # 리스트에서 discard 처리하기
+                            dict_video_album['active'] = 'false'
+                            dict_video_album['discard'] = 'true'
+                # Query 저장 프로세스
+                data = {
+                    'list_dict_video_album': list_dict_video_album,
+                    'check_discard': True,
+                    }
+                Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+                q_video_album_selected.refresh_from_db()
+                    
+            return redirect('hans-ent-video-album-list')
+
+        # 앨범 커버 이미지 변경하기
+        if request.POST.get('button') == 'change_video_album_cover_image':
+            if selected_video_album_video_id_str is not None and selected_video_album_video_id_str != '':
+                selected_video_album_video_id = int(selected_video_album_video_id_str)
+                if q_video_album_selected is not None:
+                    list_dict_video_album = q_video_album_selected.list_dict_video_album
+                    # acitve 모두 false 변경
+                    for dict_video_album in list_dict_video_album:
+                        dict_video_album['active'] = 'false'
+                        if dict_video_album['id'] == selected_video_album_video_id:
+                            dict_video_album['active'] = 'true'
+                    data = {'list_dict_video_album': list_dict_video_album}
+                    Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+                    q_video_album_selected.refresh_from_db()
+        
+        # 앨범 이미지 삭제하기
+        if request.POST.get('button') == 'remove_video_album_video':
+            print('# 앨범 이미지 삭제하기')
+            if selected_video_album_video_id_str is not None and selected_video_album_video_id_str != '':
+                selected_video_album_video_id = int(selected_video_album_video_id_str)
+                if q_video_album_selected is not None:
+                    list_dict_video_album = q_video_album_selected.list_dict_video_album
+                    # 이미지 삭제 프로세스
+                    check_discard_active_video = False
+                    for dict_video_album in list_dict_video_album:
+                        if dict_video_album["id"] == selected_video_album_video_id:
+                            # 커버이미지를 삭제하는 경우이면 Default를 커버로 지정하기 위해 플래그 올린다.
+                            if dict_video_album["active"] == 'true':
+                                check_discard_active_video = True
+                            # 서버어서 이미지 삭제하기
+                            if dict_video_album["id"] != 0:
+                                # Default 이미지가 아닌 경우 삭제가능
+                                image_name_original = dict_video_album["original"]
+                                image_name_cover = dict_video_album["cover"]
+                                image_name_thumbnail = dict_video_album["thumbnail"]
+                                file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_original)
+                                file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_cover)
+                                file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_thumbnail)
+                                print('file_path_o', file_path_o)
+                                if os.path.exists(file_path_o):
+                                    try:
+                                        os.remove(file_path_o)
+                                    except:
+                                        pass
+                                if os.path.exists(file_path_c):
+                                    try:
+                                        os.remove(file_path_c)
+                                    except:
+                                        pass
+                                if os.path.exists(file_path_t):
+                                    try:
+                                        os.remove(file_path_t)
+                                    except:
+                                        pass
+                                # 리스트에서 discard 처리하기
+                                dict_video_album['active'] = 'false'
+                                dict_video_album['discard'] = 'true'
+                    # Active true(커버이미지)를 삭제한 경우 Default이미지를 커버로 다시 등장시킨다.
+                    if check_discard_active_video == True:
+                        for dict_video_album in list_dict_video_album:
+                            if dict_video_album["id"] == 0:
+                                dict_video_album["active"] = 'true'
+                                dict_video_album["discard"] = 'false'
+                    # Query 저장 프로세스
+                    data = {'list_dict_video_album': list_dict_video_album}
+                    Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+                    q_video_album_selected.refresh_from_db() 
+
+        # 업로드 타이틀 정보 저장하기
+        if input_text_title_str is not None and input_text_title_str != '':
+            print('# 업로드 타이틀 정보 저장하기')
+            if q_video_album_selected is None:
+                q_video_album_selected = create_video_album()
+            data = {
+                'title': input_text_title_str,
+            }
+            Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+            q_video_album_selected.refresh_from_db()
+            
+        # 업로드 모델이름 저장하기
+        if input_text_name_str is not None and input_text_name_str != '':
+            print('# 업로드 모델이름 저장하기')
+            if q_video_album_selected is None:
+                q_video_album_selected = create_video_album()
+            data = {
+                'name': input_text_name_str,
+            }
+            Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+            q_video_album_selected.refresh_from_db()
+        
+        # 업로드 스튜디오 정보 저장하기
+        if input_text_studio_str is not None and input_text_studio_str != '':
+            if q_video_album_selected is None:
+                q_video_album_selected = create_video_album()
+            data = {
+                'studio': input_text_studio_str,
+            }
+            Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+            q_video_album_selected.refresh_from_db()
+
+        # 사진 앨범 타입 선택하기
+        if selected_video_sub_type_str is not None and selected_video_sub_type_str != '':
+            if q_video_album_selected is None:
+                q_video_album_selected = create_video_album()
+            data = {
+                'types': selected_video_sub_type_str,
+            }
+            Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+            q_video_album_selected.refresh_from_db()
+
+        # 업로드 출시일 정보 저장하기
+        if input_date_released_str is not None and input_date_released_str != '':
+            if q_video_album_selected is None:
+                q_video_album_selected = create_video_album()
+            date_string = str(input_date_released_str)
+            date_format = '%Y-%m-%d'
+            # date_released = datetime.strftime(input_date_released_str, date_format).date()
+            date_object = datetime.strptime(date_string, date_format).date()
+            data = {
+                'date_released': date_object,
+            }
+            Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+            q_video_album_selected.refresh_from_db()
+        
+        # Tag 저장하기
+        if input_text_tag_str is not None and input_text_tag_str != '':
+            if q_video_album_selected is None:
+                q_video_album_selected = create_video_album()
+            tags = q_video_album_selected.tags
+            if tags is None:
+                tags = []
+            if input_text_tag_str not in tags:
+                print('tag save', input_text_tag_str)
+                tags.append(input_text_tag_str)
+            data = {
+                'tags': tags,
+            }
+            Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+            q_video_album_selected.refresh_from_db()
+
+
+        # 모델 선택하기
+        if request.POST.get('button') == 'actor_select':
+            if q_video_album_selected is None:
+                q_video_album_selected = create_video_album()
+            if q_video_album_selected is not None and q_actor is not None:
+                print('선택된 모델', q_actor)
+                data = {
+                    'main_actor': q_actor,
+                }
+                Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+                q_video_album_selected.refresh_from_db()
+
+        # 모델 선택해제하기
+        if request.POST.get('button') == 'actor_select_reset':
+            print('# 모델 선택해제하기')
+            if q_video_album_selected is None:
+                q_video_album_selected = create_video_album()
+            if q_video_album_selected is not None:
+                data = {
+                    'main_actor': None,
+                }
+                Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+                q_video_album_selected.refresh_from_db() 
+
+        # 이미지 업로드 했으면 저장하기
+        if request.FILES:
+            if q_video_album_selected is None:
+                q_video_album_selected = create_video_album()
+            # 앨범 갤러이 이미지 저장하기
+            images = request.FILES.getlist('images')
+            if images is not None and len(images) > 0:
+                save_video_album_images(q_video_album_selected, images)
+
+        # 비디오 업로드 했으면 저장하기
+        if request.FILES:
+            if q_video_album_selected is None:
+                q_video_album_selected = create_video_album()
+            # 앨범 갤러이 이미지 저장하기
+            videos = request.FILES.getlist('videos')
+            if videos is not None and len(videos) > 0:
+                save_video_album_videos(q_video_album_selected, videos)
+
+        # 신규 Video Album 생성
+        if request.POST.get('button') == 'create_video_album':
+            q_actor = None 
+            q_video_album_selected = None
+            print('good luck~!')
+            pass
+
+        # Data Serialization
+        if q_video_album_selected is not None:
+            print('# 앨범이 등록되어 있다면', q_video_album_selected)
+            print('q_actor', q_actor)
+            if q_actor is None:
+                q_actor = q_video_album_selected.main_actor
+               
+            # Settings에 선택된 Album 쿼리 등록
+            print('세팅에 현재 앨범 등록하기', q_mysettings_hansent)
+            data = {
+                'video_album_selected': q_video_album_selected
+            }
+            MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
+            q_mysettings_hansent.refresh_from_db()
+        
+            # Data Serialize
+            selected_serialized_data_video_album = Video_Album_Serializer(q_video_album_selected, many=False).data
+            # dict_album_key_fullsize_value_thumbnail_image_path = get_dict_album_key_fullsize_value_thumbnail_image_path(q_video_album_selected)  # 앨범에 등록된 이미지 표시정보(Path) 획득하기
+        
+        if q_actor is not None:
+            selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
+
+        jsondata = {
+            'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
+            'BASE_DIR_VIDEO': BASE_DIR_VIDEO,
+            'selected_serialized_data_actor': selected_serialized_data_actor,
+            'selected_serialized_data_video_album': selected_serialized_data_video_album,
+        }
+        print('jsondata', jsondata)
+        print('======================================================================================================= 3')
+        return JsonResponse(jsondata, safe=False)  
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_video_album_upload_modal_actor_search(request):
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
+    
+    if request.method == 'GET':
+        print('get', request)
+        keyword_str = request.GET.get('keyword')
+        qs_xxx = Actor.objects.filter(Q(check_discard=False) & (Q(name__icontains=keyword_str) | Q(synonyms__icontains=keyword_str)))
+        list_serialized_data_actor = None
+        if qs_xxx is not None and len(qs_xxx) > 0:
+            list_serialized_data_actor = Actor_Serializer(qs_xxx, many=True).data
+        jsondata = {
+            'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
+            'list_serialized_data_actor': list_serialized_data_actor, 
+        }
+        return JsonResponse(jsondata, safe=False)
+
+    if request.method == 'POST':
+        print('********************', request.POST)
+        jsondata = {}
+        return JsonResponse(jsondata, safe=False)
+
+
+
+#############################################################################################################################################
+# Music Album  
+#############################################################################################################################################
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_music_album_list(request):
+    import datetime
+    ls_today = datetime.date.today()
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
+   
+    if request.method == 'GET':
+        total_num_registered_item = Music_Album.objects.count()
+        # Searching 결과값 찾기
+        list_searched_xxx_id = q_mysettings_hansent.list_searched_music_album_id
+        if list_searched_xxx_id is not None:
+            total_num_searched_item = len(list_searched_xxx_id)
+        else:
+            total_num_searched_item = 0
+        # Sorting Submenu 조건
+        selected_field_sorting_str = q_mysettings_hansent.selected_field_music
+        # Acending or Decending?
+        field_ascending_str = q_mysettings_hansent.check_field_ascending_music
+        if field_ascending_str == False:
+            selected_field_sorting = f'-{selected_field_sorting_str}'
+        else:
+            selected_field_sorting = selected_field_sorting_str
+        # 화면에 표시할 아이템 개수 지정
+        count_page_number = q_mysettings_hansent.count_page_number_music
+        count_page_number_min = (count_page_number - 1) * LIST_NUM_DISPLAY_IN_PAGE
+        count_page_number_max = count_page_number * LIST_NUM_DISPLAY_IN_PAGE
+        # 쿼리 필터링
+        if list_searched_xxx_id is not None and len(list_searched_xxx_id) > 0:
+            qs_xxx = Music_Album.objects.filter(Q(check_discard=False) & Q(id__in=list_searched_xxx_id)).order_by(selected_field_sorting)[count_page_number_min:count_page_number_max]
+        else:
+            qs_xxx = Music_Album.objects.filter(Q(check_discard=False)).order_by(selected_field_sorting)[count_page_number_min:count_page_number_max]
+        print('qs_xxx', qs_xxx)
+        # Data Serialization            
+        list_serialized_data_music_album = Music_Album_Serializer(qs_xxx, many=True).data
+        
+        jsondata = {
+            'BASE_DIR_MUSIC': BASE_DIR_MUSIC,
+            'list_field_sorting': LIST_MUSIC_FIELD,
+            'list_serialized_data_music_album': list_serialized_data_music_album,
+            'total_num_registered_item': total_num_registered_item,
+            'total_num_searched_item': total_num_searched_item,
+            'list_count_page_number': [count_page_number_min, count_page_number_max, count_page_number],
+        }
+        print('jsondata', jsondata)
+        return JsonResponse(jsondata, safe=False)
+   
+    if request.method == 'POST':
+        # print(request.POST)
+        if request.POST.get('button') == 'sorting_items':
+            selected_sorting_field_str = request.POST.get('sort_by')
+            selected_field_music = q_mysettings_hansent.selected_field_music
+            check_field_ascending_music = q_mysettings_hansent.check_field_ascending_music
+            if selected_sorting_field_str == selected_field_music:
+                if check_field_ascending_music == True:
+                    check_field_ascending_music = False
+                else:
+                    check_field_ascending_music = True
+            data = {
+                'selected_field_music':selected_sorting_field_str,
+                'check_field_ascending_music': check_field_ascending_music,
+            }
+            MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
+            print('Sorting 조건 확정 및 저장')
+            return redirect('hans-ent-actor-list')
+       
+        if request.POST.get('button') == 'page_number_min':
+            count_page_number_down(request, q_mysettings_hansent)
+            return redirect('hans-ent-actor-list')
+        if request.POST.get('button') == 'page_number_max':
+            count_page_number_up(request, q_mysettings_hansent, total_num_registered_item)
+            return redirect('hans-ent-actor-list')
+        jsondata = {}
+        return JsonResponse(jsondata, safe=False)
+    
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_music_album_list_search(request):
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
+   
+    if request.method == 'GET':
+        print(request.GET,)
+        keyword_str = request.GET.get('keyword')
+        qs_xxx = Music_Album.objects.filter(Q(check_discard=False) & (Q(title__icontains=keyword_str) | Q(main_actor__name__icontains=keyword_str) | Q(main_actor__synonyms__icontains=keyword_str)))
+        list_searched_music_album_id = []
+        if qs_xxx is not None and len(qs_xxx) > 0:
+            for q_xxx in qs_xxx:
+                list_searched_music_album_id.append(q_xxx.id)
+        data = {
+            'list_searched_music_album_id': list_searched_music_album_id,
+        }
+        MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
+        return redirect('hans-ent-actor-list')
+   
+    if request.method == 'POST':
+        keyword_str = request.POST.get('button')
+        if keyword_str == 'reset':
+            reset_hans_ent_music_album_list(q_mysettings_hansent)
+        return redirect('hans-ent-music-album-list')
+   
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_music_album_gallery_modal(request):
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
+
+    if request.method == 'GET':
+        q_music_album_selected = q_mysettings_hansent.music_album_selected
+        jsondata = {}
+        return JsonResponse(jsondata, safe=False)
+    
+    if request.method == 'POST':
+        print('streaming_music_album_gallery_modal_view POST ======================================================= 1')
+        print(request.POST,)
+        print('======================================================================================================= 2')
+        selected_serialized_data_actor = {}
+        selected_serialized_data_music_album = {}
+        dict_album_key_fullsize_value_thumbnail_image_path = {}
+        list_album_thumbnail_url = []
+
+        # 받아야 하는 정보 수집하기 Actor or Album ##############################################
+        selected_actor_id_str = request.POST.get('selected_actor_id')
+        selected_music_album_id_str = request.POST.get('selected_music_album_id')
+
+        selected_actor_id_str = None if selected_actor_id_str in LIST_STR_NONE_SERIES else selected_actor_id_str
+        selected_music_album_id_str = None if selected_music_album_id_str in LIST_STR_NONE_SERIES else selected_music_album_id_str
+        
+        if selected_actor_id_str is not None and selected_actor_id_str != '':
+            selected_actor_id = int(selected_actor_id_str)
+            q_actor = Actor.objects.get(id=selected_actor_id)
+        else:
+            q_actor = None
+        print('selected actor ', q_actor)
+
+        if selected_music_album_id_str is not None and selected_music_album_id_str != '':
+            selected_music_album_id = int(selected_music_album_id_str)
+            q_music_album = Music_Album.objects.get(id=selected_music_album_id)
+        else:
+            q_music_album = None
+        print('q_music_album: ', q_music_album)
+        
+        # Data Serialization
+        if q_music_album is not None: 
+            if q_actor is None:
+                q_actor = q_music_album.main_actor
+            selected_serialized_data_music_album = Music_Album_Serializer(q_music_album, many=False).data
+        if q_actor is not None:
+            print('q_actor', q_actor)
+            selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
+
+        jsondata = {
+            'BASE_DIR_MUSIC': BASE_DIR_MUSIC,
+            'selected_serialized_data_actor': selected_serialized_data_actor,
+            'selected_serialized_data_music_album': selected_serialized_data_music_album,
+        }
+        # print('jsondata', jsondata)
+        print('======================================================================================================= 3')
+        return JsonResponse(jsondata, safe=False)
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_music_album_upload_modal(request):
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
+    
+    if request.method == "GET":
+        jsondata = {}   
+        return JsonResponse(jsondata, safe=False)
+    
+    if request.method == 'GET':
+        selected_serialized_data_actor = {}
+        selected_serialized_data_music_album = {}
+        q_music_album_selected = q_mysettings_hansent.music_album_selected
+        # Get selected_serialized_data
+        if q_music_album_selected is not None:
+            selected_serialized_data_music_album = Music_Album_Serializer(q_music_album_selected, many=False).data
+            if q_music_album_selected.main_actor:
+                selected_serialized_data_actor = Actor_Serializer(q_music_album_selected.main_actor, many=False).data
+            else:
+                q_actor = q_mysettings_hansent.actor_selected
+                if q_actor is not None:
+                    selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
+        # Jsondata
+        jsondata = {
+            'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
+            'BASE_DIR_MUSIC': BASE_DIR_MUSIC,
+            'selected_serialized_data_actor': selected_serialized_data_actor,
+            'selected_serialized_data_music_album': selected_serialized_data_music_album,
+        }
+        return JsonResponse(jsondata, safe=False)
+    
+    if request.method == 'POST':
+        print('streaming_music_album_upload_modal_view POST ========================================================== 1')
+        print(request.POST,)
+        print('======================================================================================================= 2')
+        
+        selected_serialized_data_music_album = {}
+        selected_serialized_data_actor = {}
+                
+        selected_music_album_id_str = str(request.POST.get('selected_music_album_id'))
+        selected_music_album_music_id_str = str(request.POST.get('selected_music_album_music_id'))
+        selected_actor_id_str = request.POST.get('selected_actor_id')
+        input_text_title_str = request.POST.get('input_text_title')
+        input_text_name_str = request.POST.get('input_text_name')
+        input_text_studio_str = request.POST.get('input_text_studio')
+        input_date_released_str = request.POST.get('input_date_released')
+        input_text_tag_str = request.POST.get('input_text_tag')
+        selected_music_sub_type_str = request.POST.get('selected_music_sub_type')
+        
+        selected_music_album_id_str = None if selected_music_album_id_str in LIST_STR_NONE_SERIES else selected_music_album_id_str
+        selected_music_album_music_id_str = None if selected_music_album_music_id_str in LIST_STR_NONE_SERIES else selected_music_album_music_id_str
+        selected_actor_id_str = None if selected_actor_id_str in LIST_STR_NONE_SERIES else selected_actor_id_str
+        input_text_title_str = None if input_text_title_str in LIST_STR_NONE_SERIES else input_text_title_str
+        input_text_name_str = None if input_text_name_str in LIST_STR_NONE_SERIES else input_text_name_str
+        input_text_studio_str = None if input_text_studio_str in LIST_STR_NONE_SERIES else input_text_studio_str
+        input_date_released_str = None if input_date_released_str in LIST_STR_NONE_SERIES else input_date_released_str
+        selected_music_sub_type_str = None if selected_music_sub_type_str in LIST_STR_NONE_SERIES else selected_music_sub_type_str
+        
+        print('selected_actor_id_str', selected_actor_id_str)
+        print('selected_music_album_id_str', selected_music_album_id_str)
+
+        # 선택된 모델 정보 획득
+        if selected_actor_id_str is not None and selected_actor_id_str != '':
+            selected_actor_id = int(selected_actor_id_str)
+            q_actor = Actor.objects.get(id=selected_actor_id)
+        else:
+            q_actor = None
+        
+        # 선택된 앨범 정보 획득
+        if selected_music_album_id_str is not None and selected_music_album_id_str != '' :
+            selected_music_album_id = int(selected_music_album_id_str)
+            q_music_album_selected = Music_Album.objects.get(id=selected_music_album_id)
+            if q_music_album_selected is not None:
+                if q_actor is None:
+                    q_actor = q_music_album_selected.main_actor
+        else:
+            q_music_album_selected = None 
+        
+        # 앨범 통으로 삭제하기
+        if request.POST.get('button') == 'music_album_delete':
+            print('# 앨범 통으로 삭제하기', q_music_album_selected)
+            if q_music_album_selected is not None:
+                list_dict_music_album = q_music_album_selected.list_dict_music_album
+                if list_dict_music_album is not None and len(list_dict_music_album) > 1:
+                    # 앨범에 등록된 Music 삭제하기
+                    for dict_music_album in list_dict_music_album:
+                        # 서버어서 이미지 삭제하기
+                        if dict_music_album["id"] != 0:
+                            # Default 이미지가 아닌 경우 삭제가능
+                            image_name_original = dict_music_album["original"]
+                            image_name_cover = dict_music_album["cover"]
+                            image_name_thumbnail = dict_music_album["thumbnail"]
+                            file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_MUSIC, image_name_original)
+                            file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_MUSIC, image_name_cover)
+                            file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_MUSIC, image_name_thumbnail)
+                            print('file_path_o', file_path_o)
+                            if os.path.exists(file_path_o):
+                                try:
+                                    os.remove(file_path_o)
+                                except:
+                                    pass
+                            if os.path.exists(file_path_c):
+                                try:
+                                    os.remove(file_path_c)
+                                except:
+                                    pass
+                            if os.path.exists(file_path_t):
+                                try:
+                                    os.remove(file_path_t)
+                                except:
+                                    pass
+                            # 리스트에서 discard 처리하기
+                            dict_music_album['active'] = 'false'
+                            dict_music_album['discard'] = 'true'
+                # Query 저장 프로세스
+                data = {
+                    'list_dict_music_album': list_dict_music_album,
+                    'check_discard': True,
+                    }
+                Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+                q_music_album_selected.refresh_from_db()
+                    
+            return redirect('hans-ent-music-album-list')
+
+        # 앨범 커버 이미지 변경하기
+        if request.POST.get('button') == 'change_music_album_cover_image':
+            if selected_music_album_music_id_str is not None and selected_music_album_music_id_str != '':
+                selected_music_album_music_id = int(selected_music_album_music_id_str)
+                if q_music_album_selected is not None:
+                    list_dict_music_album = q_music_album_selected.list_dict_music_album
+                    # acitve 모두 false 변경
+                    for dict_music_album in list_dict_music_album:
+                        dict_music_album['active'] = 'false'
+                        if dict_music_album['id'] == selected_music_album_music_id:
+                            dict_music_album['active'] = 'true'
+                    data = {'list_dict_music_album': list_dict_music_album}
+                    Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+                    q_music_album_selected.refresh_from_db()
+        
+        # 앨범 이미지 삭제하기
+        if request.POST.get('button') == 'remove_music_album_music':
+            print('# 앨범 이미지 삭제하기')
+            if selected_music_album_music_id_str is not None and selected_music_album_music_id_str != '':
+                selected_music_album_music_id = int(selected_music_album_music_id_str)
+                if q_music_album_selected is not None:
+                    list_dict_music_album = q_music_album_selected.list_dict_music_album
+                    # 이미지 삭제 프로세스
+                    check_discard_active_music = False
+                    for dict_music_album in list_dict_music_album:
+                        if dict_music_album["id"] == selected_music_album_music_id:
+                            # 커버이미지를 삭제하는 경우이면 Default를 커버로 지정하기 위해 플래그 올린다.
+                            if dict_music_album["active"] == 'true':
+                                check_discard_active_music = True
+                            # 서버어서 이미지 삭제하기
+                            if dict_music_album["id"] != 0:
+                                # Default 이미지가 아닌 경우 삭제가능
+                                image_name_original = dict_music_album["original"]
+                                image_name_cover = dict_music_album["cover"]
+                                image_name_thumbnail = dict_music_album["thumbnail"]
+                                file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_MUSIC, image_name_original)
+                                file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_MUSIC, image_name_cover)
+                                file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_MUSIC, image_name_thumbnail)
+                                print('file_path_o', file_path_o)
+                                if os.path.exists(file_path_o):
+                                    try:
+                                        os.remove(file_path_o)
+                                    except:
+                                        pass
+                                if os.path.exists(file_path_c):
+                                    try:
+                                        os.remove(file_path_c)
+                                    except:
+                                        pass
+                                if os.path.exists(file_path_t):
+                                    try:
+                                        os.remove(file_path_t)
+                                    except:
+                                        pass
+                                # 리스트에서 discard 처리하기
+                                dict_music_album['active'] = 'false'
+                                dict_music_album['discard'] = 'true'
+                    # Active true(커버이미지)를 삭제한 경우 Default이미지를 커버로 다시 등장시킨다.
+                    if check_discard_active_music == True:
+                        for dict_music_album in list_dict_music_album:
+                            if dict_music_album["id"] == 0:
+                                dict_music_album["active"] = 'true'
+                                dict_music_album["discard"] = 'false'
+                    # Query 저장 프로세스
+                    data = {'list_dict_music_album': list_dict_music_album}
+                    Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+                    q_music_album_selected.refresh_from_db() 
+
+        # 업로드 타이틀 정보 저장하기
+        if input_text_title_str is not None and input_text_title_str != '':
+            print('# 업로드 타이틀 정보 저장하기')
+            if q_music_album_selected is None:
+                q_music_album_selected = create_music_album()
+            data = {
+                'title': input_text_title_str,
+            }
+            Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+            q_music_album_selected.refresh_from_db()
+            
+        # 업로드 모델이름 저장하기
+        if input_text_name_str is not None and input_text_name_str != '':
+            print('# 업로드 모델이름 저장하기')
+            if q_music_album_selected is None:
+                q_music_album_selected = create_music_album()
+            data = {
+                'name': input_text_name_str,
+            }
+            Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+            q_music_album_selected.refresh_from_db()
+        
+        # 업로드 스튜디오 정보 저장하기
+        if input_text_studio_str is not None and input_text_studio_str != '':
+            if q_music_album_selected is None:
+                q_music_album_selected = create_music_album()
+            data = {
+                'studio': input_text_studio_str,
+            }
+            Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+            q_music_album_selected.refresh_from_db()
+
+        # 사진 앨범 타입 선택하기
+        if selected_music_sub_type_str is not None and selected_music_sub_type_str != '':
+            if q_music_album_selected is None:
+                q_music_album_selected = create_music_album()
+            data = {
+                'types': selected_music_sub_type_str,
+            }
+            Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+            q_music_album_selected.refresh_from_db()
+
+        # 업로드 출시일 정보 저장하기
+        if input_date_released_str is not None and input_date_released_str != '':
+            if q_music_album_selected is None:
+                q_music_album_selected = create_music_album()
+            date_string = str(input_date_released_str)
+            date_format = '%Y-%m-%d'
+            # date_released = datetime.strftime(input_date_released_str, date_format).date()
+            date_object = datetime.strptime(date_string, date_format).date()
+            data = {
+                'date_released': date_object,
+            }
+            Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+            q_music_album_selected.refresh_from_db()
+        
+        # Tag 저장하기
+        if input_text_tag_str is not None and input_text_tag_str != '':
+            if q_music_album_selected is None:
+                q_music_album_selected = create_music_album()
+            tags = q_music_album_selected.tags
+            if tags is None:
+                tags = []
+            if input_text_tag_str not in tags:
+                print('tag save', input_text_tag_str)
+                tags.append(input_text_tag_str)
+            data = {
+                'tags': tags,
+            }
+            Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+            q_music_album_selected.refresh_from_db()
+
+
+        # 모델 선택하기
+        if request.POST.get('button') == 'actor_select':
+            if q_music_album_selected is None:
+                q_music_album_selected = create_music_album()
+            if q_music_album_selected is not None and q_actor is not None:
+                print('선택된 모델', q_actor)
+                data = {
+                    'main_actor': q_actor,
+                }
+                Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+                q_music_album_selected.refresh_from_db()
+
+        # 모델 선택해제하기
+        if request.POST.get('button') == 'actor_select_reset':
+            print('# 모델 선택해제하기')
+            if q_music_album_selected is None:
+                q_music_album_selected = create_music_album()
+            if q_music_album_selected is not None:
+                data = {
+                    'main_actor': None,
+                }
+                Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+                q_music_album_selected.refresh_from_db() 
+
+        # 이미지 업로드 했으면 저장하기
+        if request.FILES:
+            if q_music_album_selected is None:
+                q_music_album_selected = create_music_album()
+            # 앨범 갤러이 이미지 저장하기
+            images = request.FILES.getlist('images')
+            if images is not None and len(images) > 0:
+                save_music_album_images(q_music_album_selected, images)
+
+        # 신규 Music Album 생성
+        if request.POST.get('button') == 'create_music_album':
+            q_actor = None 
+            q_music_album_selected = None
+            print('good luck~!')
+            pass
+
+        # Data Serialization
+        if q_music_album_selected is not None:
+            print('# 앨범이 등록되어 있다면', q_music_album_selected)
+            print('q_actor', q_actor)
+            if q_actor is None:
+                q_actor = q_music_album_selected.main_actor
+               
+            # Settings에 선택된 Album 쿼리 등록
+            print('세팅에 현재 앨범 등록하기', q_mysettings_hansent)
+            data = {
+                'music_album_selected': q_music_album_selected
+            }
+            MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
+            q_mysettings_hansent.refresh_from_db()
+        
+            # Data Serialize
+            selected_serialized_data_music_album = Music_Album_Serializer(q_music_album_selected, many=False).data
+            # dict_album_key_fullsize_value_thumbnail_image_path = get_dict_album_key_fullsize_value_thumbnail_image_path(q_music_album_selected)  # 앨범에 등록된 이미지 표시정보(Path) 획득하기
+        
+        if q_actor is not None:
+            selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
+
+        jsondata = {
+            'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
+            'BASE_DIR_MUSIC': BASE_DIR_MUSIC,
+            'selected_serialized_data_actor': selected_serialized_data_actor,
+            'selected_serialized_data_music_album': selected_serialized_data_music_album,
+        }
+        print('jsondata', jsondata)
+        print('======================================================================================================= 3')
+        return JsonResponse(jsondata, safe=False)  
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+@login_required
+def hans_ent_music_album_upload_modal_actor_search(request):
+    q_user = request.user
+    q_mysettings_hansent = MySettings_HansEnt.objects.get(user=q_user)
+    
+    if request.method == 'GET':
+        print('get', request)
+        keyword_str = request.GET.get('keyword')
+        qs_xxx = Actor.objects.filter(Q(check_discard=False) & (Q(name__icontains=keyword_str) | Q(synonyms__icontains=keyword_str)))
+        list_serialized_data_actor = None
+        if qs_xxx is not None and len(qs_xxx) > 0:
+            list_serialized_data_actor = Actor_Serializer(qs_xxx, many=True).data
+        jsondata = {
+            'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
+            'list_serialized_data_actor': list_serialized_data_actor, 
+        }
+        return JsonResponse(jsondata, safe=False)
+
+    if request.method == 'POST':
+        print('********************', request.POST)
+        jsondata = {}
+        return JsonResponse(jsondata, safe=False)
+
 
 
 #############################################################################################################################################

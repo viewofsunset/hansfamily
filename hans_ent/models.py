@@ -74,6 +74,7 @@ LIST_MENU_HANS_ENT = (
     ('01', 'ACTOR'),
     ('02', 'PICTURE'),
     ('03', 'VIDEO'),
+    ('04', 'MUSIC'),
 )
 LIST_ACTOR_TAGS = ["JAV", "BJ", "Model", "Actress","Idol", "Amature", "Gravure", "Onlyfans", "Tweeter", "Instagram", "Porn_Actor", "Youtuber"]
 LIST_LOCATIONS = (

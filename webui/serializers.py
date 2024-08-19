@@ -53,3 +53,19 @@ class Video_Album_Serializer(serializers.ModelSerializer):
             'tags',
             'date_released',
         ]
+
+
+class Music_Album_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Music_Album
+        fields = [
+            'id',
+            # 'main_actor__id',
+            'title',
+            'list_dict_music_album',
+            'code',
+            'studio',
+            'score',
+            'tags',
+            'date_released',
+        ]

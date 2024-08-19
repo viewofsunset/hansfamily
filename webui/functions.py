@@ -73,6 +73,7 @@ def hashcode_generator():
 #############################################################################################################################################
 #############################################################################################################################################
 
+# Mysettings Reset하기
 def reset_hans_ent_actor_list(q_mysettings_hansent):
     data = {
         'actor_selected': None,
@@ -85,7 +86,6 @@ def reset_hans_ent_actor_list(q_mysettings_hansent):
     MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
     return True
 
-
 def reset_hans_ent_picture_album_list(q_mysettings_hansent):
     data = {
         'picture_album_selected': None,
@@ -96,7 +96,6 @@ def reset_hans_ent_picture_album_list(q_mysettings_hansent):
     }
     MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
     return True
-
 
 def reset_hans_ent_video_album_list(q_mysettings_hansent):
     data = {
@@ -109,7 +108,6 @@ def reset_hans_ent_video_album_list(q_mysettings_hansent):
     MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
     return True
 
-
 def reset_hans_ent_music_album_list(q_mysettings_hansent):
     data = {
         'music_album_selected': None,
@@ -120,6 +118,8 @@ def reset_hans_ent_music_album_list(q_mysettings_hansent):
     }
     MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
     return True
+
+
 
 
 # Default 배우 쿼리 생성
@@ -143,6 +143,32 @@ def create_picture_album():
     q_picture_album = Picture_Album.objects.create(**data)
     print('Picture Album 신규 생성!', q_picture_album)
     return q_picture_album
+
+# Default Video Album 쿼리 생성
+def create_video_album():
+    hashcode = hashcode_generator()
+    data = {
+        'hashcode': hashcode,
+        'list_dict_video_album':DEFAULT_LIST_DICT_VIDEO_ALBUM,
+    }
+    q_video_album = Video_Album.objects.create(**data)
+    print('Video Album 신규 생성!', q_video_album)
+    return q_video_album
+
+# Default Music Album 쿼리 생성
+def create_music_album():
+    hashcode = hashcode_generator()
+    data = {
+        'hashcode': hashcode,
+        'list_dict_music_album':DEFAULT_LIST_DICT_MUSIC_ALBUM,
+    }
+    q_music_album = Music_Album.objects.create(**data)
+    print('Music Album 신규 생성!', q_music_album)
+    return q_music_album
+
+
+
+
 
 # 두 배우 합치기
 def merge_two_actor_into_one(q_actor, q_actor_s):
@@ -243,6 +269,8 @@ def merge_two_actor_into_one(q_actor, q_actor_s):
     
 
 
+
+# 이미지 저장하기
 """ 
 입력값은 PIL object. 그러면 알아서 커버이미지, 썸네일이미지 두가지 모두 출력
     PIL image, 
@@ -416,8 +444,6 @@ def save_actor_profile_images(q_actor, images):
     return list_dict_profile_album
     
 
-
-
 # Picture Album 이미지/썸네일 저장하기
 def save_picture_album_images(q_picture_album_selected, images):
     """
@@ -490,4 +516,242 @@ def save_picture_album_images(q_picture_album_selected, images):
     Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
     q_picture_album_selected.refresh_from_db()
     return list_dict_picture_album
-    # return True
+    
+
+
+
+
+# Video Album 이미지/썸네일 저장하기
+def save_video_album_images(q_video_album_selected, images):
+
+    return True
+
+# Video Album Video / Still image 저장하기
+def save_video_album_videos(q_video_album_selected, videos):
+
+    return True
+
+
+
+
+
+
+# 스틸 이미지 사이즈 조절
+def resize_still_image_file(img):
+    output_image_size = (300, 200)
+    max_size = 300
+    # Get the original dimensions
+    original_width, original_height = img.size
+    # Calculate the scaling factor for width and height
+    width_scale = max_size / original_width
+    height_scale = max_size / original_height
+    # Choose the smaller of the two scales to maintain aspect ratio
+    scale = min(width_scale, height_scale)
+    # Calculate the new dimensions
+    new_width = int(original_width * scale)
+    new_height = int(original_height * scale)
+    # Resize the image
+    img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    bulky_resized_width, bulky_resized_height = img.size
+    # Calculate the center coordinates
+    center_x = bulky_resized_width / 2
+    center_y = bulky_resized_height / 2
+    # Calculate cropping box coordinates
+    left = center_x - output_image_size[0] / 2
+    top = center_y - output_image_size[1] / 2
+    right = center_x + output_image_size[0] / 2
+    bottom = center_y + output_image_size[1] / 2
+    # Crop the image
+    img = img.crop((left, top, right, bottom))
+    print(img.size)
+    return img
+
+
+
+
+# 비디오 파일로부터 썸네일, 스틸 이미지 생성하기
+def get_thumbnail_and_stillimages(q_vid, file_name):
+    
+    
+    video_file_name = str(q_vid.video_file)
+    video_file_name = video_file_name.split('/')[-1]
+    video_file_path = os.path.join(VIDEO_FILE_DIR, video_file_name) 
+    print('video_file_path', video_file_path)
+    dict_still_image_path_interval = {}
+    try:
+        clips = VideoFileClip(video_file_path)
+        print('clips', clips)
+        
+        frames = clips.reader.fps #frame per second
+        duration = clips.duration # seconds
+        print('duration', duration)
+        max_duration = int(duration)+1
+        if duration < 600:
+            # < 10 min
+            division = 5  
+        else:
+            if duration < 3600:
+                # < 60 min
+                division = 10
+            else:
+                if duration < 7200:
+                    # < 120 min
+                    division = 15
+                else:  
+                    # > 120 min
+                    division = 20
+        interval = max_duration // division
+        i = 1
+        while i < division + 1:
+            print('i', i)
+            interval_x = interval * i  
+            print('interval_x', interval_x)
+            frame = clips.get_frame(interval_x)
+
+            # Still 이미지 저장하기(장고DB Filefield 저장하지 않고 모두 모아서 JsonField에 저장한다.)
+            still_img_file_path = os.path.join(STILL_IMAGE_DIR, f"{q_vid.id}-still-{file_name}-{i}.jpg")
+            new_still_pil  = Image.fromarray(frame) # Get still image from specific video frame
+            # Remove Alpah channel befor saving
+            new_still_pil = new_still_pil.convert('RGB')
+            resized_still_pil = resize_still_image_file(new_still_pil)
+            resized_still_pil.save(still_img_file_path)
+            new_still_img_file_path = still_img_file_path.split('media/')[-1]
+            dict_still_image_path_interval[i] = [new_still_img_file_path, interval_x]
+            # print('dict_still_image_path', dict_still_image_path)
+
+            # 비디오 중간지점에서 썸네일 하나 생성하기
+            if (division + 1)//2 == i:
+                print('# 비디오 중간지점에서 썸네일 하나 생성하기 시작')
+                cover_img_file_path = os.path.join(COVER_IMAGE_DIR, f"{q_vid.id}-cover-{file_name}-{i}.jpg")
+                thumbnail_img_file_path = os.path.join(THUMBNAIL_IMAGE_DIR, f"{q_vid.id}-thumbnail-{file_name}-{i}.jpg")
+                
+                new_frame_image = Image.fromarray(frame)
+                new_frame_image = new_frame_image.convert('RGB')
+                cover_pil, thumbnail_pil  = resize_pil_image_for_cover_and_thumbnail_pil(new_frame_image)
+
+                # 커버이미지 및 썸네일 이미지 저장
+                print('# 커버이미지 및 썸네일 이미지 저장', q_vid.image_cover, q_vid.image_thumbnail )
+                image_cover_path = str(q_vid.image_cover)
+                image_thumbnail_path = str(q_vid.image_thumbnail)
+                if image_cover_path is None or image_cover_path == '':
+                    print('# 커버이미지 저장')
+                    cover_pil.save(cover_img_file_path)
+                    new_cover_img_file_path = cover_img_file_path.split('media/')[-1]
+                    data = {
+                        'image_cover': new_cover_img_file_path,
+                    }
+                    Video_Album_Vid.objects.filter(id=q_vid.id).update(**data)
+                    q_vid.refresh_from_db()
+
+                if image_thumbnail_path is None or image_thumbnail_path == '':
+                    print('# 썸네일 이미지 저장')
+                    thumbnail_pil.save(thumbnail_img_file_path)
+                    new_thumbnail_img_file_path = thumbnail_img_file_path.split('media/')[-1]
+                    data = {
+                        'image_thumbnail': new_thumbnail_img_file_path,
+                    }
+                    Video_Album_Vid.objects.filter(id=q_vid.id).update(**data)
+                    q_vid.refresh_from_db()
+            i = i + 1
+    except:
+        data = {
+            'image_cover': NO_IMAGE_PATH,
+            'image_thumbnail': NO_IMAGE_PATH,
+        }
+        Video_Album_Vid.objects.filter(id=q_vid.id).update(**data)
+        q_vid.refresh_from_db()
+        dict_still_image_path_interval = None
+
+    data = {
+        'list_still_image': dict_still_image_path_interval
+    }
+    print('list_still_image', dict_still_image_path_interval)
+    Video_Album_Vid.objects.filter(id=q_vid.id).update(**data)
+    return True
+
+    
+# Video Album Vidoe File 저장하기
+def save_video_album_files_to_db(q_selected_video_album, videos):
+    # BASE_DIR = settings.MEDIA_ROOT
+    # BASE_UPLOAD_DIR = os.path.join(BASE_DIR, "uploads") 
+    # VIDEO_ALBUM_DIR = os.path.join(BASE_UPLOAD_DIR, "video_album") 
+    # VIDEO_FILE_DIR = os.path.join(VIDEO_ALBUM_DIR, "video_files") 
+    # SUBTITLE_FILE_DIR = os.path.join(VIDEO_ALBUM_DIR, "subtitle_files") 
+    # COVER_IMAGE_DIR = os.path.join(VIDEO_ALBUM_DIR, "cover_images") 
+    # THUMBNAIL_IMAGE_DIR = os.path.join(VIDEO_ALBUM_DIR, "thumbnail_images") 
+    # STILL_IMAGE_DIR = os.path.join(VIDEO_ALBUM_DIR, "still_images") 
+
+    # # 폴더 내 파일 이름 리스트화 및 동일파일이름 체크
+    # list_album_file_name = []
+    # file_names = os.listdir(VIDEO_FILE_DIR)
+    # for file_name in file_names:
+    #     list_album_file_name.append(file_name)
+
+    title = q_selected_video_album.title
+    actor_name = q_selected_video_album.actor_name
+
+    list_dict_video_album = q_selected_video_album.list_dict_video_album
+    if list_dict_video_album is not None and len(list_dict_video_album) > 0:
+        for dict_video_album in list_dict_video_album:
+            dict_video_album["active"] = "false"
+        data = {'list_dict_video_album': list_dict_video_album,}
+        Video_Album.objects.filter(id=q_selected_video_album.id).update(**data)
+        q_selected_video_album.refresh_from_db()
+    else:
+        list_dict_video_album = []
+    num_video_album_video = len(list_dict_video_album)
+    # get base info
+    hashcode = q_selected_video_album.hashcode
+    if hashcode is None:
+        hashcode = hashcode_generator()
+        data = {'hashcode': hashcode}
+        Video_Album.objects.filter(id=q_selected_video_album.id).update(**data)
+        q_selected_video_album.refresh_from_db()
+    
+    total_video_number = len(videos)
+    i = 0
+    for file in videos:    
+        if image_cover_path is None or image_cover_path == '':
+            print('앨범에 커버 없음, 영상프레임에서 뽑아써야함')
+            vid_image_cover = None
+        else:
+            print('앨범에 커버 있음, Vid에 재활용')
+            vid_image_cover = q_selected_album.image_cover
+            
+        if image_thumbnail_path is None or image_thumbnail_path == '':
+            print('앨범에 썸네일 없음, 영상프레임에서 뽑아써야함')
+            vid_image_thumbnail = None
+        else:
+            print('앨범에 썸네일 있음, Vid에 재활용')
+            vid_image_thumbnail = q_selected_album.image_thumbnail
+            
+        if file_name_cleaned not in list_album_file_name:
+            q_vid = Video_Album_Vid.objects.create(
+                album=q_selected_album,
+                video_file=file,
+                title=title,
+                name=actor_name,
+                image_cover=vid_image_cover,
+                image_thumbnail=vid_image_thumbnail
+            )
+            # Still Image & thumbnail 만들기
+            get_thumbnail_and_stillimages(q_vid, file_name_cleaned)
+            list_album_video_id.append(q_vid.id)
+    if image_cover_path is None or image_cover_path == '':
+        print('앨범에 커버 없음, 영상프레임에서 뽑아써 저장하기')
+        album_image_cover = q_vid.image_cover
+    else:
+        album_image_cover= q_selected_album.image_cover
+    if image_thumbnail_path is None or image_thumbnail_path == '':
+        print('앨범에 썸네일 없음, 영상프레임에서 뽑아써 저장하기')
+        album_image_thumbnail = q_vid.image_thumbnail
+    else:
+        album_image_thumbnail= q_selected_album.image_thumbnail
+    data = {
+        'list_album_video_id': list_album_video_id,
+        
+    }
+    Video_Album.objects.filter(id=q_selected_album.id).update(**data)
+    q_selected_album.refresh_from_db()
+    return q_selected_album
+    

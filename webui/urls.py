@@ -24,6 +24,7 @@ urlpatterns = [
     path("hans_ent_actor_list_search/", hans_ent_actor_list_search, name="hans-ent-actor-list-search"),
     path("hans_ent_actor_profile_modal/", hans_ent_actor_profile_modal, name="hans-ent-actor-profile-modal"),
     path("hans_ent_actor_upload_modal/", hans_ent_actor_upload_modal, name="hans-ent-actor-upload-modal"),
+    
     # picture album
     path("hans_ent_picture_album_list/", hans_ent_picture_album_list, name="hans-ent-picture-album-list"),
     path("hans_ent_picture_album_list_search/", hans_ent_picture_album_list_search, name="hans-ent-picture-album-list-search"),
@@ -31,7 +32,20 @@ urlpatterns = [
     path("hans_ent_picture_album_upload_modal/", hans_ent_picture_album_upload_modal, name="hans-ent-picture-album-upload-modal"),
     path("hans_ent_picture_album_upload_modal_actor_search/", hans_ent_picture_album_upload_modal_actor_search, name="hans-ent-picture-album-upload-modal-actor-search"),
     
-
+    # video album
+    path("hans_ent_video_album_list/", hans_ent_video_album_list, name="hans-ent-video-album-list"),
+    path("hans_ent_video_album_list_search/", hans_ent_video_album_list_search, name="hans-ent-video-album-list-search"),
+    path("hans_ent_video_album_gallery_modal/", hans_ent_video_album_gallery_modal, name="hans-ent-video-album-gallery-modal"),
+    path("hans_ent_video_album_upload_modal/", hans_ent_video_album_upload_modal, name="hans-ent-video-album-upload-modal"),
+    path("hans_ent_video_album_upload_modal_actor_search/", hans_ent_video_album_upload_modal_actor_search, name="hans-ent-video-album-upload-modal-actor-search"),
+    
+    # music album
+    path("hans_ent_music_album_list/", hans_ent_music_album_list, name="hans-ent-music-album-list"),
+    path("hans_ent_music_album_list_search/", hans_ent_music_album_list_search, name="hans-ent-music-album-list-search"),
+    path("hans_ent_music_album_gallery_modal/", hans_ent_music_album_gallery_modal, name="hans-ent-music-album-gallery-modal"),
+    path("hans_ent_music_album_upload_modal/", hans_ent_music_album_upload_modal, name="hans-ent-music-album-upload-modal"),
+    path("hans_ent_music_album_upload_modal_actor_search/", hans_ent_music_album_upload_modal_actor_search, name="hans-ent-music-album-upload-modal-actor-search"),
+    
     #--------------------------------------------------------------------------------------------------------------------------------------
     # secret
     #--------------------------------------------------------------------------------------------------------------------------------------
