@@ -127,26 +127,12 @@
                     })
                 },
 
-                // 우측 기능 버튼 클릭
-                f_hans_ent_video_album_upload_modal() {
-                    axios.post('/hans_ent_video_album_upload_modal/', {
-                        'selected_video_album_id': 'null',
-                        'messages': 'hello',
-                    }, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'X-CSRFToken': "{{ csrf_token }}"
-                    }})
-                    .then((response) => {
-                        console.log('Video Album Upload 모달창으로 전송시작 ', response.data)
-                        post_hans_ent_video_album_upload_modal.f_reset_return()
-                        post_hans_ent_video_album_upload_modal.f_sync_data_to_video_album_upload_modal(response.data);
-                    })
-                    .catch(() => {
-                        console.log('Error! f_hans_ent_video_album_upload_modal')
-                    })
-                },
 
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // 버튼 클릭 정보 전송
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                // Actor 생성하기 버튼
                 f_hans_ent_actor_upload_modal() {
                     this.selected_actor_id = event
                     console.log('############################# 1',this.selected_actor_id)
@@ -183,6 +169,25 @@
                     })
                     .catch(() => {
                         console.log('Error! hans_ent_picture_album_upload_modal')
+                    })
+                },
+
+                // Video Album 생성하기 버튼
+                f_hans_ent_video_album_upload_modal() {
+                    axios.post('/hans_ent_video_album_upload_modal/', {
+                        'selected_video_album_id': 'null',
+                        'messages': 'hello',
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }})
+                    .then((response) => {
+                        console.log('Video Album Upload 모달창으로 전송시작 ', response.data)
+                        post_hans_ent_video_album_upload_modal.f_sync_data_to_video_album_upload_modal(response.data);
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_video_album_upload_modal')
                     })
                 },
 

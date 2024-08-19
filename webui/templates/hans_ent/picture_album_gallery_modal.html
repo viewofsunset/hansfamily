@@ -19,7 +19,7 @@
 				&nbsp; 
 				<button type="button" class="btn btn-primary btn-sm"  @click="f_hans_ent_picture_album_gallery_fullscreen_w_path" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-gallery-fullscreen-modal" >Fullscreen</button>
 				&nbsp; 
-                
+
 				<!--
 					아이콘들 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				-->
@@ -130,10 +130,15 @@
 				this.data_actor = data['selected_serialized_data_actor']
 				this.data_picture_album = data['selected_serialized_data_picture_album']
 				
-				this.selected_actor_id = this.data_actor['id']
-				this.selected_picture_album_id = this.data_picture_album['id']
-                this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
-				console.log('Picture Album Gallery Modal로 정보 전송 완료', data)
+                if (Object.keys(this.data_actor).length > 0 ) {
+					this.selected_actor_id = this.data_actor['id']
+				}
+                if (Object.keys(this.data_picture_album).length > 0 ) {
+					this.selected_picture_album_id = this.data_picture_album['id']
+                    this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+				}
+				
+                console.log('Picture Album Gallery Modal로 정보 전송 완료', data)
 			},
 			
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

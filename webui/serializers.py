@@ -11,7 +11,6 @@ class Actor_Serializer(serializers.ModelSerializer):
             'id',
             'name',
             'synonyms',
-            'image_cover',
             'age',
             'height',
             'date_birth',

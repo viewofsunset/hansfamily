@@ -54,8 +54,7 @@
 			data_actor: {},
             selected_actor_id: '',
 			list_dict_picture_album: [],
-			dict_album_key_fullsize_value_thumbnail_image_path: {},
-            list_album_thumbnail_url: [],
+			list_album_thumbnail_url: [],
 
 			
 		}
@@ -74,12 +73,14 @@
 				this.data_actor = data['selected_serialized_data_actor']
 				this.data_picture_album = data['selected_serialized_data_picture_album']
                 
-				this.selected_actor_id = this.data_actor['id']
-				this.selected_picture_album_id = this.data_picture_album['id']
-				this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
-
+				if (Object.keys(this.data_actor).length > 0 ) {
+					this.selected_actor_id = this.data_actor['id']
+				}
+				if (Object.keys(this.data_picture_album).length > 0 ) {
+					this.selected_picture_album_id = this.data_picture_album['id']
+					this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+				}
 				console.log('Gallery Fullscreen Modal로 전송 완료', data)
-				this.dict_album_key_fullsize_value_thumbnail_image_path = data['dict_album_key_fullsize_value_thumbnail_image_path']
 			},
 
             f_sync_data_to_picture_album_gallery_fullscreen_modal_w_url(data) {

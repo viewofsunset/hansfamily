@@ -11,7 +11,7 @@
             
             
 			<div class="modal-header">
-				<h1 class="modal-title fs-4" id="exampleModalLabel"> [[ data_actor.id ]] Profile: [[ data_actor.name ]]</h1>
+				<h1 class="modal-title fs-4" id="exampleModalLabel"> [[ selected_actor_id ]] Profile: [[ data_actor.name ]]</h1>
 				&nbsp; 
                 
                 <!-- 
@@ -41,14 +41,10 @@
 						<!-- 문서 Title -->
 						<tr>
 							<td rowspan="6" width="30%">
-                                <div v-if="data_actor.image_cover">
-                                    <img :src="data_actor.image_cover" width="200">
-                                </div>
-                                <div v-else-if="data_actor.cover_image_url">
-                                    <img :src="data_actor.cover_image_url" width="200">
-                                </div>
-                                <div v-else>
-                                    No Image
+                                <div v-for="item in active_list_dict_profile_album" :key="item.id">
+									<a :href="BASE_DIR_ACTOR+item.original" target="_blank">
+										<img :src="BASE_DIR_ACTOR+item.cover" width="300">
+									</a>
                                 </div>
 							</td>
 						
@@ -117,47 +113,6 @@
 
 
 				
-				<!-- Registered Profile Images -->
-                <hr>
-                <table class="table">
-                    <tr>
-                        <td width="20%">
-                            <h4>Profile Gallery</h4>
-                        </td>
-                        <td width="10%">
-                            <button type="button" class="btn" @click="f_button_fold_unfold_album_profile">
-                                <div v-if="status_profile_gallery_close == false">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16">
-                                        <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"/>
-                                        <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"/>
-                                        <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"/>
-                                    </svg>
-                                </div>
-                                <div v-else>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
-                                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
-                                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
-                                    </svg>
-                                </div>
-                            </button>
-                        </td>
-                        <td width="15%">
-                            <button type="button" class="btn btn-primary btn-sm"  @click="f_hans_ent_actor_profile_gallery_fullscreen_modal(data_actor.id)" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-profile-gallery-fullscreen-modal" >Fullscreen</button>
-                        </td>
-                        <td></td>
-                    </tr>
-                </table>
-                <div v-if="status_profile_gallery_close == false">
-                    <div class="gallery-container">
-                        <div v-for="(key, index) in Object.keys(dict_actor_key_fullsize_value_thumbnail_image_path)" :key="key" class="card" >
-                            <a :href="key" target="_blank">
-                                <img v-bind:src="dict_actor_key_fullsize_value_thumbnail_image_path[key]" >
-                                <div class="text-overlay">[[ index ]]</div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                    
                 
                 <!--
                     등록된 사진 앨범  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,6 +141,7 @@
                                 </div>
                             </button>
                         </td>
+                        <!-- 버튼 Picture Album 업로드 -->
                         <td width="15%">
                             <button @click="f_hans_ent_picture_album_upload_modal_by_actor_id(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-upload-modal">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-upload" viewBox="0 0 16 16">
@@ -238,14 +194,7 @@
                                                     <path fill-rule="evenodd" d="M7.646 4.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V14.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708z"/>
                                                 </svg>
                                             </button>
-                                            &nbsp;
-                                            <a v-if="data_picture_album.list_album_picture_id != null">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16">
-                                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-                                                </svg>
-                                            </a>
                                         </div> 
-                                        
 
                                     </div> 
                                 </div>
@@ -348,41 +297,26 @@
 		delimiters: ["[[", "]]"],
 		data() {
 		return {
+            BASE_DIR_ACTOR: '',
             BASE_DIR_PICTURE: '',
+            BASE_DIR_VIDEO: '',
+            BASE_DIR_MUSIC: '',
 
-			title : '',
-            data_actor: {},
-
-            dict_actor_key_fullsize_value_thumbnail_image_path: {},
-            list_actor_picture_id: {},
-            list_data_video_album: {},
-            list_data_picture_album: {},
-            list_data_music_album: {},
+			data_actor: {},
+            list_data_picture_album: [],
+            list_data_video_album: [],
+            list_data_music_album: [],
+            list_dict_profile_album: [],
             
-            
-            LIST_ACTOR_TYPES : [],
-			LIST_ACTOR_SUB_TYPES: [],
-			streaming_menu_selected: null,
-			selected_actor_sub_type: null, 
-
-
-			selected_actor_id: '',
+            selected_actor_id: '',
             selected_video_album_id: '',
             selected_picture_album_id: '',
             selected_music_album_id: '',
 			
-			selected_actor_name: '',
-			selected_actor_name_eng: '',
-			selected_actor_name_mother: '',
-            
-            actor_info_site_url: null,
-            selected_actor_sub_type: null,
-            
-            status_profile_gallery_close: false,
+			status_profile_gallery_close: false,
             status_picture_gallery_close: false,
             status_video_gallery_close: false,
-
-			message:'',
+            status_music_gallery_close: false,
 		}
 		},
 		methods: {
@@ -394,22 +328,47 @@
 			},
 
 			f_sync_data_to_actor_profile_modal(data) {
+                this.BASE_DIR_ACTOR = data['BASE_DIR_ACTOR']
                 this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
+                this.BASE_DIR_VIDEO = data['BASE_DIR_VIDEO']
+                this.BASE_DIR_MUSIC = data['BASE_DIR_MUSIC']
                 this.data_actor = data['selected_serialized_data_actor']
                 this.list_data_picture_album = data['list_serialized_data_picture_album']
                 this.list_data_video_album = data['list_serialized_data_video_album']
+                this.list_data_music_album = data['list_serialized_data_music_album']
+                this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+
+                // this.selected_actor_id = this.data_actor['id']
+                
+                if (Object.keys(this.data_actor).length > 0 ) {
+					this.selected_actor_id = this.data_actor['id']
+				}
+
                 console.log('Actor Profile Modal로 Data 수신완료', data)
 			},
             
 			f_reset_return() {
-				// this.data_video_album = {}
-				this.selected_video_album_id = ''
-				this.title = ''
-				this.list_data_video_album = {}
-				this.data_actor = {}
-				this.selected_actor_id = ''
-				this.selected_actor_name = ''
+				data_actor = {}
+                list_data_picture_album = []
+                list_data_video_album = []
+                list_data_music_album = []
+                list_dict_profile_album = []
+                
+                selected_actor_id = ''
+                selected_video_album_id = ''
+                selected_picture_album_id = ''
+                selected_music_album_id = ''
+                
+                status_profile_gallery_close = false
+                status_picture_gallery_close = false
+                status_video_gallery_close = false
+                status_music_gallery_close = false
 			},
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // 상태 변경
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
             f_button_fold_unfold_album_profile() {
                 if (this.status_profile_gallery_close == false) {
@@ -493,13 +452,14 @@
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // 정보 전송
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            
-            // 사진 앨범 업로드 모달창으로 (Picture Album ID 가지고)
+                        
+			// icon pannel Actor Picture Album Upload Modal로 정보전송
             f_hans_ent_picture_album_upload_modal(event) {
                 this.selected_picture_album_id = event
+                console.log('선택된 사진 앨범 아이디', this.selected_picture_album_id)
                 axios.post('/hans_ent_picture_album_upload_modal/', {
-                    'selected_actor_id': this.selected_actor_id,
                     'selected_picture_album_id': this.selected_picture_album_id,
+					'selected_actor_id': this.selected_actor_id,
                 }, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -507,8 +467,7 @@
                 }
                 })
                 .then((response) => {
-                    console.log('######################## 사진 앨범 업로드 모달창으로 전송', this.selected_picture_album_id)
-                    post_streaming_picture_album_upload_modal.f_sync_data_to_picture_album_upload_modal(response.data);
+                    post_hans_ent_picture_album_upload_modal.f_sync_data_to_picture_album_upload_modal(response.data);
                 })
                 .catch(() => {
                     console.log('Error! f_hans_ent_picture_album_upload_modal')
@@ -517,7 +476,9 @@
             
             // 사진 앨범 업로드 모달창으로 (Actor Id 가지고)
             f_hans_ent_picture_album_upload_modal_by_actor_id(event) {
+                console.log('event', event)
                 this.selected_actor_id = event
+                this.selected_picture_album_id = 'none'
                 axios.post('/hans_ent_picture_album_upload_modal/', {
                     'selected_actor_id': this.selected_actor_id,
                 }, {
@@ -618,8 +579,14 @@
 		        console.log('Actor 프로필 모달창 닫힘버튼 눌렀음!')
             },
 		},
-		computed:{
-		},
+		computed: {
+            active_list_dict_profile_album() {
+                return this.list_dict_profile_album.filter(item => item.active === "true" && item.discard === "false")
+            },
+			total_list_dict_profile_album() {
+                return this.list_dict_profile_album.filter(item => item.discard === "false")
+            },
+        },
 
 		mounted: function() {
 			this.refreshData()

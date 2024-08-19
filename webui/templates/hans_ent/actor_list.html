@@ -90,8 +90,7 @@
                         this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
                         this.list_field_sorting = response.data['list_field_sorting']
                         this.list_serialized_data_actor = response.data['list_serialized_data_actor']
-                        this.list_dict_profile_album = this.list_serialized_data_actor['list_dict_profile_album']
-
+                        
                         this.total_num_registered_item = response.data['total_num_registered_item']
                         this.total_num_searched_item = response.data['total_num_searched_item']
                         this.count_page_number_min = response.data['list_count_page_number'][0]
@@ -249,6 +248,7 @@
                     }
                     })  
                     .then((response) => {
+                        post_hans_ent_actor_upload_modal.f_reset_return()
                         post_hans_ent_actor_upload_modal.f_sync_data_to_actor_upload_modal(response.data)
                         console.log('Actor List로부터 upload로 데이터 송신 완료', this.selected_actor_id)
                     })

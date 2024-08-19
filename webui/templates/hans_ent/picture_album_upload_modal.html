@@ -9,7 +9,14 @@
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h1 class="modal-title fs-4" id="exampleModalLabel"> Upload Picture Album : [[ data_actor.name ]] [[ data_picture_album.title ]]  </h1>
+				<h1 class="modal-title fs-4" id="exampleModalLabel"> 
+					<div v-if="status_create == true">
+						Create New Picture Album
+					</div>
+					<div v-else>
+						Upload Picture Album : [[ data_actor.name ]] [[ data_picture_album.title ]]  
+					</div>
+				</h1>
 				&nbsp; 
 				<!-- 
 					Icons  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,9 +57,8 @@
 							<td rowspan="4" width="30%">
 								<div class="text-end">
 									<button @click="f_replace_registered_picture_album_cover_image()" class="btn" >
-										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
-											<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-											<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-recycle" viewBox="0 0 16 16">
+											<path d="M9.302 1.256a1.5 1.5 0 0 0-2.604 0l-1.704 2.98a.5.5 0 0 0 .869.497l1.703-2.981a.5.5 0 0 1 .868 0l2.54 4.444-1.256-.337a.5.5 0 1 0-.26.966l2.415.647a.5.5 0 0 0 .613-.353l.647-2.415a.5.5 0 1 0-.966-.259l-.333 1.242zM2.973 7.773l-1.255.337a.5.5 0 1 1-.26-.966l2.416-.647a.5.5 0 0 1 .612.353l.647 2.415a.5.5 0 0 1-.966.259l-.333-1.242-2.545 4.454a.5.5 0 0 0 .434.748H5a.5.5 0 0 1 0 1H1.723A1.5 1.5 0 0 1 .421 12.24zm10.89 1.463a.5.5 0 1 0-.868.496l1.716 3.004a.5.5 0 0 1-.434.748h-5.57l.647-.646a.5.5 0 1 0-.708-.707l-1.5 1.5a.5.5 0 0 0 0 .707l1.5 1.5a.5.5 0 1 0 .708-.707l-.647-.647h5.57a1.5 1.5 0 0 0 1.302-2.244z"/>
 										</svg>
 									</button>
 								</div>
@@ -75,7 +81,7 @@
 									[[ data_picture_album.title ]]
 								</strong>
 								<br>
-								<input type="text" @input="f_input_text_title" class="form-control" enabled>
+								<input type="text" @input="f_input_text_title" class="form-control" enabled id="id-input-text-title">
 							</td>
 							<th style="background-color:rgb(240,240,240,0.5)" >
 								Score
@@ -93,7 +99,7 @@
 							<th style="background-color:rgb(240,240,240,0.5)">
 								Name [[ input_text_name ]]
 							
-								<!-- Actor 등록 해제하기 -->
+								<!-- Actor 커버 이미지 변경하기 -->
 								
 									<div v-if="data_actor == null">
 										<button @click="f_fold_searched_actor_list()" class="btn" >
@@ -111,11 +117,12 @@
 										</button>
 									</div>
 								</button>
-								
 							</th>
-							
-							<td>
 
+							<!-- 
+							    Actor 이름 등록 /////////////////////////////////////
+							-->
+							<td>
 								<div>
 									Selected Model:
 									<strong> <h5>[[ data_actor.name ]] </h5> </strong>
@@ -131,7 +138,7 @@
 						</tr>
 
 						<!--
-							앨범에 Studio 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							앨범에 Studio / Release date 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						-->
 						<tr>
 							<th style="background-color:rgb(240,240,240,0.5)">
@@ -142,7 +149,7 @@
 									[[ data_picture_album.studio ]]
 								</strong>
 								<br>
-								<input type="text" @input="f_input_text_studio" class="form-control" enabled>
+								<input type="text" @input="f_input_text_studio" class="form-control" enabled id="id-input-text-studio">
 							</td>
 							<th style="background-color:rgb(240,240,240,0.5)">
 								Release Date [[ input_date_released ]]
@@ -152,19 +159,15 @@
 									[[ data_picture_album.date_released ]]
 								</strong>
 								<br>
-								<input type="date" @input="f_input_date_released" class="form-control" enabled>	
+								<input type="date" @input="f_input_date_released" class="form-control" enabled id="id-input-date-released">	
 							</td>
-							
 						</tr>
 						
 
-						
-
 						<!--
-							앨범에 출시일 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							앨범에 Tag 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						-->
 						<tr>
-						
 							<th style="background-color:rgb(240,240,240,0.5)">
 								Tag
 							</th>
@@ -173,6 +176,8 @@
 								<div v-for="item in data_picture_album.tags" class="card" >
                                     [[ item ]]
                                 </div>
+								<br>
+								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id-input-text-tag">
 							</td>
 
 							
@@ -314,9 +319,16 @@
 			
 
 			<div class="modal-footer">
-				<button v-if="selected_picture_album_id != null" type="button" class="btn btn-warning"  @click="f_select_picture_album_to_delete(selected_picture_album_id)" data-bs-dismiss="modal">Delete</button>
+				<div v-if="status_create == false">
+					<button type="button" class="btn btn-warning"  @click="f_select_picture_album_to_delete(selected_picture_album_id)" data-bs-dismiss="modal">Delete</button>
+				</div>
 				<button type="button" class="btn btn-secondary" @click="f_modal_close" data-bs-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary"  @click="f_upload_album_form" >Upload</button>
+				<div v-if="status_create == true">
+					<button type="button" class="btn btn-primary"  @click="f_upload_album_form" >Create</button>
+				</div>
+				<div v-else>
+					<button type="button" class="btn btn-primary"  @click="f_upload_album_form" >Upload</button>
+				</div>
 			</div>
 		
 		</div>
@@ -347,6 +359,7 @@
 			input_text_studio: '',
 			input_date_released: '',
 			input_date_birthday: '',
+			input_text_tag: '',
 						
 			images:'',
 			
@@ -357,6 +370,7 @@
 
 			status_cover_image_change: false, // True 커버이미지 변경을 위한 상태로 전환
 			status_picture_album_picture_remove: false,  // 등록된 사진 삭제 위한 상태로 전환
+			status_create: false,
 		}
 		},
 		methods: {
@@ -368,28 +382,39 @@
 					this.BASE_DIR_PICTURE = response.data['BASE_DIR_PICTURE']
 					this.data_actor = response.data['selected_serialized_data_actor']
 					this.data_picture_album = response.data['selected_serialized_data_picture_album']
-
-					this.selected_actor_id = this.data_actor['id']
-					this.selected_picture_album_id = this.data_picture_album['id']
-					this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+					
+					if (Object.keys(this.data_actor).length > 0 ) {
+						this.selected_actor_id = this.data_actor['id']
+					}
+					if (Object.keys(this.data_picture_album).length > 0 ) {
+						this.selected_picture_album_id = this.data_picture_album['id']
+						this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+					}
 				})
 			},
 
 			f_sync_data_to_picture_album_upload_modal(data) {
+				this.f_reset_return()
                 this.BASE_DIR_ACTOR = data['BASE_DIR_ACTOR']
 				this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
 				this.data_actor = data['selected_serialized_data_actor']
 				this.data_picture_album = data['selected_serialized_data_picture_album']
-
-				this.selected_actor_id = this.data_actor['id']
-				this.selected_picture_album_id = this.data_picture_album['id']
-				this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
-                				
+				
+				if (Object.keys(this.data_actor).length > 0 ) {
+					this.selected_actor_id = this.data_actor['id']
+				} 
+				
+                if (Object.keys(this.data_picture_album).length > 0 ) {
+					this.selected_picture_album_id = this.data_picture_album['id']
+					this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+				} else {
+					this.status_create = true
+				}
 				console.log('Picture Album Upload Modal로 데이터 수신 완료', this.selected_picture_album_id)
 			},
 			
 			f_reset_return() {
-				console.log('hahahahaha')
+				console.log('reset')
 
 				this.data_actor = {}
 				this.data_picture_album = {}
@@ -405,6 +430,7 @@
 				this.input_text_studio = ''
 				this.input_date_released = ''
 				this.input_date_birthday = ''
+				this.input_text_tag = ''
 
 				this.images =''
 
@@ -415,6 +441,14 @@
 
 				this.status_cover_image_change = false
 				this.status_picture_album_picture_remove = false 
+				this.status_create = false
+
+				$('#id-input-text-title').val("");
+				$('#id_input_text_search_actor_select').val("");
+				$('#id-input-text-studio').val("");
+				$('#id-input-date-released').val("");
+				$('#id-input-text-tag').val("");
+				$('#id_upload_album_image_to_db').val("");
 			},
 
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -563,16 +597,19 @@
                     console.log('Error! f_actor_select_for_album_upload')
                 })
 			},
+
 			// 검색결과 리셋
 			f_fold_searched_actor_list() {
 				this.input_text_name = '';
 				$('#id_input_text_search_actor_select').val("");
 				this.list_serialized_data_actor = []
 			},
+
 			// 선택한 Actor 선택해제
 			f_deselect_selected_actor(event) {
 				this.data_actor = {}
 			},
+
 			// 선택한 Actor 삭제
 			f_remove_selected_actor(event) {
 				const isConfirmed = window.confirm("앨범 삭제를 승인하시겠습니까?");
@@ -631,6 +668,10 @@
 				this.input_date_released = event.target.value
 			},
 
+			f_input_text_tag(event) {
+				this.input_text_tag = event.target.value
+			},
+
 			f_file_album_images_select(event) {
 			this.images = event.target.files;
 			console.log(this.images)
@@ -649,6 +690,7 @@
 				formData.append('input_text_name', this.input_text_name);
 				formData.append('input_text_studio', this.input_text_studio);
 				formData.append('input_date_released', this.input_date_released);
+				formData.append('input_text_tag', this.input_text_tag);
 				formData.append('selected_picture_sub_type', this.selected_picture_sub_type)
 				this.show_progress = true;
 				
@@ -666,6 +708,7 @@
 					})
 					.then((response) => {
 						$("#id_upload_album_image_to_db").val("");
+						this.f_reset_return()
 						this.data_actor = response.data['selected_serialized_data_actor']
 						this.data_picture_album = response.data['selected_serialized_data_picture_album']
 

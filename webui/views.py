@@ -272,8 +272,9 @@ def hans_ent_actor_profile_modal(request):
         """
         print(request.POST,)
         selected_serialized_data_actor = {}
-        list_serialized_data_video_album = {}
-        list_serialized_data_picture_album = {}
+        list_serialized_data_picture_album = []
+        list_serialized_data_video_album = []
+        list_serialized_data_music_album = []
         
         # 받아야 하는 정보 수집하기 Actor or Album ##############################################
         selected_actor_id_str = request.POST.get('selected_actor_id')
@@ -313,13 +314,10 @@ def hans_ent_actor_profile_modal(request):
             selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
             qs_video_album = Video_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
             qs_picture_album = Picture_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
-            print('qs_video_album', qs_video_album)
-            print('qs_picture_album', qs_picture_album)
-            # print('qs_music_album', qs_music_album)
             if qs_picture_album is not None and len(qs_picture_album) > 0:
                 list_serialized_data_picture_album = Picture_Album_Serializer(qs_picture_album, many=True).data
-            if qs_video_album is not None and len(qs_video_album) > 0:
-                list_serialized_data_video_album = Video_Album_Detail_Serializer(qs_video_album, many=True).data
+            # if qs_video_album is not None and len(qs_video_album) > 0:
+            #     list_serialized_data_video_album = Video_Album_Detail_Serializer(qs_video_album, many=True).data
             
         jsondata = {
             'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
@@ -329,6 +327,7 @@ def hans_ent_actor_profile_modal(request):
             'selected_serialized_data_actor': selected_serialized_data_actor,
             'list_serialized_data_picture_album': list_serialized_data_picture_album,
             'list_serialized_data_video_album': list_serialized_data_video_album,
+            'list_serialized_data_music_album': list_serialized_data_music_album,
         }
         print('jsondata', jsondata)
         return JsonResponse(jsondata, safe=False)
@@ -349,19 +348,26 @@ def hans_ent_actor_upload_modal(request):
         # Request 정보 획득
         selected_actor_id_str = request.POST.get('selected_actor_id') # 기 선택되어 있는 배우, Merge시 사라지는 모델
         sacrificial_actor_id_str = request.POST.get('sacrificial_actor_id') # 새로 선택한 배우, Merge 하고 나서 살아남는 모델
-        input_model_name_str = request.POST.get('input_text_name')
+        selected_profile_album_picture_id_str = request.POST.get('selected_profile_album_picture_id')
+        input_text_name_str = request.POST.get('input_text_name')
+        input_text_synonyms_str = request.POST.get('input_text_synonyms')
         input_date_birthday_str = request.POST.get('input_date_birthday')
-        selected_actor_type_str = request.POST.get('selected_actor_type')
-        selected_actor_sub_type_str = request.POST.get('selected_actor_sub_type')
+        input_text_height_str = request.POST.get('input_text_height')
+        input_info_site_name_str = request.POST.get('input_info_site_name')
+        input_info_site_url_str = request.POST.get('input_info_site_url')
+        input_text_tag_str = request.POST.get('input_text_tag')
         
         # Request 정보 필터링 String화
         selected_actor_id_str = None if selected_actor_id_str in LIST_STR_NONE_SERIES else selected_actor_id_str
         sacrificial_actor_id_str = None if sacrificial_actor_id_str in LIST_STR_NONE_SERIES else sacrificial_actor_id_str
-        input_model_name_str = None if input_model_name_str in LIST_STR_NONE_SERIES else input_model_name_str
+        selected_profile_album_picture_id_str = None if selected_profile_album_picture_id_str in LIST_STR_NONE_SERIES else selected_profile_album_picture_id_str
+        input_text_name_str = None if input_text_name_str in LIST_STR_NONE_SERIES else input_text_name_str
+        input_text_synonyms_str = None if input_text_synonyms_str in LIST_STR_NONE_SERIES else input_text_synonyms_str
         input_date_birthday_str = None if input_date_birthday_str in LIST_STR_NONE_SERIES else input_date_birthday_str
-        selected_actor_type_str = None if selected_actor_type_str in LIST_STR_NONE_SERIES else selected_actor_type_str
-        selected_actor_sub_type_str = None if selected_actor_sub_type_str in LIST_STR_NONE_SERIES else selected_actor_sub_type_str
-        
+        input_text_height_str = None if input_text_height_str in LIST_STR_NONE_SERIES else input_text_height_str
+        input_info_site_name_str = None if input_info_site_name_str in LIST_STR_NONE_SERIES else input_info_site_name_str
+        input_info_site_url_str = None if input_info_site_url_str in LIST_STR_NONE_SERIES else input_info_site_url_str
+        input_text_tag_str = None if input_text_tag_str in LIST_STR_NONE_SERIES else input_text_tag_str
         
         # 선택된 배우 쿼리 찾기
         if selected_actor_id_str is not None and selected_actor_id_str != '':
@@ -370,6 +376,76 @@ def hans_ent_actor_upload_modal(request):
         else:
             q_actor = None 
         
+        print('q_actor', q_actor)
+
+        # 앨범 커버 이미지 변경하기
+        if request.POST.get('button') == 'change_profile_album_cover_image':
+            if selected_profile_album_picture_id_str is not None and selected_profile_album_picture_id_str != '':
+                selected_profile_album_picture_id = int(selected_profile_album_picture_id_str)
+                if q_actor is not None:
+                    list_dict_profile_album = q_actor.list_dict_profile_album
+                    # acitve 모두 false 변경
+                    for dict_profile_album in list_dict_profile_album:
+                        dict_profile_album['active'] = 'false'
+                        if dict_profile_album['id'] == selected_profile_album_picture_id:
+                            dict_profile_album['active'] = 'true'
+                    data = {'list_dict_profile_album': list_dict_profile_album}
+                    Actor.objects.filter(id=q_actor.id).update(**data)
+                    q_actor.refresh_from_db()
+        
+        # 앨범 이미지 삭제하기
+        if request.POST.get('button') == 'remove_profile_album_picture':
+            print('# 앨범 이미지 삭제하기')
+            if selected_profile_album_picture_id_str is not None and selected_profile_album_picture_id_str != '':
+                selected_profile_album_picture_id = int(selected_profile_album_picture_id_str)
+                if q_actor is not None:
+                    list_dict_profile_album = q_actor.list_dict_profile_album
+                    # 이미지 삭제 프로세스
+                    check_discard_active_picture = False
+                    for dict_profile_album in list_dict_profile_album:
+                        if dict_profile_album["id"] == selected_profile_album_picture_id:
+                            # 커버이미지를 삭제하는 경우이면 Default를 커버로 지정하기 위해 플래그 올린다.
+                            if dict_profile_album["active"] == 'true':
+                                check_discard_active_picture = True
+                            # 서버어서 이미지 삭제하기
+                            if dict_profile_album["id"] != 0:
+                                # Default 이미지가 아닌 경우 삭제가능
+                                image_name_original = dict_profile_album["original"]
+                                image_name_cover = dict_profile_album["cover"]
+                                image_name_thumbnail = dict_profile_album["thumbnail"]
+                                file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_original)
+                                file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_cover)
+                                file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_thumbnail)
+                                print('file_path_o', file_path_o)
+                                if os.path.exists(file_path_o):
+                                    try:
+                                        os.remove(file_path_o)
+                                    except:
+                                        pass
+                                if os.path.exists(file_path_c):
+                                    try:
+                                        os.remove(file_path_c)
+                                    except:
+                                        pass
+                                if os.path.exists(file_path_t):
+                                    try:
+                                        os.remove(file_path_t)
+                                    except:
+                                        pass
+                                # 리스트에서 discard 처리하기
+                                dict_profile_album['active'] = 'false'
+                                dict_profile_album['discard'] = 'true'
+                    # Active true(커버이미지)를 삭제한 경우 Default이미지를 커버로 다시 등장시킨다.
+                    if check_discard_active_picture == True:
+                        for dict_profile_album in list_dict_profile_album:
+                            if dict_profile_album["id"] == 0:
+                                dict_profile_album["active"] = 'true'
+                                dict_profile_album["discard"] = 'false'
+                    # Query 저장 프로세스
+                    data = {'list_dict_profile_album': list_dict_profile_album}
+                    Actor.objects.filter(id=q_actor.id).update(**data)
+                    q_actor.refresh_from_db() 
+
         # Merge 위해 새로 선택한 모델 정보 획득
         if sacrificial_actor_id_str is not None and sacrificial_actor_id_str != '':
             if q_actor is not None:
@@ -377,45 +453,6 @@ def hans_ent_actor_upload_modal(request):
                 q_actor_s = Actor.objects.get(id=sacrificial_actor_id)
             else:
                 q_actor_s = None 
-
-        # 업로드 모델이름 저장하기
-        if input_model_name_str is not None and input_model_name_str != '':
-            if q_actor is None:
-                q_actor = create_actor()
-            data = {
-                'name': input_model_name_str,
-            }
-            Actor.objects.filter(id=q_actor.id).update(**data)
-            q_actor.refresh_from_db()
-        
-        # 생일 정보 저장하기
-        if input_date_birthday_str is not None and input_date_birthday_str != '':
-            if q_actor is None:
-                q_actor = create_actor()
-            date_string = str(input_date_birthday_str)
-            date_format = '%Y-%m-%d'
-            date_object = datetime.strptime(date_string, date_format).date()
-            data = {
-                'date_birth': date_object,
-            }
-            Actor.objects.filter(id=q_actor.id).update(**data)
-            q_actor.refresh_from_db()
-        
-        # Website 등록
-        if request.POST.get('button') == 'website_url':
-            if q_actor is None:
-                q_actor = create_actor()
-            input_actor_info_site_name = request.POST.get('input_actor_info_site_name')
-            input_actor_info_site_url = request.POST.get('input_actor_info_site_url')
-            list_dict_info_url = q_actor.list_dict_info_url
-            if list_dict_info_url is None:
-                list_dict_info_url = []
-            list_dict_info_url.append({"name":input_actor_info_site_name, "url":input_actor_info_site_url})
-            data = {
-                'list_dict_info_url': list_dict_info_url,
-            }
-            Actor.objects.filter(id=q_actor.id).update(**data)
-            q_actor.refresh_from_db()
         
         # Merge 하기, 선택된 모델에 검색된 모델을 합치기(선택된 모델이 살아남는다.)
         if request.POST.get('button') == 'select_to_merge':
@@ -438,47 +475,88 @@ def hans_ent_actor_upload_modal(request):
             Actor.objects.filter(id=q_actor_s.id).update(**data)
             q_actor_s.refresh_from_db()
         
-        # Actor 커버 이미지 삭제하기 == default를 active 시키고 나머지는 inactive 시키기
-        if request.POST.get('button') == 'remove_cover_image':
+        # Actor 이름 저장하기
+        if input_text_name_str is not None and input_text_name_str != '':
             if q_actor is None:
                 q_actor = create_actor()
-            list_dict_profile_album = q_actor.list_dict_profile_album
-            # remove files from directory and item in the list
-            list_find_last_img = []
-            for dict_profile_album in list_dict_profile_album:
-                list_find_last_img.append(dict_profile_album["id"])
-                if dict_profile_album["active"] == "true":
-                    if dict_profile_album["id"] != 0:
-                        delete_id = dict_profile_album["id"]
-                        image_name_original = dict_profile_album["original"]
-                        image_name_cover = dict_profile_album["cover"]
-                        image_name_thumbnail = dict_profile_album["thumbnail"]
-                        file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_original)
-                        file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_cover)
-                        file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_thumbnail)
-                        print('file_path_o', file_path_o)
-                        if os.path.exists(file_path_o):
-                            os.remove(file_path_o)
-                        if os.path.exists(file_path_c):
-                            os.remove(file_path_c)
-                        if os.path.exists(file_path_t):
-                            os.remove(file_path_t)
-                        list_dict_profile_album.remove(dict_profile_album)
-            # Activate last ID
-            list_find_last_img.remove(delete_id)
-            max_id = max(list_find_last_img)
-            for dict_profile_album in list_dict_profile_album:
-                if dict_profile_album["id"] == max_id:
-                    dict_profile_album["active"] = "true"
-                else:
-                    dict_profile_album["active"] = "false"
             data = {
-                'list_dict_profile_album': list_dict_profile_album,
+                'name': input_text_name_str,
             }
             Actor.objects.filter(id=q_actor.id).update(**data)
-            q_actor.refresh_from_db() 
-            
-        # Actor 커버 이미지 & 갤러리 이미지 업로드 저장하기
+            q_actor.refresh_from_db()
+
+        # Actor 동의어 저장하기
+        if input_text_synonyms_str is not None and input_text_synonyms_str != '':
+            if q_actor is None:
+                q_actor = create_actor()
+            synonyms = q_actor.synonyms
+            if synonyms is None:
+                synonyms = []
+            if input_text_synonyms_str not in synonyms:
+                synonyms.append(input_text_synonyms_str)
+            data = {
+                'synonyms': synonyms,
+            }
+            Actor.objects.filter(id=q_actor.id).update(**data)
+            q_actor.refresh_from_db()
+        
+        # 생일 정보 저장하기
+        if input_date_birthday_str is not None and input_date_birthday_str != '':
+            if q_actor is None:
+                q_actor = create_actor()
+            date_string = str(input_date_birthday_str)
+            date_format = '%Y-%m-%d'
+            date_object = datetime.strptime(date_string, date_format).date()
+            data = {
+                'date_birth': date_object,
+            }
+            Actor.objects.filter(id=q_actor.id).update(**data)
+            q_actor.refresh_from_db()
+        
+        # 키 저장하기
+        if input_text_height_str is not None and input_text_height_str != '':
+            if q_actor is None:
+                q_actor = create_actor()
+            input_text_height_int = int(input_text_height_str)
+            data = {
+                'height': input_text_height_int,
+            }
+            Actor.objects.filter(id=q_actor.id).update(**data)
+            q_actor.refresh_from_db()
+        
+        # Website 등록
+        if input_info_site_name_str is not None and input_info_site_name_str != '':
+            if input_info_site_url_str is not None and input_info_site_url_str != '':
+                if q_actor is None:
+                    q_actor = create_actor()
+                list_dict_info_url = q_actor.list_dict_info_url
+                if list_dict_info_url is None:
+                    list_dict_info_url = []
+                if input_info_site_name_str not in list_dict_info_url:
+                    list_dict_info_url.append({"name":input_info_site_name_str, "url":input_info_site_url_str})
+                    data = {
+                        'list_dict_info_url': list_dict_info_url,
+                    }
+                    Actor.objects.filter(id=q_actor.id).update(**data)
+                    q_actor.refresh_from_db()
+        
+        # Tag 저장하기
+        if input_text_tag_str is not None and input_text_tag_str != '':
+            if q_actor is None:
+                q_actor = create_actor()
+            tags = q_actor.tags
+            if tags is None:
+                tags = []
+            if input_text_tag_str not in tags:
+                print('tag save', input_text_tag_str)
+                tags.append(input_text_tag_str)
+            data = {
+                'tags': tags,
+            }
+            Actor.objects.filter(id=q_actor.id).update(**data)
+            q_actor.refresh_from_db()
+
+        # Actor Profile 이미지 업로드 저장하기
         if request.FILES:
             if q_actor is None:
                 q_actor = create_actor()
@@ -508,7 +586,6 @@ def hans_ent_actor_upload_modal(request):
         jsondata = {
             'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
             'selected_serialized_data_actor': selected_serialized_data_actor,
-            
         }
         print('jsondata', jsondata)
         return JsonResponse(jsondata, safe=False)
@@ -729,6 +806,7 @@ def hans_ent_picture_album_upload_modal(request):
         input_text_name_str = request.POST.get('input_text_name')
         input_text_studio_str = request.POST.get('input_text_studio')
         input_date_released_str = request.POST.get('input_date_released')
+        input_text_tag_str = request.POST.get('input_text_tag')
         selected_picture_sub_type_str = request.POST.get('selected_picture_sub_type')
         
         selected_picture_album_id_str = None if selected_picture_album_id_str in LIST_STR_NONE_SERIES else selected_picture_album_id_str
@@ -930,6 +1008,23 @@ def hans_ent_picture_album_upload_modal(request):
             Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
             q_picture_album_selected.refresh_from_db()
         
+        # Tag 저장하기
+        if input_text_tag_str is not None and input_text_tag_str != '':
+            if q_picture_album_selected is None:
+                q_picture_album_selected = create_picture_album()
+            tags = q_picture_album_selected.tags
+            if tags is None:
+                tags = []
+            if input_text_tag_str not in tags:
+                print('tag save', input_text_tag_str)
+                tags.append(input_text_tag_str)
+            data = {
+                'tags': tags,
+            }
+            Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
+            q_picture_album_selected.refresh_from_db()
+
+
         # 모델 선택하기
         if request.POST.get('button') == 'actor_select':
             if q_picture_album_selected is None:
@@ -992,13 +1087,11 @@ def hans_ent_picture_album_upload_modal(request):
         if q_actor is not None:
             selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
 
-        
-
         jsondata = {
             'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
             'BASE_DIR_PICTURE': BASE_DIR_PICTURE,
-            'selected_serialized_data_picture_album': selected_serialized_data_picture_album,
             'selected_serialized_data_actor': selected_serialized_data_actor,
+            'selected_serialized_data_picture_album': selected_serialized_data_picture_album,
         }
         print('jsondata', jsondata)
         print('======================================================================================================= 3')

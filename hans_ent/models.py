@@ -92,6 +92,7 @@ LIST_NUM_DISPLAY_IN_PAGE = 100
 LIST_ACTOR_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
 LIST_PICTURE_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
 LIST_VIDEO_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
+LIST_MUSIC_FIELD = ["id", "name", "age", "locations", "evaluation", "date_updated"]
 
 
 """
@@ -124,7 +125,6 @@ class Actor(models.Model):
     name = models.CharField(max_length=200, null=True, blank=True)
     synonyms = models.JSONField(null=True, blank=True)
     hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
-    image_cover = models.ImageField(null=True, blank=True)  # 400px by 500px, 
     age = models.IntegerField(null=True, blank=True)
     date_birth = models.DateField(null=True, blank=True)
     locations = models.CharField(max_length=50, choices=LIST_LOCATIONS, default=LIST_LOCATIONS[0][0], blank=True) # Submenu Switching
@@ -148,9 +148,9 @@ class Actor(models.Model):
 """
 list_dict_picture_album rule:
 [
-{"id":"0", "thumbnail":"default_picture_album-t.png", "cover":"default_picture_album-c.png", "original":"default_picture_album-o.png", "active":"true", "discard":"false"},
-{"id":"1", "thumbnail":"abcd-1-t.png", "cover":"abcd-1-c.png", "original":"abcd-1-o.png", "active":"false", "discard":"false"},
-{"id":"2", "thumbnail":"abcd-2-t.png", "cover":"abcd-2-c.png", "original":"abcd-2-o.png", "active":"false", "discard":"false"},
+{"id":"0", "thumbnail":"default-t.png", "cover":"default-c.png", "original":"default-o.png", "active":"true", "discard":"false"},
+{"id":"1", "thumbnail":"abcd-t-1.png", "cover":"abcd-c-1.png", "original":"abcd-o-1.png", "active":"false", "discard":"false"},
+{"id":"2", "thumbnail":"abcd-t-2.png", "cover":"abcd-c-2.png", "original":"abcd-o-2.png", "active":"false", "discard":"false"},
 ]
 abcd == hashcode
 """
@@ -175,13 +175,13 @@ class Picture_Album(models.Model):
 """
 list_dict_video_album rule:
 [
-{"id":"0", "video":"abcd-1-v.mp4", "thumbnail":"default_video_album-t.png", "cover":"default_video_album-c.png", "original":"default_video_album-o.png", "still":"default_video_album-s.png" "active":"true"},
-{"id":"1", "video":"abcd-1-v.mp4", "thumbnail":"abcd-1-t.png", "cover":"abcd-1-c.png", "original":"abcd-1-o.png", "still":["abcd-1-s-1.png", "abcd-1-s-2.png"], "active":"false"},
-{"id":"2", "video":"abcd-2-v.mp4", "thumbnail":"abcd-2-t.png", "cover":"abcd-2-c.png", "original":"abcd-2-o.png", "still":["abcd-2-s-1.png", "abcd-2-s-2.png"], "active":"false"},
+{"id":"0", "video":"default.mp4", "thumbnail":"default-t.png", "cover":"default-c.png", "original":"default-o.png", "still":"default_video_album-s.png" "active":"true", "discard":"false"},
+{"id":"1", "video":"abcd-v-1.mp4", "thumbnail":"abcd-t-1.png", "cover":"abcd-c-1.png", "original":"abcd-o-1.png", "still":["abcd-s-1-1.png", "abcd-s-1-2.png"], "active":"false", "discard":"false"},
+{"id":"2", "video":"abcd-v-2.mp4", "thumbnail":"abcd-t-2.png", "cover":"abcd-c-2.png", "original":"abcd-o-2.png", "still":["abcd-s-2-1.png", "abcd-s-2-2.png"], "active":"false", "discard":"false"},
 ]
 abcd == hashcode
 """
-DEFAULT_LIST_DICT_VIDEO_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true", "discard":"false"}]
+DEFAULT_LIST_DICT_VIDEO_ALBUM = [{"id":0, "video":"default.mp4", "original":"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true", "discard":"false"}]
 
 class Video_Album(models.Model):
     main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
@@ -198,6 +198,34 @@ class Video_Album(models.Model):
     def __str__(self):
         return f'{self.title} Video_Album'
 
+
+
+"""
+list_dict_video_album rule:
+[
+{"id":"0", "music":"abcd-1-m.mp3", "thumbnail":"default-t.png", "cover":"default-c.png", "original":"default-o.png", "lyrics":"default-l.txt" "active":"false", "discard":"false"},
+{"id":"1", "music":"abcd-m-1.mp3", "thumbnail":"abcd-t-1.png", "cover":"abcd-c-1.png", "original":"abcd-o-1.png", "lyrics":"abcd-l-1.txt", "active":"true", "discard":"false"},
+{"id":"2", "music":"abcd-m-2.mp3", "thumbnail":"abcd-t-2.png", "cover":"abcd-c-2.png", "original":"abcd-o-2.png", "lyrics":"abcd-l-2.txt", "active":"false", "discard":"false"},
+]
+abcd == hashcode
+"""
+
+DEFAULT_LIST_DICT_MUSIC_ALBUM = [{'id':0, "music":"default.mp3", "original":"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true", "discard":"false", "discard":"false"}]
+
+class Music_Album(models.Model):
+    main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
+    title = models.CharField(max_length=200, null=True, blank=True)
+    hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
+    list_dict_music_album = models.JSONField(null=True, blank=True)
+    code = models.CharField(max_length=250, null=True, blank=True)
+    studio = models.CharField(max_length=250, null=True, blank=True)
+    score = models.FloatField(default=0)
+    tags = models.JSONField(null=True, blank=True) # Collect tags from LIST_ACTOR_TAGS
+    date_released = models.DateField(null=True, blank=True)
+    check_discard = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.title} Music_Album'
 
 
 
@@ -223,138 +251,16 @@ class MySettings_HansEnt(models.Model):
     check_field_ascending_video = models.BooleanField(default=True)
     count_page_number_video = models.IntegerField(default=1)
     list_searched_video_id = models.JSONField(null=True, blank=True)
+    # music
+    music_album_selected = models.ForeignKey(Music_Album, on_delete=models.SET_NULL, null=True, blank=True)
+    selected_field_music = models.CharField(max_length=50, default=LIST_MUSIC_FIELD[0], blank=True)
+    check_field_ascending_music = models.BooleanField(default=True)
+    count_page_number_music = models.IntegerField(default=1)
+    list_searched_music_id = models.JSONField(null=True, blank=True)
     # system
     check_discard = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.user.username} MySettings_HansEnt'
-
-
-
-
-# class Picture_Album(models.Model):
-#     main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
-
-#     title = models.CharField(max_length=200, null=True, blank=True)
-#     name = models.CharField(max_length=200, null=True, blank=True)
-#     types = models.CharField(max_length=50, choices=LIST_MENU_PICTURE_TYPES, default=LIST_MENU_PICTURE_TYPES[0][0], blank=True) # Submenu Switching
-#     location = models.CharField(max_length=50, choices=LIST_LOCATIONS, default=LIST_LOCATIONS[0][0], blank=True) # Submenu Switching
-#     score = models.CharField(max_length=50, choices=LIST_RATING_SCORES, default=LIST_RATING_SCORES[0][0], blank=True) # Submenu Switching
-#     # properties
-#     studio = models.CharField(max_length=200, null=True, blank=True)
-#     date_released = models.DateField(null=True, blank=True)
-#     list_tag = models.JSONField(null=True, blank=True) 
-#     code = models.CharField(max_length=50, null=True, blank=True)
-
-#     # URLs
-#     detail_info_url =  models.TextField(null=True, blank=True)  # 앨범 정보 및 섬네일 있는 페이지
-#     list_album_thumbnail_url = models.JSONField(null=True, blank=True) # Web에 있는 Thumbnail URL
-#     album_download_url = models.TextField(null=True, blank=True) # Web에 모델 출현 엘범 갤러리 URL
-#     list_album_picture_url = models.JSONField(null=True, blank=True) # Web에 있는 이미지 URL
-#     model_gallery_url = models.TextField(null=True, blank=True) # Web에 모델 출현 엘범 갤러리 URL
-#     cover_image_url =  models.TextField(null=True, blank=True)
-#     # DB images
-#     image_cover = models.ImageField(null=True, blank=True)  # uploads/picture_album/cover_images/{{ q_pic_album.id }}/{{ file_name }}
-#     list_album_picture_id = models.JSONField(null=True, blank=True) # DB에 저장된 Picture_Album_Pic ID
-    
-#     # check_systems
-#     # check_profile_album = models.BooleanField(default=False)
-#     check_under_uploading = models.BooleanField(default=False)
-#     date_created = models.DateField(auto_now_add=True, null=True)
-#     date_updated = models.DateTimeField(auto_now=True, null=True)
-#     check_discard = models.BooleanField(default=False)
-    
-
-
-
-# class Picture_Album_Pic(models.Model):
-#     album = models.ForeignKey(Picture_Album, on_delete=models.SET_NULL, null=True, blank=True)
-#     title = models.CharField(max_length=250, null=True, blank=True)
-#     image_thumbnail = models.ImageField(null=True, blank=True) # uploads/picture_album/thumbnail_images/{{ q_pic.id }}/{{ file_name }}
-#     image_original = models.ImageField(null=True, blank=True) # uploads/picture_album/original_images /{{ q_pic_album.id }}/{{ file_name }}
-#     check_discard = models.BooleanField(default=False)
-
-
-
-
-
-# class Video_Album(models.Model):
-#     main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
-
-#     title = models.CharField(max_length=200, null=True, blank=True)
-#     file_name = models.CharField(max_length=200, null=True, blank=True)
-#     types = models.CharField(max_length=50, choices=LIST_MENU_VIDEO_TYPES, default=LIST_MENU_VIDEO_TYPES[0][0], blank=True) # Submenu Switching
-#     locations = models.CharField(max_length=50, choices=LIST_LOCATIONS, default=LIST_LOCATIONS[0][0], blank=True) # Submenu Switching
-#     score = models.CharField(max_length=50, choices=LIST_RATING_SCORES, default=LIST_RATING_SCORES[0][0], blank=True) # Submenu Switching
-#     # properties
-#     studio = models.CharField(max_length=100, null=True, blank=True)
-#     actor_name = models.CharField(max_length=200, null=True, blank=True)
-#     list_actors = models.JSONField(null=True, blank=True)
-#     director = models.CharField(max_length=100, null=True, blank=True)
-#     description = models.TextField(null=True, blank=True)
-#     date_released = models.DateField(null=True, blank=True)
-#     code = models.CharField(max_length=50, null=True, blank=True)
-#     # URLs
-#     detail_info_url = models.TextField(null=True, blank=True)
-#     cover_image_url = models.TextField(null=True, blank=True)
-#     # DB images
-#     image_original = models.ImageField(null=True, blank=True) # uploads/video_album/original_images /{{ q_vid.id }}/{{ file_name }}
-#     image_cover = models.ImageField(null=True, blank=True)  # uploads/video_album/cover_images/{{ q_vid.id }}/{{ file_name }}
-#     list_album_video_id = models.JSONField(null=True, blank=True) # DB에 저장된 Video_Album_Vid ID
-#     # check systems
-#     date_created = models.DateField(auto_now_add=True, null=True)
-#     date_updated = models.DateTimeField(auto_now=True, null=True)
-#     check_discard = models.BooleanField(default=False)
-
-#     # check_under_uploading = models.BooleanField(default=False)
-
-
-# class Video_Album_Vid(models.Model):
-#     album = models.ForeignKey(Video_Album, on_delete=models.SET_NULL, null=True, blank=True)
-#     title = models.CharField(max_length=250, null=True, blank=True)
-#     youtube_address_key = models.CharField(max_length=100, null=True, blank=True)
-#     video_file = models.FileField(null=True, blank=True)  # uploads/video_album/video_files/{{ q_vid.id }}/{{ file_name }}
-#     subtitle_file = models.FileField(null=True, blank=True)  # uploads/video_album/subtitle_files/{{ q_vid.id }}/{{ file_name }}
-#     image_thumbnail = models.ImageField(null=True, blank=True) # uploads/video_album/thumbnail_images/{{ q_vid.id }}/{{ file_name }}
-#     list_still_image = models.JSONField(null=True, blank=True)  # list [path_still_images]
-#     check_discard = models.BooleanField(default=False)
-    
-
-
-
-
-
-# class Music_Album(models.Model):
-#     main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
-
-#     title = models.CharField(max_length=200, null=True, blank=True)
-#     types = models.CharField(max_length=50, choices=LIST_MENU_MUSIC_TYPES, default=LIST_MENU_MUSIC_TYPES[0][0], blank=True) # Submenu Switching
-#     location = models.CharField(max_length=50, choices=LIST_LOCATIONS, default=LIST_LOCATIONS[0][0], blank=True) # Submenu Switching
-#     score = models.CharField(max_length=50, choices=LIST_RATING_SCORES, default=LIST_RATING_SCORES[0][0], blank=True) # Submenu Switching
-#     # properties
-#     date_released = models.DateField(null=True, blank=True)
-#     # URLs
-#     detail_info_url =  models.TextField(null=True, blank=True)
-#     cover_image_url =  models.TextField(null=True, blank=True)
-#     # DB images
-#     image_original = models.ImageField(null=True, blank=True) # uploads/music_album/original_images /{{ q_music_album.id }}/{{ file_name }}
-#     image_cover = models.ImageField(null=True, blank=True)  # uploads/music_album/cover_images/{{ q_music_album.id }}/{{ file_name }}
-#     list_album_music_id = models.JSONField(null=True, blank=True) # DB에 저장된 Picture_Album_Pic ID
-#     # systems
-#     date_created = models.DateField(auto_now_add=True, null=True)
-#     date_updated = models.DateTimeField(auto_now=True, null=True)
-#     check_discard = models.BooleanField(default=False)
-
-#     # check_under_uploading = models.BooleanField(default=False)
-
-
-# class Music_Album_Mus(models.Model):
-#     album = models.ForeignKey(Music_Album, on_delete=models.SET_NULL, null=True, blank=True)
-#     title = models.CharField(max_length=250, null=True, blank=True)
-#     video_file = models.FileField(null=True, blank=True)  # uploads/music_album/video_files/{{ q_mus.id }}/{{ file_name }}
-#     audio_file = models.FileField(null=True, blank=True)  # uploads/music_album/audio_files/{{ q_mus.id }}/{{ file_name }}
-#     youtube_address_key = models.CharField(max_length=200, null=True, blank=True)
-#     image_thumbnail = models.ImageField(null=True, blank=True) # uploads/music_album/thumbnail_images/{{ q_pic.id }}/{{ file_name }}
-#     check_discard = models.BooleanField(default=False)
 
 

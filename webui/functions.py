@@ -389,7 +389,11 @@ def save_actor_profile_images(q_actor, images):
             list_dict_profile_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"false", "discard":"false"})
         i = i + 1
         num_profile_image = num_profile_image + 1
-     
+    # default 이미지 discard 하기
+    for dict_profile_album in list_dict_profile_album:
+        if dict_profile_album["id"] == 0:
+            dict_profile_album["active"] = 'false'
+            dict_profile_album["discard"] = 'true'
     # db save and refresh  
     data = {
         'list_dict_profile_album': list_dict_profile_album,
