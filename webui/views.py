@@ -239,7 +239,8 @@ def hans_ent_actor_list_search(request):
     if request.method == 'GET':
         print(request.GET,)
         keyword_str = request.GET.get('keyword')
-        qs_xxx = Actor.objects.filter(Q(check_discard=False)) & (Q(name__icontains=keyword_str))
+        qs_xxx = Actor.objects.filter(Q(check_discard=False) & (Q(name__icontains=keyword_str) | Q(synonyms__icontains=keyword_str)))
+        print('qs_xxx', qs_xxx)
         list_searched_actor_id = []
         if qs_xxx is not None and len(qs_xxx) > 0:
             for q_xxx in qs_xxx:
@@ -606,7 +607,7 @@ def hans_ent_picture_album_list(request):
     if request.method == 'GET':
         total_num_registered_item = Picture_Album.objects.count()
         # Searching 결과값 찾기
-        list_searched_xxx_id = q_mysettings_hansent.list_searched_picture_id
+        list_searched_xxx_id = q_mysettings_hansent.list_searched_picture_album_id
         if list_searched_xxx_id is not None:
             total_num_searched_item = len(list_searched_xxx_id)
         else:
@@ -681,13 +682,13 @@ def hans_ent_picture_album_list_search(request):
     if request.method == 'GET':
         print(request.GET,)
         keyword_str = request.GET.get('keyword')
-        qs_xxx = Picture_Album.objects.filter(Q(check_discard=False)) & (Q(title__icontains=keyword_str) | Q(main_actor__name__icontains=keyword_str))
-        list_searched_picture_id = []
+        qs_xxx = Picture_Album.objects.filter(Q(check_discard=False) & (Q(title__icontains=keyword_str) | Q(main_actor__name__icontains=keyword_str) | Q(main_actor__synonyms__icontains=keyword_str)))
+        list_searched_picture_album_id = []
         if qs_xxx is not None and len(qs_xxx) > 0:
             for q_xxx in qs_xxx:
-                list_searched_picture_id.append(q_xxx.id)
+                list_searched_picture_album_id.append(q_xxx.id)
         data = {
-            'list_searched_picture_id': list_searched_picture_id,
+            'list_searched_picture_album_id': list_searched_picture_album_id,
         }
         MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
         return redirect('hans-ent-actor-list')

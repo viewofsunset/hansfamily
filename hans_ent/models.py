@@ -244,19 +244,19 @@ class MySettings_HansEnt(models.Model):
     selected_field_picture = models.CharField(max_length=50, default=LIST_PICTURE_FIELD[0], blank=True)
     check_field_ascending_picture = models.BooleanField(default=True)
     count_page_number_picture = models.IntegerField(default=1)
-    list_searched_picture_id = models.JSONField(null=True, blank=True)
+    list_searched_picture_album_id = models.JSONField(null=True, blank=True)
     # video
     video_album_selected = models.ForeignKey(Video_Album, on_delete=models.SET_NULL, null=True, blank=True)
     selected_field_video = models.CharField(max_length=50, default=LIST_VIDEO_FIELD[0], blank=True)
     check_field_ascending_video = models.BooleanField(default=True)
     count_page_number_video = models.IntegerField(default=1)
-    list_searched_video_id = models.JSONField(null=True, blank=True)
+    list_searched_video_album_id = models.JSONField(null=True, blank=True)
     # music
     music_album_selected = models.ForeignKey(Music_Album, on_delete=models.SET_NULL, null=True, blank=True)
     selected_field_music = models.CharField(max_length=50, default=LIST_MUSIC_FIELD[0], blank=True)
     check_field_ascending_music = models.BooleanField(default=True)
     count_page_number_music = models.IntegerField(default=1)
-    list_searched_music_id = models.JSONField(null=True, blank=True)
+    list_searched_music_album_id = models.JSONField(null=True, blank=True)
     # system
     check_discard = models.BooleanField(default=False)
 

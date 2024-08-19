@@ -233,18 +233,12 @@
 						</div>
 					</div>
 				</div>
-				
-
-
-
 
 				<!--
-					앨범에 이미지 등록 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					앨범에 이미지 파일 업로드  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				-->
-				<!-- 이미지 파일 업로드 폼-->
 				<div>
 					<table  class="table">
-						<!-- File Upload -->
 						<tr>
 							<th style="background-color:rgb(240,240,240,0.5)">
 								File 업로드
@@ -261,7 +255,9 @@
 					</table>
 				</div>
 				
-				<!-- Progress Bar -->
+				<!-- 
+					Progress Bar ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
 				<div v-if="show_progress==true" >
 					<div class="progress">
 						<div
@@ -273,6 +269,22 @@
 							aria-valuemax="100">
 							[[ progress_value ]] %
 						</div>
+					</div>
+				</div>
+
+				<!--
+					모달창 제어 버튼 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div class="modal-footer">
+					<div v-if="status_create == false">
+						<button type="button" class="btn btn-warning"  @click="f_select_picture_album_to_delete(selected_picture_album_id)" data-bs-dismiss="modal">Delete</button>
+					</div>
+					<button type="button" class="btn btn-secondary" @click="f_modal_close" data-bs-dismiss="modal">Close</button>
+					<div v-if="status_create == true">
+						<button type="button" class="btn btn-primary"  @click="f_upload_album_form" >Create</button>
+					</div>
+					<div v-else>
+						<button type="button" class="btn btn-primary"  @click="f_upload_album_form" >Upload</button>
 					</div>
 				</div>
 
@@ -313,23 +325,8 @@
 						
 					</div>
 				</div>
-				
-			
 			</div>
 			
-
-			<div class="modal-footer">
-				<div v-if="status_create == false">
-					<button type="button" class="btn btn-warning"  @click="f_select_picture_album_to_delete(selected_picture_album_id)" data-bs-dismiss="modal">Delete</button>
-				</div>
-				<button type="button" class="btn btn-secondary" @click="f_modal_close" data-bs-dismiss="modal">Close</button>
-				<div v-if="status_create == true">
-					<button type="button" class="btn btn-primary"  @click="f_upload_album_form" >Create</button>
-				</div>
-				<div v-else>
-					<button type="button" class="btn btn-primary"  @click="f_upload_album_form" >Upload</button>
-				</div>
-			</div>
 		
 		</div>
 	</div>
@@ -403,7 +400,7 @@
 				if (Object.keys(this.data_actor).length > 0 ) {
 					this.selected_actor_id = this.data_actor['id']
 				} 
-				
+
                 if (Object.keys(this.data_picture_album).length > 0 ) {
 					this.selected_picture_album_id = this.data_picture_album['id']
 					this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
@@ -673,8 +670,17 @@
 			},
 
 			f_file_album_images_select(event) {
-			this.images = event.target.files;
-			console.log(this.images)
+				this.images = event.target.files;
+				if (this.images.length > 100) {
+					// const isImagesOver100 = window.confirm("등록하려는 사진은 한 번에 100장 이상 불가능 합니다.");
+					// console.log('100장이 넘었습니다.')
+					// trimmedList(images)
+					alert("over 100 picture cannot save!");
+					// this.images = images.slice(0, 99);
+					// console.log(this.images.length)
+					this.images = null;
+				}
+				console.log(this.images)
 			},
 
 			async f_upload_album_form() {
@@ -683,7 +689,7 @@
 				if (this.images != null) {
 					for (let i = 0; i < this.images.length; i++) {
 						formData.append('images', this.images[i]);
-				}}
+				}} else {}
 				formData.append('selected_picture_album_id', this.selected_picture_album_id);
 				formData.append('selected_actor_id', this.selected_actor_id);
 				formData.append('input_text_title', this.input_text_title);
@@ -869,6 +875,9 @@
 			total_list_dict_picture_album() {
                 return this.list_dict_picture_album.filter(item => item.discard === "false")
             },
+			trimmedList(images) {
+				return this.images.slice(0, 100); // Keeps only the first 100 items
+			},
         },
         mounted: function() {
 			this.refreshData()

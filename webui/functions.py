@@ -92,7 +92,7 @@ def reset_hans_ent_picture_album_list(q_mysettings_hansent):
         'selected_field_picture': LIST_PICTURE_FIELD[0],
         'check_field_ascending_picture': True,
         'count_page_number_picture': 1,
-        'list_searched_picture_id': None,
+        'list_searched_picture_album_id': None,
     }
     MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
     return True
@@ -104,10 +104,23 @@ def reset_hans_ent_video_album_list(q_mysettings_hansent):
         'selected_field_video': LIST_VIDEO_FIELD[0],
         'check_field_ascending_video': True,
         'count_page_number_video': 1,
-        'list_searched_video_id': None,
+        'list_searched_video_album_id': None,
     }
     MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
     return True
+
+
+def reset_hans_ent_music_album_list(q_mysettings_hansent):
+    data = {
+        'music_album_selected': None,
+        'selected_field_music': LIST_MUSIC_FIELD[0],
+        'check_field_ascending_music': True,
+        'count_page_number_music': 1,
+        'list_searched_music_album_id': None,
+    }
+    MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
+    return True
+
 
 # Default 배우 쿼리 생성
 def create_actor():
