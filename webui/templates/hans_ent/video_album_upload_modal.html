@@ -63,9 +63,9 @@
 									</button>
 								</div>
 
-								<div v-for="item in active_list_dict_video_album" :key="item.id">
-									<a :href="BASE_DIR_PICTURE+item.original" target="_blank">
-										<img :src="BASE_DIR_PICTURE+item.cover" width="300">
+								<div v-for="item in active_list_dict_picture_album" :key="item.id">
+									<a :href="BASE_DIR_VIDEO+item.cover" target="_blank">
+										<img :src="BASE_DIR_VIDEO+item.cover" width="300">
 									</a>
                                 </div>
 							</td>
@@ -255,7 +255,7 @@
 					</table>
 				</div>
 				<!--
-					앨범에 이미지 파일 업로드  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					앨범에 비디오 파일 업로드  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				-->
 				<div>
 					<table  class="table">
@@ -320,34 +320,72 @@
 						</svg>
 					</button>
 				</div>
+
 				<!-- Registered Images -->
-				 <div v-if="list_dict_video_album != null">
-					<div class="grid-container-video-album-video">
-						
-						<div v-for="(dict_video_album, index) in total_list_dict_video_album" :key="index" class="box-video-album-video">
-							<div v-if="status_cover_image_change === true && status_video_album_video_remove === false" >
-								<button @click="f_select_video_as_cover(dict_video_album.id)">
-									<img v-bind:src="BASE_DIR_PICTURE+dict_video_album.thumbnail" width="140">
-									
-								</button>
-							</div>
-							<div v-else-if="status_cover_image_change === false && status_video_album_video_remove === true" >
-								<button @click="f_select_video_to_remove(dict_video_album.id)">
-									<img v-bind:src="BASE_DIR_PICTURE+dict_video_album.thumbnail" width="140">
-								</button>
-							</div>
-							<div v-else>
-								<a :href="BASE_DIR_PICTURE+dict_video_album.original" target="_blank">
-									<img v-bind:src="BASE_DIR_PICTURE+dict_video_album.thumbnail" width="140">
-								</a>
-							</div>
+				<div class="grid-container-video-album-video">
+					
+					<div v-for="(dict_picture_album, index) in total_list_dict_picture_album" :key="index" class="box-video-album-video">
+						<div v-if="status_cover_image_change === true && status_video_album_video_remove === false" >
+							<button @click="f_select_picture_as_cover(dict_picture_album.id)">
+								<img v-bind:src="BASE_DIR_VIDEO+dict_picture_album.thumbnail" width="140">
+								
+							</button>
 						</div>
-						
+						<div v-else-if="status_cover_image_change === false && status_video_album_video_remove === true" >
+							<button @click="f_select_video_to_remove(dict_picture_album.id)">
+								<img v-bind:src="BASE_DIR_VIDEO+dict_picture_album.thumbnail" width="140">
+							</button>
+						</div>
+						<div v-else>
+							<a :href="BASE_DIR_VIDEO+dict_picture_album.original" target="_blank">
+								<img v-bind:src="BASE_DIR_VIDEO+dict_picture_album.thumbnail" width="140">
+							</a>
+						</div>
 					</div>
+					
 				</div>
-			</div>
+
+				<hr>
+
+				<!--
+					앨범에 등록한 비디오 표시 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div class="text-end">
+					<button @click="f_remove_registered_video_album_video()" class="btn" >
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+							<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+							<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+						</svg>
+					</button>
+				</div>
+
+				<!-- Registered Videos -->
+				<div class="grid-container-video-album-video">
+					
+					<div v-for="(dict_video_album, index) in total_list_dict_video_album" :key="index" class="box-video-album-video">
+						<div v-if="status_cover_image_change === true && status_video_album_video_remove === false" >
+							<button @click="f_select_still_as_cover(dict_video_album.id)">
+								<img v-bind:src="BASE_DIR_VIDEO+dict_video_album.thumbnail" width="140">
+								
+							</button>
+						</div>
+						<div v-else-if="status_cover_image_change === false && status_video_album_video_remove === true" >
+							<button @click="f_select_video_to_remove(dict_video_album.id)">
+								<img v-bind:src="BASE_DIR_VIDEO+dict_video_album.thumbnail" width="140">
+							</button>
+						</div>
+						<div v-else>
+							<button @click="f_hans_ent_video_album_gallery_modal(dict_video_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-video-album-gallery-modal">
+								<img v-bind:src="BASE_DIR_VIDEO+dict_video_album.thumbnail" width="140">
+							</button>
+						</div>
+					</div>
+					
+				</div>
 			
-		
+
+
+			</div>
 		</div>
 	</div>
 </div>
@@ -360,14 +398,16 @@
 		data() {
 		return {
             BASE_DIR_ACTOR : '',
-			BASE_DIR_PICTURE: '',
+			BASE_DIR_VIDEO: '',
 			
 			data_actor : {},
 			data_video_album: {},
-            list_dict_video_album: [],
+            list_dict_picture_album: [],
+			list_dict_video_album: [],
 			list_serialized_data_actor: [],
 						
 			selected_video_album_id: '',
+			selected_video_album_picture_id: '',
 			selected_video_album_video_id: '',
 			selected_actor_id: '',
 
@@ -397,7 +437,7 @@
 				axios.get('/hans_ent_video_album_upload_modal/')
 				.then((response) => {
 					this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
-					this.BASE_DIR_PICTURE = response.data['BASE_DIR_PICTURE']
+					this.BASE_DIR_VIDEO = response.data['BASE_DIR_VIDEO']
 					this.data_actor = response.data['selected_serialized_data_actor']
 					this.data_video_album = response.data['selected_serialized_data_video_album']
 					
@@ -406,6 +446,7 @@
 					}
 					if (Object.keys(this.data_video_album).length > 0 ) {
 						this.selected_video_album_id = this.data_video_album['id']
+						this.list_dict_picture_album = this.data_video_album['list_dict_picture_album']
 						this.list_dict_video_album = this.data_video_album['list_dict_video_album']
 					}
 				})
@@ -414,7 +455,7 @@
 			f_sync_data_to_video_album_upload_modal(data) {
 				this.f_reset_return()
                 this.BASE_DIR_ACTOR = data['BASE_DIR_ACTOR']
-				this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
+				this.BASE_DIR_VIDEO = data['BASE_DIR_VIDEO']
 				this.data_actor = data['selected_serialized_data_actor']
 				this.data_video_album = data['selected_serialized_data_video_album']
 				
@@ -424,6 +465,7 @@
 
                 if (Object.keys(this.data_video_album).length > 0 ) {
 					this.selected_video_album_id = this.data_video_album['id']
+					this.list_dict_picture_album = this.data_video_album['list_dict_picture_album']
 					this.list_dict_video_album = this.data_video_album['list_dict_video_album']
 				} else {
 					this.status_create = true
@@ -436,10 +478,12 @@
 
 				this.data_actor = {}
 				this.data_video_album = {}
+				this.list_dict_picture_album = []
 				this.list_dict_video_album = []
 				this.list_serialized_data_actor = []
 
 				this.selected_video_album_id = ''
+				this.selected_video_album_picture_id = ''
 				this.selected_video_album_video_id = ''
 				this.selected_actor_id = ''
 
@@ -482,13 +526,13 @@
 				}
 			},
 
-			f_select_video_as_cover(event) {
+			f_select_picture_as_cover(event) {
 				console.log(event)
-				this.selected_video_album_video_id = event
+				this.selected_video_album_picture_id = event
 				axios.post('/hans_ent_video_album_upload_modal/', {
                     'button': 'change_video_album_cover_image',
 					'selected_video_album_id': this.selected_video_album_id,
-					'selected_video_album_video_id': this.selected_video_album_video_id,
+					'selected_video_album_picture_id': this.selected_video_album_picture_id,
                 }, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -497,13 +541,13 @@
                 })
                 .then((response) => {
 					this.status_cover_image_change = false
-					this.selected_video_album_video_id = ''
+					this.selected_video_album_picture_id = ''
 					console.log(response.data)
 					this.data_video_album = response.data['selected_serialized_data_video_album']
 					this.list_dict_video_album = this.data_video_album['list_dict_video_album']
                 })
                 .catch(() => {
-                    console.log('Error! f_select_video_as_cover')
+                    console.log('Error! f_select_picture_as_cover')
                 })
 			},
 
@@ -702,11 +746,11 @@
 
 			f_file_album_video_select(event) {
 				this.videos = event.target.files;
-				if (this.images.length > 100) {
+				if (this.videos.length > 100) {
 					alert("over 100 video cannot save!");
 					this.videos = null;
 				}
-				console.log(this.images)
+				console.log(this.videos)
 			},
 
 			async f_upload_album_form() {
@@ -790,10 +834,11 @@
             },
 
             f_hans_ent_video_album_gallery_modal(event) {
-                this.selected_video_album_id = event
-                console.log(this.selected_video_album_id)
+                this.selected_video_album_video_id = event
+                console.log(this.selected_video_album_video_id)
 				axios.post('/hans_ent_video_album_gallery_modal/', {
-                    'selected_video_album_id': event,
+                    'selected_video_album_id': this.selected_video_album_id,
+					'selected_video_album_video_id': event,
                     'modal': 'gallery'
                 }, {
                 headers: {
@@ -901,6 +946,12 @@
 
 		},
 		computed: {
+			active_list_dict_picture_album() {
+                return this.list_dict_picture_album.filter(item => item.active === "true" && item.discard === "false")
+            },
+			total_list_dict_picture_album() {
+                return this.list_dict_picture_album.filter(item => item.discard === "false")
+            },
             active_list_dict_video_album() {
                 return this.list_dict_video_album.filter(item => item.active === "true" && item.discard === "false")
             },

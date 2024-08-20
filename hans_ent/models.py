@@ -147,13 +147,14 @@ class Actor(models.Model):
 
 
 """
-list_dict_picture_album rule:
-[
-{"id":"0", "thumbnail":"default-t.png", "cover":"default-c.png", "original":"default-o.png", "active":"true", "discard":"false"},
-{"id":"1", "thumbnail":"abcd-t-1.png", "cover":"abcd-c-1.png", "original":"abcd-o-1.png", "active":"false", "discard":"false"},
-{"id":"2", "thumbnail":"abcd-t-2.png", "cover":"abcd-c-2.png", "original":"abcd-o-2.png", "active":"false", "discard":"false"},
-]
-abcd == hashcode
+Picture Album은
+    1개의 list_dict_picture_album 을 가진다:
+    [
+    {"id":"0", "thumbnail":"default-t.png", "cover":"default-c.png", "original":"default-o.png", "active":"true", "discard":"false"},
+    {"id":"1", "thumbnail":"abcd-t-1.png", "cover":"abcd-c-1.png", "original":"abcd-o-1.png", "active":"false", "discard":"false"},
+    {"id":"2", "thumbnail":"abcd-t-2.png", "cover":"abcd-c-2.png", "original":"abcd-o-2.png", "active":"false", "discard":"false"},
+    ]
+    abcd == hashcode
 """
 DEFAULT_LIST_DICT_PICTURE_ALBUM = [{'id':0, 'original':"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true", "discard":"false"}]
 
@@ -174,20 +175,31 @@ class Picture_Album(models.Model):
 
 
 """
-list_dict_video_album rule:
-[
-{"id":"0", "video":"default.mp4", "thumbnail":"default-t.png", "cover":"default-c.png", "original":"default-o.png", "still":"default_video_album-s.png" "active":"true", "discard":"false"},
-{"id":"1", "video":"abcd-v-1.mp4", "thumbnail":"abcd-t-1.png", "cover":"abcd-c-1.png", "original":"abcd-o-1.png", "still":["abcd-s-1-1.png", "abcd-s-1-2.png"], "active":"false", "discard":"false"},
-{"id":"2", "video":"abcd-v-2.mp4", "thumbnail":"abcd-t-2.png", "cover":"abcd-c-2.png", "original":"abcd-o-2.png", "still":["abcd-s-2-1.png", "abcd-s-2-2.png"], "active":"false", "discard":"false"},
-]
-abcd == hashcode
+Video Album은
+        1개의 list_dict_picture_album과 1개의 list_dict_video_album 이 있음
+        list_dict_picture_album은 커버이미지들을 담당. Picture_Album의 list_dict_picture_album과 기능적으로 같다.
+        [
+        {"id":"0", "thumbnail":"default-t.png", "cover":"default-c.png", "original":"default-o.png", "active":"true", "discard":"false"},
+        {"id":"1", "thumbnail":"abcd-p-t-1.png", "cover":"abcd-p-c-1.png", "original":"abcd-p-o-1.png", "active":"false", "discard":"false"},
+        {"id":"2", "thumbnail":"abcd-p-t-2.png", "cover":"abcd-p-c-2.png", "original":"abcd-p-o-2.png", "active":"false", "discard":"false"},
+        ]
+        abcd == hashcode
+        list_dict_video_album은 video들을 담당
+        [
+        {"id":"0", "video":"default.mp4", "thumbnail":"default-t.png", "cover":"default-c.png", "original":"default-o.png", "still":{"0":"default-s.png"}, "active":"true", "discard":"false"},
+        {"id":"1", "video":"abcd-v-1.mp4", "thumbnail":"abcd-v-t-1.png", "cover":"abcd-v-c-1.png", "original":"abcd-v-o-1.png", "still":{"10":"abcd-s-1-1.png", "20":"abcd-s-1-2.png"}, "active":"false", "discard":"false"},
+        {"id":"2", "video":"abcd-v-2.mp4", "thumbnail":"abcd-v-t-2.png", "cover":"abcd-v-c-2.png", "original":"abcd-v-o-2.png", "still":{"10":"abcd-s-2-1.png", "20":"abcd-s-2-2.png"}, "active":"false", "discard":"false"},
+        ]
+        스틸이미지는 dictionary 형태로 시간값을 키값으로, 이미지패쓰를 밸류값으로 가진다.
+        abcd == hashcode
 """
-DEFAULT_LIST_DICT_VIDEO_ALBUM = [{"id":0, "video":"default.mp4", "original":"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "active":"true", "discard":"false"}]
+DEFAULT_LIST_DICT_VIDEO_ALBUM = [{"id":0, "video":"default.mp4", "original":"default-o.png", "cover":"default-c.png", "thumbnail":"default-t.png", "still":[{"time":1, "path":"default-s.png"}], "active":"true", "discard":"false"}]
 
 class Video_Album(models.Model):
     main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
+    list_dict_picture_album = models.JSONField(null=True, blank=True)
     list_dict_video_album = models.JSONField(null=True, blank=True)
     code = models.CharField(max_length=250, null=True, blank=True)
     studio = models.CharField(max_length=250, null=True, blank=True)
@@ -217,6 +229,8 @@ class Music_Album(models.Model):
     main_actor = models.ForeignKey(Actor, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     hashcode = models.CharField(max_length=250, null=True, blank=True)  # hash code = str(random_uuid), random_uuid = uuid.uuid4()
+    list_dict_picture_album = models.JSONField(null=True, blank=True)
+    list_dict_video_album = models.JSONField(null=True, blank=True)
     list_dict_music_album = models.JSONField(null=True, blank=True)
     code = models.CharField(max_length=250, null=True, blank=True)
     studio = models.CharField(max_length=250, null=True, blank=True)

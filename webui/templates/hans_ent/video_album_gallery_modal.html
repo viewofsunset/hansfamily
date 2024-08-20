@@ -50,25 +50,56 @@
 
 			<div class="modal-body">
 			
-				<!-- Registered Images -->
-				<div v-if="data_video_album.list_dict_video_album != null">
-					<div class="card">
-						
-                        <div v-for="(dict_video_album, index) in total_list_dict_video_album" :key="index"  >
-							<button @click="f_delete_video_album_pic(key)" class="btn" >
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
-									<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-									<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-								</svg>
-							</button>
-                            <a :href="BASE_DIR_PICTURE+dict_video_album.original" target="_blank" >
-                                <img :src="BASE_DIR_PICTURE+dict_video_album.original" class="image-center">
-                            </a>
-                            <br>
-						</div>
+				<!-- Selected Video Player -->
 
+				<div class="container">
+				
+					<div v-for="(item, index) in active_list_dict_video_album" :key="index">
+						<video width="1080" height="650" :poster="BASE_DIR_VIDEO+item.thumbnail" id="selected_video" controls crossorigin playsinline id="player">
+							<source :src="BASE_DIR_VIDEO+item.video" type="video/mp4" />
+						</video>   
+
+						<hr v-if="check_video_player_expand == true">
+						<div v-if="check_video_player_expand == true">
+							<div class="stillimage-container">
+								<div v-for="(item_sub, index) in item.still" :key="index" class="stillimage-box">
+									<button @click="f_video_still_image_selected(item_sub.time)" class="btn" >
+										<img v-bind:src="BASE_DIR_VIDEO+item_sub.path"  width="110">
+									</button>
+								</div>
+							</div>
+						</div>
+						
 					</div>
 				</div>
+
+				
+
+				<!-- Registered Videos -->
+				
+  				<div v-if="total_list_dict_video_album.length > 0">
+					<hr>
+					<div class="gallery-container">
+						<div v-for="(item, index) in total_list_dict_video_album" :key="index" class="card" >
+							<button @click="f_steaming_video_player_modal(item.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-streaming-video-player-modal">
+								<span>
+									<img :src="BASE_DIR_VIDEO+item.thumbnail" width="200">
+								</span>
+								<div class="text-overlay">[[ item.id ]]</div>
+							</button>
+							
+							<div class="text-end">
+								<button @click="f_delete_video_album_vid(item.id)" class="btn" >
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+										<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+										<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+									</svg>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
 
 			</div>
 
@@ -84,6 +115,15 @@
 
 
 <script>
+	
+	const player = new Plyr('#player', {
+		controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+		settings: ['quality', 'speed'],
+		autoplay: false,
+		loop: { active: false },
+		muted: false,
+	});
+
 	var post_hans_ent_video_album_gallery_modal = createApp({
 		delimiters: ["[[", "]]"],
 		data() {
@@ -92,6 +132,7 @@
 			
 			data_actor: {},
 			data_video_album: {},
+			list_dict_picture_album: [],
 			list_dict_video_album: [],
             selected_video_album_id: '',
 			selected_actor_id: '',
@@ -101,10 +142,14 @@
 			selected_dict_index: '',
 			input_text_title: '',
 
+			selected_video_source: '',
+
 			gallery_status_origin: false,
 
             dict_album_key_fullsize_value_thumbnail_image_path: [],
 			list_album_thumbnail_url: [],
+
+			check_video_player_expand: true,
 		}
 		},
 		methods: {
@@ -126,7 +171,7 @@
 			},
 
 			f_sync_data_to_video_album_gallery_modal(data) {
-                this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
+                this.BASE_DIR_VIDEO = data['BASE_DIR_VIDEO']
 				this.data_actor = data['selected_serialized_data_actor']
 				this.data_video_album = data['selected_serialized_data_video_album']
 				
@@ -135,6 +180,7 @@
 				}
                 if (Object.keys(this.data_video_album).length > 0 ) {
 					this.selected_video_album_id = this.data_video_album['id']
+					this.list_dict_picture_album = this.data_video_album['list_dict_picture_album']
                     this.list_dict_video_album = this.data_video_album['list_dict_video_album']
 				}
 				
@@ -178,6 +224,48 @@
 					)
 			},
 
+
+			
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // 비디오 기능 수행
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			f_video_player_close() {
+				console.log('close button hit')
+				// $($("video")[0])[0].plyr.media.pause()
+				player.pause();
+				player.source=null
+				this.selected_video_file_path=null
+				if (this.youtube_player) {
+					this.youtube_player.stopVideo();
+				}
+			},
+			
+			f_video_player_expand(event) {
+				if (event == false) {
+					this.check_video_player_expand = true;
+				} else {
+					this.check_video_player_expand = false;
+				}
+				console.log(this.check_video_player_expand)
+			},
+
+			f_video_player_timejump(event) {
+				console.log(event)
+				player.currentTime = parseInt(event);
+				player.muted = false;
+				player.play();
+				// player.pause();
+			},
+
+			f_video_still_image_selected (event) {
+				// videoplayer.currentTime = parseInt(event);
+				// videoplayer.play();
+				player.currentTime = parseInt(event);
+				player.muted = false;
+				player.source = get_selected_video_source();
+				player.play();
+			},
 
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // 앨범 기능 수행
@@ -299,15 +387,24 @@
 			
 		},
         computed: {
+			active_list_dict_picture_album() {
+                return this.list_dict_picture_album.filter(item => item.active === "true" && item.discard === "false")
+            },
+			total_list_dict_picture_album() {
+                return this.list_dict_picture_album.filter(item => item.discard === "false")
+            },
             active_list_dict_video_album() {
                 return this.list_dict_video_album.filter(item => item.active === "true" && item.discard === "false")
             },
 			total_list_dict_video_album() {
                 return this.list_dict_video_album.filter(item => item.discard === "false")
             },
-			c_hasItems_video() {
-				return this.data_video_album.list_dict_video_album.length > 1;
-			}
+			trimmedList(images) {
+				return this.images.slice(0, 100); // Keeps only the first 100 items
+			},
+			get_selected_video_source() {
+				return this.list_dict_video_album.filter(item => item.active === "true" && item.discard === "false")['video']
+			},
         },
 		mounted: function() {
 			this.refreshData()
@@ -320,6 +417,8 @@
 		// post_hans_ent_video_album_gallery_modal.f_reset_return()
 		// post_hans_ent_video_album_list.refreshData()
 		// console.log('앨범 갤러리 모달창 닫혔음!')
+		player.pause();
+		player.source=null
 	});
 
 </script>

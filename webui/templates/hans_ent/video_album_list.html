@@ -17,9 +17,9 @@
                     <div class="box">
                         <div class="card-body">
                             <button @click="f_hans_ent_video_album_gallery_modal(data_video_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-video-album-gallery-modal">
-                                <div v-for="(dict_video_album, index) in data_video_album.list_dict_video_album" :key="index" >
-                                    <div v-if="dict_video_album.active == 'true'">
-                                        <img :src="BASE_DIR_PICTURE+dict_video_album.cover" width="200">
+                                <div v-for="(dict_picture_album, index) in data_video_album.list_dict_picture_album" :key="index" >
+                                    <div v-if="dict_picture_album.active == 'true'">
+                                        <img :src="BASE_DIR_VIDEO+dict_picture_album.cover" width="200">
                                     </div>
                                 </div>
                             </button>
@@ -62,7 +62,7 @@
             delimiters: ["[[", "]]"],
             data() {
             return {
-                BASE_DIR_PICTURE: '',
+                BASE_DIR_VIDEO: '',
                 list_menu_type: [],
                 list_field_sorting: [],
                 list_serialized_data_video_album: [],
@@ -86,7 +86,7 @@
                 refreshData() {
                     axios.get('/hans_ent_video_album_list')
                     .then((response) => {
-                        this.BASE_DIR_PICTURE = response.data['BASE_DIR_PICTURE']
+                        this.BASE_DIR_VIDEO = response.data['BASE_DIR_VIDEO']
                         this.list_field_sorting = response.data['list_field_sorting']
                         this.list_serialized_data_video_album = response.data['list_serialized_data_video_album']
                         this.list_dict_profile_album = this.list_serialized_data_video_album['list_dict_profile_album']
@@ -216,7 +216,7 @@
                 // 정보 전송
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                // 갤러리 모달창으로 정보 보내기
+                // 비디오 갤러리 모달창으로 정보 보내기
                 f_hans_ent_video_album_gallery_modal(event) {
                     this.selected_video_album_id = event
                     console.log('f_streaming_video_album_gallery_modal ', this.selected_video_album_id)

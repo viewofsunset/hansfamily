@@ -1334,6 +1334,7 @@ def hans_ent_video_album_upload_modal(request):
         selected_serialized_data_actor = {}
                 
         selected_video_album_id_str = str(request.POST.get('selected_video_album_id'))
+        selected_video_album_picture_id_str = str(request.POST.get('selected_video_album_picture_id'))
         selected_video_album_video_id_str = str(request.POST.get('selected_video_album_video_id'))
         selected_actor_id_str = request.POST.get('selected_actor_id')
         input_text_title_str = request.POST.get('input_text_title')
@@ -1344,6 +1345,7 @@ def hans_ent_video_album_upload_modal(request):
         selected_video_sub_type_str = request.POST.get('selected_video_sub_type')
         
         selected_video_album_id_str = None if selected_video_album_id_str in LIST_STR_NONE_SERIES else selected_video_album_id_str
+        selected_video_album_picture_id_str = None if selected_video_album_picture_id_str in LIST_STR_NONE_SERIES else selected_video_album_picture_id_str
         selected_video_album_video_id_str = None if selected_video_album_video_id_str in LIST_STR_NONE_SERIES else selected_video_album_video_id_str
         selected_actor_id_str = None if selected_actor_id_str in LIST_STR_NONE_SERIES else selected_actor_id_str
         input_text_title_str = None if input_text_title_str in LIST_STR_NONE_SERIES else input_text_title_str
@@ -1420,16 +1422,16 @@ def hans_ent_video_album_upload_modal(request):
 
         # 앨범 커버 이미지 변경하기
         if request.POST.get('button') == 'change_video_album_cover_image':
-            if selected_video_album_video_id_str is not None and selected_video_album_video_id_str != '':
-                selected_video_album_video_id = int(selected_video_album_video_id_str)
+            if selected_video_album_picture_id_str is not None and selected_video_album_picture_id_str != '':
+                selected_video_album_picture_id = int(selected_video_album_picture_id_str)
                 if q_video_album_selected is not None:
-                    list_dict_video_album = q_video_album_selected.list_dict_video_album
+                    list_dict_picture_album = q_video_album_selected.list_dict_picture_album
                     # acitve 모두 false 변경
-                    for dict_video_album in list_dict_video_album:
-                        dict_video_album['active'] = 'false'
-                        if dict_video_album['id'] == selected_video_album_video_id:
-                            dict_video_album['active'] = 'true'
-                    data = {'list_dict_video_album': list_dict_video_album}
+                    for dict_picture_album in list_dict_picture_album:
+                        dict_picture_album['active'] = 'false'
+                        if dict_picture_album['id'] == selected_video_album_picture_id:
+                            dict_picture_album['active'] = 'true'
+                    data = {'list_dict_picture_album': list_dict_picture_album}
                     Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
                     q_video_album_selected.refresh_from_db()
         
@@ -1594,11 +1596,13 @@ def hans_ent_video_album_upload_modal(request):
 
         # 비디오 업로드 했으면 저장하기
         if request.FILES:
+            print('# 비디오 업로드 했으면 저장하기')
             if q_video_album_selected is None:
                 q_video_album_selected = create_video_album()
-            # 앨범 갤러이 이미지 저장하기
+            # 비디오 저장하기
             videos = request.FILES.getlist('videos')
             if videos is not None and len(videos) > 0:
+                print('# 비디오 저장하기')
                 save_video_album_videos(q_video_album_selected, videos)
 
         # 신규 Video Album 생성
@@ -1625,7 +1629,6 @@ def hans_ent_video_album_upload_modal(request):
         
             # Data Serialize
             selected_serialized_data_video_album = Video_Album_Serializer(q_video_album_selected, many=False).data
-            # dict_album_key_fullsize_value_thumbnail_image_path = get_dict_album_key_fullsize_value_thumbnail_image_path(q_video_album_selected)  # 앨범에 등록된 이미지 표시정보(Path) 획득하기
         
         if q_actor is not None:
             selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
