@@ -193,3 +193,16 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
+
+
+
+
+# Large File Handling setting
+DATA_UPLOAD_MAX_MEMORY_SIZE = None  # Unlimited upload size
+
+FILE_UPLOAD_HANDLERS = [
+    'django.core.files.uploadhandler.MemoryFileUploadHandler',
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+]
+
+TIMEOUT = None  # Set your own timeout handling

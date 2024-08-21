@@ -81,7 +81,7 @@
 									[[ data_picture_album.title ]]
 								</strong>
 								<br>
-								<input type="text" @input="f_input_text_title" class="form-control" enabled id="id-input-text-title">
+								<input type="text" @input="f_input_text_title" class="form-control" enabled id="id-input-text-title" ref="ref_input_text_title">
 							</td>
 							<th style="background-color:rgb(240,240,240,0.5)" >
 								Score
@@ -127,7 +127,7 @@
 									Selected Model:
 									<strong> <h5>[[ data_actor.name ]] </h5> </strong>
 								</div>
-								<input type="text" @keyup.enter="f_actor_search_by_name" v-model="input_text_name" class="form-control" placeholder="Hit Enter Key for Search" id="id_input_text_search_actor_select">
+								<input type="text" @keyup.enter="f_actor_search_by_name" v-model="input_text_name" class="form-control" placeholder="Hit Enter Key for Search" id="id_input_text_search_actor_select" ref="ref_input_text_search_actor_select">
 							</td>
 							<th style="background-color:rgb(240,240,240,0.5)">
 								등록된 Album 수
@@ -149,7 +149,7 @@
 									[[ data_picture_album.studio ]]
 								</strong>
 								<br>
-								<input type="text" @input="f_input_text_studio" class="form-control" enabled id="id-input-text-studio">
+								<input type="text" @input="f_input_text_studio" class="form-control" enabled id="id-input-text-studio" ref="ref_input_text_studio">
 							</td>
 							<th style="background-color:rgb(240,240,240,0.5)">
 								Release Date [[ input_date_released ]]
@@ -159,7 +159,7 @@
 									[[ data_picture_album.date_released ]]
 								</strong>
 								<br>
-								<input type="date" @input="f_input_date_released" class="form-control" enabled id="id-input-date-released">	
+								<input type="date" @input="f_input_date_released" class="form-control" enabled id="id-input-date-released" ref="ref_input_date_released">	
 							</td>
 						</tr>
 						
@@ -177,7 +177,7 @@
                                     [[ item ]]
                                 </div>
 								<br>
-								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id-input-text-tag">
+								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id-input-text-tag" ref="ref_input_text_tag">
 							</td>
 
 							
@@ -249,7 +249,7 @@
 								</div>
 							</td>
 							<td style="background-color:rgb(255,255,255,0.05)">
-								<input type="file" @change="f_file_album_images_select" multiple class="form-control" id="id_upload_album_image_to_db">
+								<input type="file" @change="f_file_album_images_select" multiple class="form-control" id="id_upload_album_image_to_db" ref="ref_upload_album_image_file">
 							</td>
 						</tr>
 					</table>
@@ -400,7 +400,6 @@
 				if (Object.keys(this.data_actor).length > 0 ) {
 					this.selected_actor_id = this.data_actor['id']
 				} 
-
                 if (Object.keys(this.data_picture_album).length > 0 ) {
 					this.selected_picture_album_id = this.data_picture_album['id']
 					this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
@@ -440,12 +439,12 @@
 				this.status_picture_album_picture_remove = false 
 				this.status_create = false
 
-				$('#id-input-text-title').val("");
-				$('#id_input_text_search_actor_select').val("");
-				$('#id-input-text-studio').val("");
-				$('#id-input-date-released').val("");
-				$('#id-input-text-tag').val("");
-				$('#id_upload_album_image_to_db').val("");
+				this.$refs.ref_input_text_title.value = '';
+				this.$refs.ref_input_text_search_actor_select.value = '';
+				this.$refs.ref_input_text_studio.value = '';
+				this.$refs.ref_input_date_released.value = '';
+				this.$refs.ref_input_text_tag.value = '';
+				this.$refs.ref_upload_album_image_file.value = '';
 			},
 
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -476,9 +475,12 @@
                 .then((response) => {
 					this.status_cover_image_change = false
 					this.selected_picture_album_picture_id = ''
-					console.log(response.data)
+					
 					this.data_picture_album = response.data['selected_serialized_data_picture_album']
-					this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+					if (Object.keys(this.data_picture_album).length > 0 ) {
+						this.selected_picture_album_id = this.data_picture_album['id']
+						this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+					}
                 })
                 .catch(() => {
                     console.log('Error! f_select_picture_as_cover')
@@ -513,9 +515,12 @@
                 .then((response) => {
 					this.status_picture_album_picture_remove = false
 					this.selected_picture_album_picture_id = ''
-					console.log(response.data)
+
 					this.data_picture_album = response.data['selected_serialized_data_picture_album']
-					this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+					if (Object.keys(this.data_picture_album).length > 0 ) {
+						this.selected_picture_album_id = this.data_picture_album['id']
+						this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+					}
                 })
                 .catch(() => {
                     console.log('Error! f_select_picture_to_remove')
@@ -553,6 +558,9 @@
 				}
 			},
 
+			
+
+
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Actor 선택
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -586,9 +594,12 @@
                 })
                 .then((response) => {
 					this.input_text_name = '';
-					$('#id_input_text_search_actor_select').val("");
+					this.$refs.ref_input_text_search_actor_select.value = '';
 					console.log(response.data)
 					this.data_actor = response.data['selected_serialized_data_actor']
+					if (Object.keys(this.data_actor).length > 0 ) {
+						this.selected_actor_id = this.data_actor['id']
+					} 
                 })
                 .catch(() => {
                     console.log('Error! f_actor_select_for_album_upload')
@@ -598,7 +609,7 @@
 			// 검색결과 리셋
 			f_fold_searched_actor_list() {
 				this.input_text_name = '';
-				$('#id_input_text_search_actor_select').val("");
+				this.$refs.ref_input_text_search_actor_select.value = '';
 				this.list_serialized_data_actor = []
 			},
 
@@ -628,6 +639,10 @@
 					.then((response) => {
 						console.log(response.data)
 						this.data_picture_album = response.data['selected_serialized_data_picture_album']
+						if (Object.keys(this.data_picture_album).length > 0 ) {
+							this.selected_picture_album_id = this.data_picture_album['id']
+							this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+						} 
 						this.selected_serialized_data_actor = null
 					})
 					.catch(() => {
@@ -690,6 +705,12 @@
 					for (let i = 0; i < this.images.length; i++) {
 						formData.append('images', this.images[i]);
 				}} else {}
+
+				if (this.videos != null) {
+					for (let i = 0; i < this.videos.length; i++) {
+						formData.append('videos', this.videos[i]);
+				}} else {}
+
 				formData.append('selected_picture_album_id', this.selected_picture_album_id);
 				formData.append('selected_actor_id', this.selected_actor_id);
 				formData.append('input_text_title', this.input_text_title);
@@ -700,9 +721,6 @@
 				formData.append('selected_picture_sub_type', this.selected_picture_sub_type)
 				this.show_progress = true;
 				
-				if (this.images == null) {
-				}
-
 				try {
 					await axios.post('/hans_ent_picture_album_upload_modal/', formData, {
 					headers: {
@@ -713,17 +731,18 @@
 					this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
 					})
 					.then((response) => {
-						$("#id_upload_album_image_to_db").val("");
 						this.f_reset_return()
+						this.status_create = false 
 						this.data_actor = response.data['selected_serialized_data_actor']
 						this.data_picture_album = response.data['selected_serialized_data_picture_album']
 
-						this.selected_actor_id = this.data_actor['id']
-						this.selected_picture_album_id = this.data_picture_album['id']
-						this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
-						
-						this.show_progress = false;
-						this.progress_value = 0
+						if (Object.keys(this.data_actor).length > 0 ) {
+							this.selected_actor_id = this.data_actor['id']
+						} 
+						if (Object.keys(this.data_picture_album).length > 0 ) {
+							this.selected_picture_album_id = this.data_picture_album['id']
+							this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+						} 
                     })
 					alert('Upload successful');
 				} catch (error) {	
@@ -819,9 +838,16 @@
 					})
 					.then((response) => {
 						console.log(response.data)
-						this.data_actor = response.data['selected_serialized_data_actor']
-                        this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
-						this.refreshData()
+						this.data_actor = data['selected_serialized_data_actor']
+						this.data_picture_album = data['selected_serialized_data_picture_album']
+						
+						if (Object.keys(this.data_actor).length > 0 ) {
+							this.selected_actor_id = this.data_actor['id']
+						} 
+						if (Object.keys(this.data_picture_album).length > 0 ) {
+							this.selected_picture_album_id = this.data_picture_album['id']
+							this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+						}
 					})
 					.catch(() => {
 						console.log('Error! f_hans_ent_picture_album_profile_modal')
@@ -848,10 +874,16 @@
 					}
 					})
 					.then((response) => {
-						this.data_actor = response.data['selected_serialized_data_actor']
+						this.data_actor = data['selected_serialized_data_actor']
+						this.data_picture_album = data['selected_serialized_data_picture_album']
 						
-						this.selected_picture_album_id = this.data_actor['id']
-						this.dict_picture_album_key_fullsize_value_thumbnail_image_path = response.data['dict_picture_album_key_fullsize_value_thumbnail_image_path']
+						if (Object.keys(this.data_actor).length > 0 ) {
+							this.selected_actor_id = this.data_actor['id']
+						} 
+						if (Object.keys(this.data_picture_album).length > 0 ) {
+							this.selected_picture_album_id = this.data_picture_album['id']
+							this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+						}
 					})
 					.catch(() => {
 						console.log('Error! f_hans_ent_picture_album_profile_modal')
@@ -862,10 +894,9 @@
 				}
 			},
 
-
-
-			
-			f_modal_close() {},
+			f_modal_close() {
+				console.log('close button clicked.')
+			},
 
 		},
 		computed: {
@@ -875,9 +906,6 @@
 			total_list_dict_picture_album() {
                 return this.list_dict_picture_album.filter(item => item.discard === "false")
             },
-			trimmedList(images) {
-				return this.images.slice(0, 100); // Keeps only the first 100 items
-			},
         },
         mounted: function() {
 			this.refreshData()

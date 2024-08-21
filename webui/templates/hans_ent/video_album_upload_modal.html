@@ -56,7 +56,7 @@
 							-->
 							<td rowspan="4" width="30%">
 								<div class="text-end">
-									<button @click="f_replace_registered_video_album_cover_image()" class="btn" >
+									<button @click="f_status_cover_image_change()" class="btn" >
 										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-recycle" viewBox="0 0 16 16">
 											<path d="M9.302 1.256a1.5 1.5 0 0 0-2.604 0l-1.704 2.98a.5.5 0 0 0 .869.497l1.703-2.981a.5.5 0 0 1 .868 0l2.54 4.444-1.256-.337a.5.5 0 1 0-.26.966l2.415.647a.5.5 0 0 0 .613-.353l.647-2.415a.5.5 0 1 0-.966-.259l-.333 1.242zM2.973 7.773l-1.255.337a.5.5 0 1 1-.26-.966l2.416-.647a.5.5 0 0 1 .612.353l.647 2.415a.5.5 0 0 1-.966.259l-.333-1.242-2.545 4.454a.5.5 0 0 0 .434.748H5a.5.5 0 0 1 0 1H1.723A1.5 1.5 0 0 1 .421 12.24zm10.89 1.463a.5.5 0 1 0-.868.496l1.716 3.004a.5.5 0 0 1-.434.748h-5.57l.647-.646a.5.5 0 1 0-.708-.707l-1.5 1.5a.5.5 0 0 0 0 .707l1.5 1.5a.5.5 0 1 0 .708-.707l-.647-.647h5.57a1.5 1.5 0 0 0 1.302-2.244z"/>
 										</svg>
@@ -81,7 +81,7 @@
 									[[ data_video_album.title ]]
 								</strong>
 								<br>
-								<input type="text" @input="f_input_text_title" class="form-control" enabled id="id-input-text-title">
+								<input type="text" @input="f_input_text_title" class="form-control" enabled id="id-input-text-title" ref="ref_input_text_title">
 							</td>
 							<th style="background-color:rgb(240,240,240,0.5)" >
 								Score
@@ -127,7 +127,7 @@
 									Selected Model:
 									<strong> <h5>[[ data_actor.name ]] </h5> </strong>
 								</div>
-								<input type="text" @keyup.enter="f_actor_search_by_name" v-model="input_text_name" class="form-control" placeholder="Hit Enter Key for Search" id="id_input_text_search_actor_select">
+								<input type="text" @keyup.enter="f_actor_search_by_name" v-model="input_text_name" class="form-control" placeholder="Hit Enter Key for Search" id="id_input_text_search_actor_select" ref="ref_input_text_search_actor_select">
 							</td>
 							<th style="background-color:rgb(240,240,240,0.5)">
 								등록된 Album 수
@@ -149,7 +149,7 @@
 									[[ data_video_album.studio ]]
 								</strong>
 								<br>
-								<input type="text" @input="f_input_text_studio" class="form-control" enabled id="id-input-text-studio">
+								<input type="text" @input="f_input_text_studio" class="form-control" enabled id="id-input-text-studio" ref="ref_input_text_studio">
 							</td>
 							<th style="background-color:rgb(240,240,240,0.5)">
 								Release Date [[ input_date_released ]]
@@ -159,7 +159,7 @@
 									[[ data_video_album.date_released ]]
 								</strong>
 								<br>
-								<input type="date" @input="f_input_date_released" class="form-control" enabled id="id-input-date-released">	
+								<input type="date" @input="f_input_date_released" class="form-control" enabled id="id-input-date-released" ref="ref_input_date_released">	
 							</td>
 						</tr>
 						
@@ -177,7 +177,7 @@
                                     [[ item ]]
                                 </div>
 								<br>
-								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id-input-text-tag">
+								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id-input-text-tag" ref="ref_input_text_tag">
 							</td>
 
 							
@@ -249,7 +249,7 @@
 								</div>
 							</td>
 							<td style="background-color:rgb(255,255,255,0.05)">
-								<input type="file" @change="f_file_album_images_select" multiple class="form-control" id="id_upload_album_image_to_db">
+								<input type="file" @change="f_file_album_images_select" multiple class="form-control" id="id_upload_album_image_to_db" ref="ref_upload_album_image_file">
 							</td>
 						</tr>
 					</table>
@@ -269,7 +269,7 @@
 								</div>
 							</td>
 							<td style="background-color:rgb(255,255,255,0.05)">
-								<input type="file" @change="f_file_album_video_select" multiple class="form-control" id="id_upload_album_video_to_db">
+								<input type="file" @change="f_file_album_video_select" multiple class="form-control" id="id_upload_album_video_to_db" ref="ref_upload_album_video_file">
 							</td>
 						</tr>
 					</table>
@@ -297,7 +297,7 @@
 				-->
 				<div class="modal-footer">
 					<div v-if="status_create == false">
-						<button type="button" class="btn btn-warning"  @click="f_select_video_album_to_delete(selected_video_album_id)" data-bs-dismiss="modal">Delete</button>
+						<button type="button" class="btn btn-warning"  @click="f_remove_select_video_album(selected_video_album_id)" data-bs-dismiss="modal">Delete</button>
 					</div>
 					<button type="button" class="btn btn-secondary" @click="f_modal_close" data-bs-dismiss="modal">Close</button>
 					<div v-if="status_create == true">
@@ -313,7 +313,7 @@
 					앨범에 등록한 이미지 표시 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				-->
 				<div class="text-end">
-					<button @click="f_remove_registered_video_album_video()" class="btn" >
+					<button @click="f_status_cover_image_remove()" class="btn" >
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
 							<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
 							<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
@@ -321,18 +321,21 @@
 					</button>
 				</div>
 
-				<!-- Registered Images -->
+				<!-- Registered Images 
+				status_cover_image_change
+				status_cover_image_remove 
+				-->
 				<div class="grid-container-video-album-video">
 					
 					<div v-for="(dict_picture_album, index) in total_list_dict_picture_album" :key="index" class="box-video-album-video">
-						<div v-if="status_cover_image_change === true && status_video_album_video_remove === false" >
-							<button @click="f_select_picture_as_cover(dict_picture_album.id)">
+						<div v-if="status_cover_image_change === true && status_cover_image_remove === false" >
+							<button @click="f_select_image_as_cover(dict_picture_album.id)">
 								<img v-bind:src="BASE_DIR_VIDEO+dict_picture_album.thumbnail" width="140">
 								
 							</button>
 						</div>
-						<div v-else-if="status_cover_image_change === false && status_video_album_video_remove === true" >
-							<button @click="f_select_video_to_remove(dict_picture_album.id)">
+						<div v-else-if="status_cover_image_change === false && status_cover_image_remove === true" >
+							<button @click="f_remove_selected_cover_image(dict_picture_album.id)">
 								<img v-bind:src="BASE_DIR_VIDEO+dict_picture_album.thumbnail" width="140">
 							</button>
 						</div>
@@ -351,7 +354,13 @@
 					앨범에 등록한 비디오 표시 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				-->
 				<div class="text-end">
-					<button @click="f_remove_registered_video_album_video()" class="btn" >
+					
+					<button @click="f_status_video_album_video_still_generate()" class="btn" >
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pip-fill" viewBox="0 0 16 16">
+							<path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2zm7 6h5a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5"/>
+						</svg>
+					</button>
+					<button @click="f_status_video_album_video_remove()" class="btn" >
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
 							<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
 							<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
@@ -359,21 +368,25 @@
 					</button>
 				</div>
 
-				<!-- Registered Videos -->
+				<!-- Registered Videos 
+				status_video_album_video_remove
+				status_video_album_remove 
+				-->
 				<div class="grid-container-video-album-video">
 					
 					<div v-for="(dict_video_album, index) in total_list_dict_video_album" :key="index" class="box-video-album-video">
-						<div v-if="status_cover_image_change === true && status_video_album_video_remove === false" >
-							<button @click="f_select_still_as_cover(dict_video_album.id)">
-								<img v-bind:src="BASE_DIR_VIDEO+dict_video_album.thumbnail" width="140">
-								
-							</button>
-						</div>
-						<div v-else-if="status_cover_image_change === false && status_video_album_video_remove === true" >
-							<button @click="f_select_video_to_remove(dict_video_album.id)">
+						<div v-if="status_video_album_video_remove === true && status_video_album_video_still_generate === false" >
+							<button @click="f_remove_selected_video_album_video(dict_video_album.id)">
 								<img v-bind:src="BASE_DIR_VIDEO+dict_video_album.thumbnail" width="140">
 							</button>
 						</div>
+
+						<div v-else-if="status_video_album_video_remove === false && status_video_album_video_still_generate === true" >
+							<button @click="f_generate_still_images_from_select_video_album_video(dict_video_album.id)">
+								<img v-bind:src="BASE_DIR_VIDEO+dict_video_album.thumbnail" width="140">
+							</button>
+						</div>
+
 						<div v-else>
 							<button @click="f_hans_ent_video_album_gallery_modal(dict_video_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-video-album-gallery-modal">
 								<img v-bind:src="BASE_DIR_VIDEO+dict_video_album.thumbnail" width="140">
@@ -426,9 +439,14 @@
 			progress_min: 0,
 			show_progress: false,
 
-			status_cover_image_change: false, // True 커버이미지 변경을 위한 상태로 전환
-			status_video_album_video_remove: false,  // 등록된 사진 삭제 위한 상태로 전환
-			status_create: false,
+			status_cover_image_change: false, 
+			status_cover_image_remove: false,
+			status_video_album_video_remove: false,  
+			status_video_album_video_still_generate: false,
+
+			status_create : false,
+			
+			
 		}
 		},
 		methods: {
@@ -462,7 +480,6 @@
 				if (Object.keys(this.data_actor).length > 0 ) {
 					this.selected_actor_id = this.data_actor['id']
 				} 
-
                 if (Object.keys(this.data_video_album).length > 0 ) {
 					this.selected_video_album_id = this.data_video_album['id']
 					this.list_dict_picture_album = this.data_video_album['list_dict_picture_album']
@@ -503,22 +520,26 @@
 				this.show_progress = false
 
 				this.status_cover_image_change = false
+				this.status_cover_image_remove = false
 				this.status_video_album_video_remove = false 
-				this.status_create = false
+				this.status_video_album_video_still_generate = false
 
-				$('#id-input-text-title').val("");
-				$('#id_input_text_search_actor_select').val("");
-				$('#id-input-text-studio').val("");
-				$('#id-input-date-released').val("");
-				$('#id-input-text-tag').val("");
-				$('#id_upload_album_image_to_db').val("");
+				this.status_create = false
+				
+				this.$refs.ref_input_text_title.value = '';
+				this.$refs.ref_input_text_search_actor_select.value = '';
+				this.$refs.ref_input_text_studio.value = '';
+				this.$refs.ref_input_date_released.value = '';
+				this.$refs.ref_input_text_tag.value = '';
+				this.$refs.ref_upload_album_image_file.value = '';
+				this.$refs.ref_upload_album_video_file.value = '';
 			},
 
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Cover image 선택/변경/
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			f_replace_registered_video_album_cover_image() {
+			f_status_cover_image_change() {
 				if (this.status_cover_image_change === true) {
 					this.status_cover_image_change = false
 				} else {
@@ -526,7 +547,7 @@
 				}
 			},
 
-			f_select_picture_as_cover(event) {
+			f_select_image_as_cover(event) {
 				console.log(event)
 				this.selected_video_album_picture_id = event
 				axios.post('/hans_ent_video_album_upload_modal/', {
@@ -542,9 +563,17 @@
                 .then((response) => {
 					this.status_cover_image_change = false
 					this.selected_video_album_picture_id = ''
-					console.log(response.data)
+
+					this.data_actor = response.data['selected_serialized_data_actor']
 					this.data_video_album = response.data['selected_serialized_data_video_album']
-					this.list_dict_video_album = this.data_video_album['list_dict_video_album']
+					if (Object.keys(this.data_actor).length > 0 ) {
+						this.selected_actor_id = this.data_actor['id']
+					}
+					if (Object.keys(this.data_video_album).length > 0 ) {
+						this.selected_video_album_id = this.data_video_album['id']
+						this.list_dict_picture_album = this.data_video_album['list_dict_picture_album']
+						this.list_dict_video_album = this.data_video_album['list_dict_video_album']
+					}
                 })
                 .catch(() => {
                     console.log('Error! f_select_picture_as_cover')
@@ -552,10 +581,55 @@
 			},
 
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // 앨범 등록한 image 삭제
+            // Cover image 삭제
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			f_remove_registered_video_album_video() {
+			f_status_cover_image_remove() {
+				if (this.status_cover_image_remove === true) {
+					this.status_cover_image_remove = false
+				} else {
+					this.status_cover_image_remove = true
+				}
+			},
+
+			f_remove_selected_cover_image(event) {
+				console.log(event)
+				this.selected_video_album_picture_id = event
+				axios.post('/hans_ent_video_album_upload_modal/', {
+                    'button': 'remove_video_album_cover_image',
+					'selected_video_album_id': this.selected_video_album_id,
+					'selected_video_album_picture_id': this.selected_video_album_picture_id,
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })
+                .then((response) => {
+					this.status_cover_image_remove = false
+					this.selected_video_album_picture_id = ''
+					
+					this.data_actor = response.data['selected_serialized_data_actor']
+					this.data_video_album = response.data['selected_serialized_data_video_album']
+					if (Object.keys(this.data_actor).length > 0 ) {
+						this.selected_actor_id = this.data_actor['id']
+					}
+					if (Object.keys(this.data_video_album).length > 0 ) {
+						this.selected_video_album_id = this.data_video_album['id']
+						this.list_dict_picture_album = this.data_video_album['list_dict_picture_album']
+						this.list_dict_video_album = this.data_video_album['list_dict_video_album']
+					}
+                })
+                .catch(() => {
+                    console.log('Error! f_select_picture_as_cover')
+                })
+			},
+
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // 앨범 등록한 Video 한개 및 그 비디오 관련 스틸이미지 삭제
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			f_status_video_album_video_remove() {
 				if (this.status_video_album_video_remove === true) {
 					this.status_video_album_video_remove = false
 				} else {
@@ -563,7 +637,7 @@
 				}
 			},
 
-			f_select_video_to_remove(event) {
+			f_remove_selected_video_album_video(event) {
 				console.log(event)
 				this.selected_video_album_video_id = event
 				axios.post('/hans_ent_video_album_upload_modal/', {
@@ -579,27 +653,37 @@
                 .then((response) => {
 					this.status_video_album_video_remove = false
 					this.selected_video_album_video_id = ''
-					console.log(response.data)
+
+					this.data_actor = response.data['selected_serialized_data_actor']
 					this.data_video_album = response.data['selected_serialized_data_video_album']
-					this.list_dict_video_album = this.data_video_album['list_dict_video_album']
+					if (Object.keys(this.data_actor).length > 0 ) {
+						this.selected_actor_id = this.data_actor['id']
+					}
+					if (Object.keys(this.data_video_album).length > 0 ) {
+						this.selected_video_album_id = this.data_video_album['id']
+						this.list_dict_picture_album = this.data_video_album['list_dict_picture_album']
+						this.list_dict_video_album = this.data_video_album['list_dict_video_album']
+					}
                 })
                 .catch(() => {
                     console.log('Error! f_select_video_to_remove')
                 })
 			},
 
+			
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // 앨범 통으로 삭제
+            // 앨범 통으로 삭제 커버이미지, 등록된 비디오들 비디오 관련 스틸이미지들 
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			
-			f_select_video_album_to_delete(event) {
+
+			f_remove_select_video_album(event) {
 				console.log('selected video album id', event)
 				this.selected_video_album_id = event
 				const isConfirmed = window.confirm("정말 사진 앨범 정보를 삭제하시겠습니까?");
 				if (isConfirmed) {
 					alert("사진 앨범 삭제를 승인하였습니다.");
 					axios.post('/hans_ent_video_album_upload_modal/', {
-						'button': 'video_album_delete',
+						'button': 'remove_video_album',
 						'selected_video_album_id': this.selected_video_album_id,
 					}, {
 					headers: {
@@ -618,7 +702,50 @@
 					alert("삭제가 취소되었습니다.");
 				}
 			},
+			
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // Still 이미지 생성
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			f_status_video_album_video_still_generate() {
+				if (this.status_video_album_video_still_generate === true) {
+					this.status_video_album_video_still_generate = false
+				} else {
+					this.status_video_album_video_still_generate = true
+				}
+			},
 
+			f_generate_still_images_from_select_video_album_video(event) {
+				this.selected_video_album_video_id = event
+				axios.post('/hans_ent_video_album_upload_modal/', {
+                    'button': 'generate_video_still_image',
+					'selected_video_album_id': this.selected_video_album_id,
+					'selected_video_album_video_id': this.selected_video_album_video_id,
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })
+                .then((response) => {
+					this.status_video_album_video_still_generate = false
+					this.selected_video_album_video_id = ''
+
+					this.data_actor = response.data['selected_serialized_data_actor']
+					this.data_video_album = response.data['selected_serialized_data_video_album']
+					if (Object.keys(this.data_actor).length > 0 ) {
+						this.selected_actor_id = this.data_actor['id']
+					}
+					if (Object.keys(this.data_video_album).length > 0 ) {
+						this.selected_video_album_id = this.data_video_album['id']
+						this.list_dict_picture_album = this.data_video_album['list_dict_picture_album']
+						this.list_dict_video_album = this.data_video_album['list_dict_video_album']
+					}
+                })
+                .catch(() => {
+                    console.log('Error! f_select_video_to_remove')
+                })
+			},
+			
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Actor 선택
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -773,7 +900,7 @@
 				formData.append('input_text_studio', this.input_text_studio);
 				formData.append('input_date_released', this.input_date_released);
 				formData.append('input_text_tag', this.input_text_tag);
-				formData.append('selected_video_sub_type', this.selected_video_sub_type)
+				// formData.append('selected_video_sub_type', this.selected_video_sub_type)
 				this.show_progress = true;
 				
 				if (this.images == null) {
@@ -789,21 +916,23 @@
 					this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
 					})
 					.then((response) => {
-						$("#id_upload_album_image_to_db").val("");
 						this.f_reset_return()
+						
 						this.data_actor = response.data['selected_serialized_data_actor']
 						this.data_video_album = response.data['selected_serialized_data_video_album']
-
-						this.selected_actor_id = this.data_actor['id']
-						this.selected_video_album_id = this.data_video_album['id']
-						this.list_dict_video_album = this.data_video_album['list_dict_video_album']
 						
-						this.show_progress = false;
-						this.progress_value = 0
+						if (Object.keys(this.data_actor).length > 0 ) {
+							this.selected_actor_id = this.data_actor['id']
+						}
+						if (Object.keys(this.data_video_album).length > 0 ) {
+							this.selected_video_album_id = this.data_video_album['id']
+							this.list_dict_picture_album = this.data_video_album['list_dict_picture_album']
+							this.list_dict_video_album = this.data_video_album['list_dict_video_album']
+						}
                     })
 					alert('Upload successful');
 				} catch (error) {	
-					console.error('Error uploading images:', error);
+					console.error('Error uploading video album:', error);
 				}
 			},
 
@@ -833,27 +962,27 @@
                 })
             },
 
-            f_hans_ent_video_album_gallery_modal(event) {
-                this.selected_video_album_video_id = event
-                console.log(this.selected_video_album_video_id)
-				axios.post('/hans_ent_video_album_gallery_modal/', {
-                    'selected_video_album_id': this.selected_video_album_id,
-					'selected_video_album_video_id': event,
-                    'modal': 'gallery'
-                }, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'X-CSRFToken': "{{ csrf_token }}"
-                }
-                })  
-                .then((response) => {
-                    console.log('모델리스트에서 모델 갤러리로 정보 전송 시작', response.data)
-                    post_hans_ent_video_album_gallery_modal.f_sync_data_video_album_list_to_gallery(response.data)
-                })
-                .catch(() => {
-                    console.log('Error! f_hans_ent_video_album_upload_modal')
-                })
-            },
+			// 비디오 갤러리 모달창으로 정보 보내기
+			f_hans_ent_video_album_gallery_modal(event) {
+					this.selected_video_album_video_id = event
+                    axios.post('/hans_ent_video_album_gallery_modal/', {
+                        'selected_video_album_id': this.selected_video_album_id,
+						'selected_video_album_video_id': event,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        console.log('###################### to Video Album Gallery Modal')
+                        post_hans_ent_video_album_gallery_modal.f_sync_data_to_video_album_gallery_modal(response.data);
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_video_album_gallery_modal')
+                    })
+                },
+
 
             f_hans_ent_video_album_upload_modal(event) {
                 this.selected_video_album_id = event
@@ -939,9 +1068,6 @@
 				}
 			},
 
-
-
-			
 			f_modal_close() {},
 
 		},

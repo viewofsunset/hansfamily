@@ -614,6 +614,7 @@ def save_video_album_images(q_video_album_selected, images):
 
 # Video Album Video / Still image 저장하기
 def save_video_album_videos(q_video_album_selected, videos):
+    print('# Video Album Video / Still image 저장하기')
     """
      Video Album은
         1개의 list_dict_picture_album과 1개의 list_dict_video_album 이 있음
@@ -621,12 +622,13 @@ def save_video_album_videos(q_video_album_selected, videos):
 
         [
         {"id":"0", "video":"default.mp4", "thumbnail":"default-t.png", "still":[{"time":1, "path":"default-s.png"}], "active":"true", "discard":"false"},
-        {"id":"1", "video":"abcd-v-1.mp4", "thumbnail":"abcd-v-t-1.png", "still":[{"time":10, "path":"abcd-s-1-1.png", "20":"abcd-s-1-2.png"}], "active":"false", "discard":"false"},
-        {"id":"2", "video":"abcd-v-2.mp4", "thumbnail":"abcd-v-t-2.png", "still":[{"time":10, "path":"abcd-s-2-1.png", "20":"abcd-s-2-2.png"}], "active":"false", "discard":"false"},
+        {"id":"1", "video":"abcd-v-1.mp4", "thumbnail":"abcd-v-s-1-1.png", "still":[{"time":10, "path":"abcd-s-1-1.png", "20":"abcd-s-1-2.png"}], "active":"false", "discard":"false"},
+        {"id":"2", "video":"abcd-v-2.mp4", "thumbnail":"abcd-v-s-1-2.png", "still":[{"time":10, "path":"abcd-s-2-1.png", "20":"abcd-s-2-2.png"}], "active":"false", "discard":"false"},
         ]
         abcd == hashcode
 
         스틸이미지는 dictionary 형태로 시간값을 키값으로, 이미지패쓰를 밸류값으로 가진다.
+        thumbnail은 still image의 첫번째 항목을 디폴트값으로 넣어준다.
     """
     # get base info
     hashcode = q_video_album_selected.hashcode
@@ -647,291 +649,164 @@ def save_video_album_videos(q_video_album_selected, videos):
         list_dict_video_album = []
     num_video_album_video = len(list_dict_video_album)
     total_video_number = len(videos)
+
     i = 0
     for video_file in videos:   
+        print('i', i)
         video_file_name = video_file.name
         file_extension = video_file_name.split('.')[-1]
         print('file_extension', file_extension)
-
         # 원본 비디오 저장
         video_name_original = f'{hashcode}-v-{num_video_album_video}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_name_original)
-        with open(file_path, 'wb+') as destination:
+        file_video_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_name_original)
+        with open(file_video_path, 'wb+') as destination:
             for chunk in video_file.chunks():
                 destination.write(chunk)
-
-        def still_image_save(j, unit_frame, hashcode, num_video_album_video):
-            cap.set(cv2.CAP_PROP_POS_FRAMES, unit_frame*j)
-            ret, frame = cap.read()
-            if ret:
-                # Save the frame as an image file
-                video_still_path = f'{hashcode}-s-{num_video_album_video}-{j}.jpg'
-                file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_still_path)
-                cv2.imwrite(file_path, frame)
-                return {"time":j, "path":video_still_path}
-            else:
-                return None
-            
-        # Still 이미지 확보
-        list_still = []
-        cap = cv2.VideoCapture(file_path)
-        if cap.isOpened():
-            list_frame_cut_still = []
-            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            fps = cap.get(cv2.CAP_PROP_FPS)
-            duration_seconds = total_frames / fps
-
-            if duration_seconds < 600: # 10 min under == 5 cut
-                unit_frame = total_frames // 5
-                j = 1
-                while j < 6:
-                    return_value = still_image_save(j, unit_frame, hashcode, num_video_album_video)
-                    if return_value is not None:
-                        list_still.append(return_value)
-                    j = j + 1
-            elif duration_seconds >= 600 and duration_seconds < 3000: # 10 ~ 30 min  == 10 cut
-                unit_frame = total_frames // 10
-                j = 1
-                while j < 11:
-                    return_value = still_image_save(j, unit_frame, hashcode, num_video_album_video)
-                    if return_value is not None:
-                        list_still.append(return_value)
-                    j = j + 1
-            elif duration_seconds >= 3000 and duration_seconds < 9000: # 30 ~ 90 min  == 15 cut
-                unit_frame = total_frames // 15
-                j = 1
-                while j < 16:
-                    return_value = still_image_save(j, unit_frame, hashcode, num_video_album_video)
-                    if return_value is not None:
-                        list_still.append(return_value)
-                    j = j + 1
-            else: # 90 min ~ Over == 20 cut
-                unit_frame = total_frames // 20
-                j = 1
-                while j < 21:
-                    return_value = still_image_save(j, unit_frame, hashcode, num_video_album_video)
-                    if return_value is not None:
-                        list_still.append(return_value)
-                    j = j + 1
-                
         # List 업데이트
         if total_video_number == i + 1:
-            list_dict_video_album.append({"id": num_video_album_video, "video": video_name_original, "thumbnail":list_still[0]["path"], "still":list_still, "active":"true", "discard":"false"})
+            list_dict_video_album.append({"id": num_video_album_video, "video": video_name_original, "thumbnail":"default-t.png", "still":[{"time":0, "path":"default-t.png"}], "active":"true", "discard":"false"})
         else:
-            list_dict_video_album.append({"id": num_video_album_video, "video": video_name_original, "thumbnail":list_still[0]["path"], "still":list_still, "active":"false", "discard":"false"})
+            list_dict_video_album.append({"id": num_video_album_video, "video": video_name_original, "thumbnail":"default-t.png", "still":[{"time":0, "path":"default-t.png"}], "active":"false", "discard":"false"})
         i = i + 1
         num_video_album_video = num_video_album_video + 1
-
+    # default 이미지 discard 하기
+    for dict_video_album in list_dict_video_album:
+        if dict_video_album["id"] == 0:
+            dict_video_album["active"] = 'false'
+            dict_video_album["discard"] = 'true'
+    # db save and refresh  
+    data = {'list_dict_video_album': list_dict_video_album,}
+    Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+    q_video_album_selected.refresh_from_db()
     return True
 
 
 
-
-
-
-# 스틸 이미지 사이즈 조절
-def resize_still_image_file(img):
-    output_image_size = (300, 200)
-    max_size = 300
-    # Get the original dimensions
-    original_width, original_height = img.size
-    # Calculate the scaling factor for width and height
-    width_scale = max_size / original_width
-    height_scale = max_size / original_height
-    # Choose the smaller of the two scales to maintain aspect ratio
-    scale = min(width_scale, height_scale)
-    # Calculate the new dimensions
-    new_width = int(original_width * scale)
-    new_height = int(original_height * scale)
-    # Resize the image
-    img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-    bulky_resized_width, bulky_resized_height = img.size
-    # Calculate the center coordinates
-    center_x = bulky_resized_width / 2
-    center_y = bulky_resized_height / 2
-    # Calculate cropping box coordinates
-    left = center_x - output_image_size[0] / 2
-    top = center_y - output_image_size[1] / 2
-    right = center_x + output_image_size[0] / 2
-    bottom = center_y + output_image_size[1] / 2
-    # Crop the image
-    img = img.crop((left, top, right, bottom))
-    print(img.size)
-    return img
-
-
-# 비디오 파일로부터 썸네일, 스틸 이미지 생성하기
-def get_thumbnail_and_stillimages(q_vid, file_name):
-    
-    
-    video_file_name = str(q_vid.video_file)
-    video_file_name = video_file_name.split('/')[-1]
-    video_file_path = os.path.join(VIDEO_FILE_DIR, video_file_name) 
-    print('video_file_path', video_file_path)
-    dict_still_image_path_interval = {}
-    try:
-        clips = VideoFileClip(video_file_path)
-        print('clips', clips)
-        
-        frames = clips.reader.fps #frame per second
-        duration = clips.duration # seconds
-        print('duration', duration)
-        max_duration = int(duration)+1
-        if duration < 600:
-            # < 10 min
-            division = 5  
-        else:
-            if duration < 3600:
-                # < 60 min
-                division = 10
-            else:
-                if duration < 7200:
-                    # < 120 min
-                    division = 15
-                else:  
-                    # > 120 min
-                    division = 20
-        interval = max_duration // division
-        i = 1
-        while i < division + 1:
-            print('i', i)
-            interval_x = interval * i  
-            print('interval_x', interval_x)
-            frame = clips.get_frame(interval_x)
-
-            # Still 이미지 저장하기(장고DB Filefield 저장하지 않고 모두 모아서 JsonField에 저장한다.)
-            still_img_file_path = os.path.join(STILL_IMAGE_DIR, f"{q_vid.id}-still-{file_name}-{i}.jpg")
-            new_still_pil  = Image.fromarray(frame) # Get still image from specific video frame
-            # Remove Alpah channel befor saving
-            new_still_pil = new_still_pil.convert('RGB')
-            resized_still_pil = resize_still_image_file(new_still_pil)
-            resized_still_pil.save(still_img_file_path)
-            new_still_img_file_path = still_img_file_path.split('media/')[-1]
-            dict_still_image_path_interval[i] = [new_still_img_file_path, interval_x]
-            # print('dict_still_image_path', dict_still_image_path)
-
-            # 비디오 중간지점에서 썸네일 하나 생성하기
-            if (division + 1)//2 == i:
-                print('# 비디오 중간지점에서 썸네일 하나 생성하기 시작')
-                cover_img_file_path = os.path.join(COVER_IMAGE_DIR, f"{q_vid.id}-cover-{file_name}-{i}.jpg")
-                thumbnail_img_file_path = os.path.join(THUMBNAIL_IMAGE_DIR, f"{q_vid.id}-thumbnail-{file_name}-{i}.jpg")
-                
-                new_frame_image = Image.fromarray(frame)
-                new_frame_image = new_frame_image.convert('RGB')
-                cover_pil, thumbnail_pil  = resize_pil_image_for_cover_and_thumbnail_pil(new_frame_image)
-
-                # 커버이미지 및 썸네일 이미지 저장
-                print('# 커버이미지 및 썸네일 이미지 저장', q_vid.image_cover, q_vid.image_thumbnail )
-                image_cover_path = str(q_vid.image_cover)
-                image_thumbnail_path = str(q_vid.image_thumbnail)
-                if image_cover_path is None or image_cover_path == '':
-                    print('# 커버이미지 저장')
-                    cover_pil.save(cover_img_file_path)
-                    new_cover_img_file_path = cover_img_file_path.split('media/')[-1]
-                    data = {
-                        'image_cover': new_cover_img_file_path,
-                    }
-                    Video_Album_Vid.objects.filter(id=q_vid.id).update(**data)
-                    q_vid.refresh_from_db()
-
-                if image_thumbnail_path is None or image_thumbnail_path == '':
-                    print('# 썸네일 이미지 저장')
-                    thumbnail_pil.save(thumbnail_img_file_path)
-                    new_thumbnail_img_file_path = thumbnail_img_file_path.split('media/')[-1]
-                    data = {
-                        'image_thumbnail': new_thumbnail_img_file_path,
-                    }
-                    Video_Album_Vid.objects.filter(id=q_vid.id).update(**data)
-                    q_vid.refresh_from_db()
-            i = i + 1
-    except:
-        data = {
-            'image_cover': NO_IMAGE_PATH,
-            'image_thumbnail': NO_IMAGE_PATH,
-        }
-        Video_Album_Vid.objects.filter(id=q_vid.id).update(**data)
-        q_vid.refresh_from_db()
-        dict_still_image_path_interval = None
-
-    data = {
-        'list_still_image': dict_still_image_path_interval
-    }
-    print('list_still_image', dict_still_image_path_interval)
-    Video_Album_Vid.objects.filter(id=q_vid.id).update(**data)
-    return True
-
-    
-# Video Album Vidoe File 저장하기
-def save_video_album_files_to_db(q_selected_video_album, videos):
-    # BASE_DIR = settings.MEDIA_ROOT
-    # BASE_UPLOAD_DIR = os.path.join(BASE_DIR, "uploads") 
-    # VIDEO_ALBUM_DIR = os.path.join(BASE_UPLOAD_DIR, "video_album") 
-    # VIDEO_FILE_DIR = os.path.join(VIDEO_ALBUM_DIR, "video_files") 
-    # SUBTITLE_FILE_DIR = os.path.join(VIDEO_ALBUM_DIR, "subtitle_files") 
-    # COVER_IMAGE_DIR = os.path.join(VIDEO_ALBUM_DIR, "cover_images") 
-    # THUMBNAIL_IMAGE_DIR = os.path.join(VIDEO_ALBUM_DIR, "thumbnail_images") 
-    # STILL_IMAGE_DIR = os.path.join(VIDEO_ALBUM_DIR, "still_images") 
-
-    # # 폴더 내 파일 이름 리스트화 및 동일파일이름 체크
-    # list_album_file_name = []
-    # file_names = os.listdir(VIDEO_FILE_DIR)
-    # for file_name in file_names:
-    #     list_album_file_name.append(file_name)
-
-    title = q_selected_video_album.title
-    actor_name = q_selected_video_album.actor_name
-
-    list_dict_video_album = q_selected_video_album.list_dict_video_album
-    if list_dict_video_album is not None and len(list_dict_video_album) > 0:
-        for dict_video_album in list_dict_video_album:
-            dict_video_album["active"] = "false"
-        data = {'list_dict_video_album': list_dict_video_album,}
-        Video_Album.objects.filter(id=q_selected_video_album.id).update(**data)
-        q_selected_video_album.refresh_from_db()
-    else:
-        list_dict_video_album = []
-    num_video_album_video = len(list_dict_video_album)
+def save_video_album_video_still_images(q_video_album_selected, dict_video_album):
     # get base info
-    # hashcode = q_selected_video_album.hashcode
-    # if hashcode is None:
-    #     hashcode = hashcode_generator()
-    #     data = {'hashcode': hashcode}
-    #     Video_Album.objects.filter(id=q_selected_video_album.id).update(**data)
-    #     q_selected_video_album.refresh_from_db()
-    
-    total_video_number = len(videos)
-    i = 0
-    for file in videos:    
-        if image_cover_path is None or image_cover_path == '':
-            print('앨범에 커버 없음, 영상프레임에서 뽑아써야함')
-            vid_image_cover = None
+    hashcode = q_video_album_selected.hashcode
+    if hashcode is None:
+        hashcode = hashcode_generator()
+        data = {'hashcode': hashcode}
+        Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+        q_video_album_selected.refresh_from_db()
+    file_video_name = dict_video_album["video"]
+    file_video_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, file_video_name)
+    video_id = dict_video_album["id"]
+
+    # Function to resize and pad the frame
+    def resize_and_pad(frame, target_width, target_height, pad_color):
+        # Get the original dimensions
+        original_height, original_width = frame.shape[:2]
+        # Compute the scaling factor and new dimensions
+        scale_width = target_width / original_width
+        scale_height = target_height / original_height
+        scale = min(scale_width, scale_height)
+        # Compute the new width and height to maintain aspect ratio
+        new_width = int(original_width * scale)
+        new_height = int(original_height * scale)
+        # Resize the frame
+        resized_frame = cv2.resize(frame, (new_width, new_height))
+        # Compute the padding for top/bottom and left/right
+        pad_left = (target_width - new_width) // 2
+        pad_right = target_width - new_width - pad_left
+        pad_top = (target_height - new_height) // 2
+        pad_bottom = target_height - new_height - pad_top
+        # Add padding
+        padded_frame = cv2.copyMakeBorder(
+            resized_frame,
+            pad_top,
+            pad_bottom,
+            pad_left,
+            pad_right,
+            cv2.BORDER_CONSTANT,
+            value=pad_color
+        )
+        return padded_frame
+
+    def still_image_save(j, unit_frame, hashcode, video_id, fps):
+        cap.set(cv2.CAP_PROP_POS_FRAMES, unit_frame*j)
+        ret, frame = cap.read()
+        # Padding color (black in this case)
+        pad_color = (255, 255, 255)  # (B, G, R)
+        target_width = 640
+        target_height = 360
+        # Resize and pad the frame
+        frame = resize_and_pad(frame, target_width, target_height, pad_color)
+        # Save
+        if ret:
+            # Save the frame as an image file
+            video_still_path = f'{hashcode}-s-{video_id}-{j}.jpg'
+            file_still_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_still_path)
+            # save Frame
+            cv2.imwrite(file_still_path, frame)
+            timestamp = (j*unit_frame) // fps
+            return {"time":timestamp, "path":video_still_path}
         else:
-            print('앨범에 커버 있음, Vid에 재활용')
-            vid_image_cover = q_selected_album.image_cover
-            
-        if image_thumbnail_path is None or image_thumbnail_path == '':
-            print('앨범에 썸네일 없음, 영상프레임에서 뽑아써야함')
-            vid_image_thumbnail = None
-        else:
-            print('앨범에 썸네일 있음, Vid에 재활용')
-            vid_image_thumbnail = q_selected_album.image_thumbnail
-            
+            return None
         
-    if image_cover_path is None or image_cover_path == '':
-        print('앨범에 커버 없음, 영상프레임에서 뽑아써 저장하기')
-        album_image_cover = q_vid.image_cover
-    else:
-        album_image_cover= q_selected_album.image_cover
-    if image_thumbnail_path is None or image_thumbnail_path == '':
-        print('앨범에 썸네일 없음, 영상프레임에서 뽑아써 저장하기')
-        album_image_thumbnail = q_vid.image_thumbnail
-    else:
-        album_image_thumbnail= q_selected_album.image_thumbnail
-    data = {
-        'list_album_video_id': list_album_video_id,
-        
-    }
-    Video_Album.objects.filter(id=q_selected_album.id).update(**data)
-    q_selected_album.refresh_from_db()
-    return q_selected_album
+    # Still 이미지 확보
+    list_still = []
+    cap = cv2.VideoCapture(file_video_path)
+    if cap.isOpened():
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        duration_seconds = total_frames / fps
+
+        if duration_seconds < 600: # 10 min under == 5 cut
+            unit_frame = total_frames // 5
+            print('5 unit_frame ', unit_frame)
+            j = 1
+            while j < 6:
+                print('j', j)
+                return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
+                if return_value is not None:
+                    list_still.append(return_value)
+                j = j + 1
+        elif duration_seconds >= 600 and duration_seconds < 3000: # 10 ~ 30 min  == 10 cut
+            unit_frame = total_frames // 10
+            print('10 unit_frame ', unit_frame)
+            j = 1
+            while j < 11:
+                print('j', j)
+                return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
+                if return_value is not None:
+                    list_still.append(return_value)
+                j = j + 1
+        elif duration_seconds >= 3000 and duration_seconds < 9000: # 30 ~ 90 min  == 15 cut
+            unit_frame = total_frames // 15
+            print('15 unit_frame ', unit_frame)
+            j = 1
+            while j < 16:
+                print('j', j)
+                return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
+                if return_value is not None:
+                    list_still.append(return_value)
+                j = j + 1
+        else: # 90 min ~ Over == 20 cut
+            unit_frame = total_frames // 20
+            print('20 unit_frame ', unit_frame)
+            j = 1
+            while j < 21:
+                print('j', j)
+                return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
+                if return_value is not None:
+                    list_still.append(return_value)
+                j = j + 1
+
+    # Dict_video_album 업데이트
+    dict_video_album["thumbnail"] = list_still[0]["path"]
+    dict_video_album["still"] = list_still
     
+    return dict_video_album
+
+
+
+
+
+
+
+
+
+
+

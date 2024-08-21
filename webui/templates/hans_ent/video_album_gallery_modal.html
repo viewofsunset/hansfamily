@@ -49,28 +49,56 @@
 			</div>
 
 			<div class="modal-body">
-			
+				[[ selected_video_album_video_id ]]
+				<hr>
+				[[ active_list_dict_video_album ]]
+				<hr>
+				[[ total_list_dict_video_album ]]
 				<!-- Selected Video Player -->
 
 				<div class="container">
 				
-					<div v-for="(item, index) in active_list_dict_video_album" :key="index">
-						<video width="1080" height="650" :poster="BASE_DIR_VIDEO+item.thumbnail" id="selected_video" controls crossorigin playsinline id="player">
-							<source :src="BASE_DIR_VIDEO+item.video" type="video/mp4" />
-						</video>   
+					<div v-if="selected_video_album_video_id == 0"> 
+						<!-- 리스트에서 앨범 대표 영상으로 접속 -->
+						<div v-for="(item, index) in active_list_dict_video_album" :key="index">
+							<video width="1080" height="650" :poster="BASE_DIR_VIDEO+item.thumbnail" id="selected_video" controls crossorigin playsinline id="player">
+								<source :src="BASE_DIR_VIDEO+item.video" type="video/mp4" />
+							</video>   
 
-						<hr v-if="check_video_player_expand == true">
-						<div v-if="check_video_player_expand == true">
-							<div class="stillimage-container">
-								<div v-for="(item_sub, index) in item.still" :key="index" class="stillimage-box">
-									<button @click="f_video_still_image_selected(item_sub.time)" class="btn" >
-										<img v-bind:src="BASE_DIR_VIDEO+item_sub.path"  width="110">
-									</button>
+							<hr v-if="check_video_player_expand == true">
+							<div v-if="check_video_player_expand == true">
+								<div class="stillimage-container">
+									<div v-for="(item_sub, index) in item.still" :key="index" class="stillimage-box">
+										<button @click="f_video_still_image_selected(item_sub.time)" class="btn" >
+											<img v-bind:src="BASE_DIR_VIDEO+item_sub.path"  width="110">
+										</button>
+									</div>
 								</div>
 							</div>
 						</div>
-						
 					</div>
+					<div v-else>
+						<!-- 앨범 내 특정 영상을 클릭하여 접속 -->
+						<div v-for="(item, index) in total_list_dict_video_album" :key="index">
+							<div v-if="item.id == selected_video_album_video_id">
+								<video width="1080" height="650" :poster="BASE_DIR_VIDEO+item.thumbnail" id="selected_video" controls crossorigin playsinline id="player">
+									<source :src="BASE_DIR_VIDEO+item.video" type="video/mp4" />
+								</video>   
+
+								<hr v-if="check_video_player_expand == true">
+								<div v-if="check_video_player_expand == true">
+									<div class="stillimage-container">
+										<div v-for="(item_sub, index) in item.still" :key="index" class="stillimage-box">
+											<button @click="f_video_still_image_selected(item_sub.time)" class="btn" >
+												<img v-bind:src="BASE_DIR_VIDEO+item_sub.path"  width="110">
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
 				</div>
 
 				
@@ -81,21 +109,12 @@
 					<hr>
 					<div class="gallery-container">
 						<div v-for="(item, index) in total_list_dict_video_album" :key="index" class="card" >
-							<button @click="f_steaming_video_player_modal(item.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-streaming-video-player-modal">
+							<button @click="f_select_video_album_video(item.id)" class="btn">
 								<span>
 									<img :src="BASE_DIR_VIDEO+item.thumbnail" width="200">
 								</span>
 								<div class="text-overlay">[[ item.id ]]</div>
 							</button>
-							
-							<div class="text-end">
-								<button @click="f_delete_video_album_vid(item.id)" class="btn" >
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
-										<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-										<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-									</svg>
-								</button>
-							</div>
 						</div>
 					</div>
 				</div>
@@ -104,7 +123,7 @@
 			</div>
 
 			<div class="modal-footer">
-				<button type="button" class="btn btn-warning btn-sm"  @click="f_delete_video_album_and_its_pic" data-bs-dismiss="modal" >Album Delete</button>
+				<button type="button" class="btn btn-warning btn-sm"  @click="f_delete_video_album" data-bs-dismiss="modal" >Album Delete</button>
 				&nbsp; 
 				<button type="button" class="btn btn-secondary" @click="f_modal_close" data-bs-dismiss="modal">Close</button>
 			</div>
@@ -128,27 +147,20 @@
 		delimiters: ["[[", "]]"],
 		data() {
 		return {
-            BASE_DIR_PICTURE : '',
+            BASE_DIR_VIDEO: '', 
 			
 			data_actor: {},
 			data_video_album: {},
 			list_dict_picture_album: [],
 			list_dict_video_album: [],
-            selected_video_album_id: '',
+            
 			selected_actor_id: '',
+			selected_video_album_id: '',
+			selected_video_album_video_id: '',
 			
-			selected_video_id: '',
-			selected_video_path:  '',
-			selected_dict_index: '',
-			input_text_title: '',
-
 			selected_video_source: '',
 
 			gallery_status_origin: false,
-
-            dict_album_key_fullsize_value_thumbnail_image_path: [],
-			list_album_thumbnail_url: [],
-
 			check_video_player_expand: true,
 		}
 		},
@@ -174,6 +186,7 @@
                 this.BASE_DIR_VIDEO = data['BASE_DIR_VIDEO']
 				this.data_actor = data['selected_serialized_data_actor']
 				this.data_video_album = data['selected_serialized_data_video_album']
+				this.selected_video_album_video_id = data['selected_video_album_video_id']
 				
                 if (Object.keys(this.data_actor).length > 0 ) {
 					this.selected_actor_id = this.data_actor['id']
@@ -185,6 +198,10 @@
 				}
 				
                 console.log('Video Album Gallery Modal로 정보 전송 완료', data)
+			},
+
+			f_select_video_album_video(event) {
+				this.selected_video_album_video_id = event
 			},
 			
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -219,7 +236,6 @@
 					{
 						'selected_serialized_data_actor': this.data_actor,
 						'selected_serialized_data_video_album': this.data_video_album,
-						'list_album_thumbnail_url': this.list_album_thumbnail_url,
 					}
 					)
 			},
@@ -271,14 +287,12 @@
             // 앨범 기능 수행
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			f_delete_video_album_pic(event) {
+			f_delete_video_album(event) {
 				console.log(event)
-				this.selected_video_path = event
 				const isConfirmed = window.confirm("정말 삭제하시겠습니까?");
 				if (isConfirmed) {
 					axios.post('/hans_ent_video_album_delete/', {
 						'button': 'remove_video_album_pic',
-						'selected_video_path': this.selected_video_path,
 						'selected_video_album_id': this.selected_video_album_id,
 					}, {
 					headers: {
@@ -289,26 +303,26 @@
 					.then((response) => {
 						this.data_video_album = response.data['selected_serialized_data_video_album']
 						this.data_actor = response.data['selected_serialized_data_actor']
-						this.dict_album_key_fullsize_value_thumbnail_image_path = response.data['dict_album_key_fullsize_value_thumbnail_image_path']
+						
 						this.selected_video_album_id = this.data_video_album['id']
 						this.selected_actor_id = this.data_actor['id']
 						console.log("사진 앨범 사진 삭제 완료", data)
 					})
 					.catch(() => {
-						console.log('Error! f_delete_video_album_pic')
+						console.log('Error! f_delete_video_album')
 					})
 				} else {
 					alert("삭제가 취소되었습니다.");
 				}
 			},
 
-			f_delete_video_album_and_its_pic() {
-				console.log('delete selected id album: ', this.selected_video_album_id)
+			f_delete_video_album_video() {
 				const isConfirmed = window.confirm("앨범에 등록된 사진들도 모두 삭제됩니다. 정말 삭제하시겠습니까?");
 				if (isConfirmed) {
                 	axios.post('/hans_ent_video_album_delete/', {
 						'button': 'remove_video_album',
 						'selected_video_album_id': this.selected_video_album_id,
+						'selected_video_album_video_id': this.selected_video_album_video_id,
 					}, {
 					headers: {
 						'Content-Type': 'multipart/form-data',
@@ -318,7 +332,7 @@
 					.then((response) => {
 						this.data_video_album = response.data['selected_serialized_data_video_album']
 						this.data_actor = response.data['selected_serialized_data_actor']
-						this.dict_album_key_fullsize_value_thumbnail_image_path = response.data['dict_album_key_fullsize_value_thumbnail_image_path']
+						
 						this.selected_video_album_id = this.data_video_album['id']
 						this.selected_actor_id = this.data_actor['id']
 						console.log("사진 앨범 삭제 완료", data)
@@ -332,9 +346,6 @@
 					}
 			},
 			
-			f_inputTextTitle(event) {
-				this.input_text_title = event.target.value
-			},
 
 			f_hans_ent_album_gallery_video_modal(event) {},
 
@@ -386,6 +397,7 @@
             },
 			
 		},
+
         computed: {
 			active_list_dict_picture_album() {
                 return this.list_dict_picture_album.filter(item => item.active === "true" && item.discard === "false")
@@ -406,9 +418,11 @@
 				return this.list_dict_video_album.filter(item => item.active === "true" && item.discard === "false")['video']
 			},
         },
+		
 		mounted: function() {
 			this.refreshData()
 		}
+
 	}).mount('#app-hans-ent-video-album-gallery-modal')
 
     // modal 화면에서 숨겨진 상태가 되면 실행되는 함수

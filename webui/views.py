@@ -402,46 +402,48 @@ def hans_ent_actor_upload_modal(request):
                 if q_actor is not None:
                     list_dict_profile_album = q_actor.list_dict_profile_album
                     # 이미지 삭제 프로세스
-                    check_discard_active_picture = False
-                    for dict_profile_album in list_dict_profile_album:
-                        if dict_profile_album["id"] == selected_profile_album_picture_id:
-                            # 커버이미지를 삭제하는 경우이면 Default를 커버로 지정하기 위해 플래그 올린다.
-                            if dict_profile_album["active"] == 'true':
-                                check_discard_active_picture = True
-                            # 서버어서 이미지 삭제하기
-                            if dict_profile_album["id"] != 0:
-                                # Default 이미지가 아닌 경우 삭제가능
-                                image_name_original = dict_profile_album["original"]
-                                image_name_cover = dict_profile_album["cover"]
-                                image_name_thumbnail = dict_profile_album["thumbnail"]
-                                file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_original)
-                                file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_cover)
-                                file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_thumbnail)
-                                print('file_path_o', file_path_o)
-                                if os.path.exists(file_path_o):
-                                    try:
-                                        os.remove(file_path_o)
-                                    except:
-                                        pass
-                                if os.path.exists(file_path_c):
-                                    try:
-                                        os.remove(file_path_c)
-                                    except:
-                                        pass
-                                if os.path.exists(file_path_t):
-                                    try:
-                                        os.remove(file_path_t)
-                                    except:
-                                        pass
-                                # 리스트에서 discard 처리하기
-                                dict_profile_album['active'] = 'false'
-                                dict_profile_album['discard'] = 'true'
-                    # Active true(커버이미지)를 삭제한 경우 Default이미지를 커버로 다시 등장시킨다.
-                    if check_discard_active_picture == True:
-                        for dict_profile_album in list_dict_profile_album:
-                            if dict_profile_album["id"] == 0:
-                                dict_profile_album["active"] = 'true'
-                                dict_profile_album["discard"] = 'false'
+                    dict_profile_album = list_dict_profile_album[selected_profile_album_picture_id]
+                    # 커버이미지를 삭제하는 경우이면 Default를 커버로 지정하기 위해 플래그 올린다.
+                    if dict_profile_album["active"] == 'true':
+                        check_discard_active_picture = True
+                    # 서버어서 이미지 삭제하기
+                    if dict_profile_album["id"] != 0:
+                        # Default 이미지가 아닌 경우 삭제가능
+                        image_name_original = dict_profile_album["original"]
+                        image_name_cover = dict_profile_album["cover"]
+                        image_name_thumbnail = dict_profile_album["thumbnail"]
+                        file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_original)
+                        file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_cover)
+                        file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_thumbnail)
+                        print('file_path_o', file_path_o)
+                        if os.path.exists(file_path_o):
+                            try:
+                                os.remove(file_path_o)
+                            except:
+                                pass
+                        if os.path.exists(file_path_c):
+                            try:
+                                os.remove(file_path_c)
+                            except:
+                                pass
+                        if os.path.exists(file_path_t):
+                            try:
+                                os.remove(file_path_t)
+                            except:
+                                pass
+                        # 리스트에서 discard 처리하기
+                        dict_profile_album['active'] = 'false'
+                        dict_profile_album['discard'] = 'true'
+                    # Active 최소 1개 유지, 마지막 이미지를 Activate시킨다. 모두 discard되었으면 default를 되살린다.
+                    count = sum(1 for d in list_dict_profile_album if d.get('active') == 'true')
+                    if count == 0:
+                        for dict_profile_album in list_dict_profile_album[::-1]:
+                            if dict_profile_album['discard'] == 'false':
+                                dict_profile_album['active'] = 'true'
+                                break
+                            if dict_profile_album['id'] == 0:
+                                dict_profile_album['active'] = 'true'
+                                dict_profile_album['discard'] = 'false'
                     # Query 저장 프로세스
                     data = {'list_dict_profile_album': list_dict_profile_album}
                     Actor.objects.filter(id=q_actor.id).update(**data)
@@ -1250,15 +1252,15 @@ def hans_ent_video_album_gallery_modal(request):
         print('======================================================================================================= 2')
         selected_serialized_data_actor = {}
         selected_serialized_data_video_album = {}
-        dict_album_key_fullsize_value_thumbnail_image_path = {}
-        list_album_thumbnail_url = []
-
+        
         # 받아야 하는 정보 수집하기 Actor or Album ##############################################
         selected_actor_id_str = request.POST.get('selected_actor_id')
         selected_video_album_id_str = request.POST.get('selected_video_album_id')
+        selected_video_album_video_id_str = request.POST.get('selected_video_album_video_id')
 
         selected_actor_id_str = None if selected_actor_id_str in LIST_STR_NONE_SERIES else selected_actor_id_str
         selected_video_album_id_str = None if selected_video_album_id_str in LIST_STR_NONE_SERIES else selected_video_album_id_str
+        selected_video_album_video_id_str = None if selected_video_album_video_id_str in LIST_STR_NONE_SERIES else selected_video_album_video_id_str
         
         if selected_actor_id_str is not None and selected_actor_id_str != '':
             selected_actor_id = int(selected_actor_id_str)
@@ -1283,12 +1285,19 @@ def hans_ent_video_album_gallery_modal(request):
             print('q_actor', q_actor)
             selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
 
+        if selected_video_album_video_id_str is not None:
+            selected_video_album_video_id = int(selected_video_album_video_id_str)
+        else:
+            selected_video_album_video_id = 0
+        
+        print('selected_video_album_video_id', selected_video_album_video_id)
         jsondata = {
             'BASE_DIR_VIDEO': BASE_DIR_VIDEO,
             'selected_serialized_data_actor': selected_serialized_data_actor,
             'selected_serialized_data_video_album': selected_serialized_data_video_album,
+            'selected_video_album_video_id': selected_video_album_video_id,
         }
-        # print('jsondata', jsondata)
+        print('jsondata', jsondata)
         print('======================================================================================================= 3')
         return JsonResponse(jsondata, safe=False)
 
@@ -1371,27 +1380,59 @@ def hans_ent_video_album_upload_modal(request):
             if q_video_album_selected is not None:
                 if q_actor is None:
                     q_actor = q_video_album_selected.main_actor
+                
         else:
             q_video_album_selected = None 
         
-        # 앨범 통으로 삭제하기
-        if request.POST.get('button') == 'video_album_delete':
-            print('# 앨범 통으로 삭제하기', q_video_album_selected)
-            if q_video_album_selected is not None:
-                list_dict_video_album = q_video_album_selected.list_dict_video_album
-                if list_dict_video_album is not None and len(list_dict_video_album) > 1:
-                    # 앨범에 등록된 Video 삭제하기
-                    for dict_video_album in list_dict_video_album:
-                        # 서버어서 이미지 삭제하기
-                        if dict_video_album["id"] != 0:
+        # 앨범 비디오 Still 이미지 생성하기
+        if request.POST.get('button') == 'generate_video_still_image':
+            if selected_video_album_video_id_str is not None and selected_video_album_video_id_str != '':
+                selected_video_album_video_id = int(selected_video_album_video_id_str)
+                if q_video_album_selected is not None:
+                    list_dict_video_album = q_video_album_selected.list_dict_video_album
+                    if len(list_dict_video_album) > 1:
+                        for dict_video_album in list_dict_video_album:
+                            if dict_video_album['id'] == selected_video_album_video_id and dict_video_album["id"] != 0:
+                                if dict_video_album['thumbnail'] == 'default-t.png':
+                                    # still image 작업 시작
+                                    dict_video_album = save_video_album_video_still_images(q_video_album_selected, dict_video_album)
+                                    pass
+                            data = {'list_dict_video_album': list_dict_video_album}
+                            Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+                            q_video_album_selected.refresh_from_db()
+
+        # 앨범 커버 이미지 변경하기
+        if request.POST.get('button') == 'change_video_album_cover_image':
+            print('# 앨범 커버 이미지 변경하기')
+            if selected_video_album_picture_id_str is not None and selected_video_album_picture_id_str != '':
+                selected_video_album_picture_id = int(selected_video_album_picture_id_str)
+                if q_video_album_selected is not None:
+                    list_dict_picture_album = q_video_album_selected.list_dict_picture_album
+                    # acitve 모두 false 변경 및 선택된 이미지만 Active true로 변경
+                    for dict_picture_album in list_dict_picture_album:
+                        dict_picture_album['active'] = 'false'
+                        if dict_picture_album['id'] == selected_video_album_picture_id:
+                            dict_picture_album['active'] = 'true'
+                    data = {'list_dict_picture_album': list_dict_picture_album}
+                    Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+                    q_video_album_selected.refresh_from_db()
+        
+        # 앨범 커버 이미지 삭제하기(선택한 이미지만)
+        if request.POST.get('button') == 'remove_video_album_cover_image':
+            print('# 앨범 커버 이미지 삭제하기')
+            if selected_video_album_picture_id_str is not None and selected_video_album_picture_id_str != '':
+                selected_video_album_picture_id = int(selected_video_album_picture_id_str)
+                if q_video_album_selected is not None:
+                    list_dict_picture_album = q_video_album_selected.list_dict_picture_album
+                    for dict_picture_album in list_dict_picture_album:
+                        if dict_picture_album["id"] == selected_video_album_picture_id and dict_picture_album["id"] != 0:
                             # Default 이미지가 아닌 경우 삭제가능
-                            image_name_original = dict_video_album["original"]
-                            image_name_cover = dict_video_album["cover"]
-                            image_name_thumbnail = dict_video_album["thumbnail"]
+                            image_name_original = dict_picture_album["original"]
+                            image_name_cover = dict_picture_album["cover"]
+                            image_name_thumbnail = dict_picture_album["thumbnail"]
                             file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_original)
                             file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_cover)
                             file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_thumbnail)
-                            print('file_path_o', file_path_o)
                             if os.path.exists(file_path_o):
                                 try:
                                     os.remove(file_path_o)
@@ -1408,8 +1449,128 @@ def hans_ent_video_album_upload_modal(request):
                                 except:
                                     pass
                             # 리스트에서 discard 처리하기
+                            dict_picture_album['active'] = 'false'
+                            dict_picture_album['discard'] = 'true'
+                    # Active 최소 1개 유지, 마지막 이미지를 Activate시킨다. 모두 discard되었으면 default를 되살린다.
+                    count = sum(1 for d in list_dict_picture_album if d.get('active') == 'true')
+                    if count == 0:
+                        for dict_picture_album in list_dict_picture_album[::-1]:
+                            if dict_picture_album['discard'] == 'false':
+                                dict_picture_album['active'] = 'true'
+                                break
+                            if dict_picture_album['id'] == 0:
+                                dict_picture_album['active'] = 'true'
+                                dict_picture_album['discard'] = 'false'
+                    # Query 저장 프로세스
+                    data = {
+                        'list_dict_picture_album': list_dict_picture_album,
+                        }
+                    Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+                    q_video_album_selected.refresh_from_db()
+        
+        # 앨범 비디오 삭제하기(선택한 비디오만)
+        if request.POST.get('button') == 'remove_video_album_video':
+            print('# 앨범 이미지 삭제하기')
+            if selected_video_album_video_id_str is not None and selected_video_album_video_id_str != '':
+                selected_video_album_video_id = int(selected_video_album_video_id_str)
+                if q_video_album_selected is not None:
+                    list_dict_video_album = q_video_album_selected.list_dict_video_album
+                    for dict_video_album in list_dict_video_album:
+                        if dict_video_album['id'] == selected_video_album_video_id and dict_video_album["id"] != 0:
+                            # Default 이미지가 아닌 경우 삭제가능
+                            file_name_video = dict_video_album["video"]
+                            file_path_video = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, file_name_video)
+                            if os.path.exists(file_path_video):
+                                try:
+                                    os.remove(file_path_video)
+                                except:
+                                    pass
+                            list_dict_file_name_still = dict_video_album["still"]
+                            for dict_file_name_still in list_dict_file_name_still:
+                                file_name_still = dict_file_name_still["path"]
+                                file_path_still = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, file_name_still)
+                                if os.path.exists(file_path_still):
+                                    try:
+                                        os.remove(file_path_still)
+                                    except:
+                                        pass
+                            # 리스트에서 discard 처리하기
                             dict_video_album['active'] = 'false'
                             dict_video_album['discard'] = 'true'
+                    # Active 최소 1개 유지, 마지막 이미지를 Activate시킨다. 모두 discard되었으면 default를 되살린다.
+                    count = sum(1 for d in list_dict_video_album if d.get('active') == 'true')
+                    if count == 0:
+                        for dict_video_album in list_dict_video_album[::-1]:
+                            if dict_video_album['discard'] == 'false':
+                                dict_video_album['active'] = 'true'
+                                break
+                            if dict_video_album['id'] == 0:
+                                dict_video_album['active'] = 'true'
+                                dict_video_album['discard'] = 'false'
+                    # Query 저장 프로세스
+                    data = {'list_dict_video_album': list_dict_video_album}
+                    Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+                    q_video_album_selected.refresh_from_db() 
+
+        # 앨범 통으로 삭제하기
+        if request.POST.get('button') == 'remove_video_album':
+            print('# 앨범 통으로 삭제하기', q_video_album_selected)
+            if q_video_album_selected is not None:
+                # 앨범에 등록된 cover 이미지 삭제하기
+                list_dict_picture_album = q_video_album_selected.list_dict_picture_album
+                if list_dict_picture_album is not None and len(list_dict_picture_album) > 1:
+                    for dict_picture_album in list_dict_picture_album :
+                        if dict_picture_album["id"] != 0:
+                            # Default 이미지가 아닌 경우 삭제가능
+                            image_name_original = dict_picture_album["original"]
+                            image_name_cover = dict_picture_album["cover"]
+                            image_name_thumbnail = dict_picture_album["thumbnail"]
+                            file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_original)
+                            file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_cover)
+                            file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_thumbnail)
+                            if os.path.exists(file_path_o):
+                                try:
+                                    os.remove(file_path_o)
+                                except:
+                                    pass
+                            if os.path.exists(file_path_c):
+                                try:
+                                    os.remove(file_path_c)
+                                except:
+                                    pass
+                            if os.path.exists(file_path_t):
+                                try:
+                                    os.remove(file_path_t)
+                                except:
+                                    pass
+                            # 리스트에서 discard 처리하기
+                            dict_picture_album['active'] = 'false'
+                            dict_picture_album['discard'] = 'true'
+                # 앨범에 등록된 Video 관련 파일 삭제하기                                    
+                list_dict_video_album = q_video_album_selected.list_dict_video_album
+                if list_dict_video_album is not None and len(list_dict_video_album) > 1:
+                    for dict_video_album in list_dict_video_album :
+                        if dict_video_album["id"] != 0:
+                            # 서버어서 이미지 삭제하기
+                            file_name_video = dict_video_album["video"]
+                            file_path_video = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, file_name_video)
+                            if os.path.exists(file_path_video):
+                                try:
+                                    os.remove(file_path_video)
+                                except:
+                                    pass
+                            list_dict_file_name_still = dict_video_album["still"]
+                            for dict_file_name_still in list_dict_file_name_still:
+                                file_name_still = dict_file_name_still["path"]
+                                file_path_still = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, file_name_still)
+                                if os.path.exists(file_path_still):
+                                    try:
+                                        os.remove(file_path_still)
+                                    except:
+                                        pass
+                        # 리스트에서 discard 처리하기
+                        dict_video_album['active'] = 'false'
+                        dict_video_album['discard'] = 'true'
                 # Query 저장 프로세스
                 data = {
                     'list_dict_video_album': list_dict_video_album,
@@ -1419,74 +1580,6 @@ def hans_ent_video_album_upload_modal(request):
                 q_video_album_selected.refresh_from_db()
                     
             return redirect('hans-ent-video-album-list')
-
-        # 앨범 커버 이미지 변경하기
-        if request.POST.get('button') == 'change_video_album_cover_image':
-            if selected_video_album_picture_id_str is not None and selected_video_album_picture_id_str != '':
-                selected_video_album_picture_id = int(selected_video_album_picture_id_str)
-                if q_video_album_selected is not None:
-                    list_dict_picture_album = q_video_album_selected.list_dict_picture_album
-                    # acitve 모두 false 변경
-                    for dict_picture_album in list_dict_picture_album:
-                        dict_picture_album['active'] = 'false'
-                        if dict_picture_album['id'] == selected_video_album_picture_id:
-                            dict_picture_album['active'] = 'true'
-                    data = {'list_dict_picture_album': list_dict_picture_album}
-                    Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
-                    q_video_album_selected.refresh_from_db()
-        
-        # 앨범 이미지 삭제하기
-        if request.POST.get('button') == 'remove_video_album_video':
-            print('# 앨범 이미지 삭제하기')
-            if selected_video_album_video_id_str is not None and selected_video_album_video_id_str != '':
-                selected_video_album_video_id = int(selected_video_album_video_id_str)
-                if q_video_album_selected is not None:
-                    list_dict_video_album = q_video_album_selected.list_dict_video_album
-                    # 이미지 삭제 프로세스
-                    check_discard_active_video = False
-                    for dict_video_album in list_dict_video_album:
-                        if dict_video_album["id"] == selected_video_album_video_id:
-                            # 커버이미지를 삭제하는 경우이면 Default를 커버로 지정하기 위해 플래그 올린다.
-                            if dict_video_album["active"] == 'true':
-                                check_discard_active_video = True
-                            # 서버어서 이미지 삭제하기
-                            if dict_video_album["id"] != 0:
-                                # Default 이미지가 아닌 경우 삭제가능
-                                image_name_original = dict_video_album["original"]
-                                image_name_cover = dict_video_album["cover"]
-                                image_name_thumbnail = dict_video_album["thumbnail"]
-                                file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_original)
-                                file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_cover)
-                                file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_thumbnail)
-                                print('file_path_o', file_path_o)
-                                if os.path.exists(file_path_o):
-                                    try:
-                                        os.remove(file_path_o)
-                                    except:
-                                        pass
-                                if os.path.exists(file_path_c):
-                                    try:
-                                        os.remove(file_path_c)
-                                    except:
-                                        pass
-                                if os.path.exists(file_path_t):
-                                    try:
-                                        os.remove(file_path_t)
-                                    except:
-                                        pass
-                                # 리스트에서 discard 처리하기
-                                dict_video_album['active'] = 'false'
-                                dict_video_album['discard'] = 'true'
-                    # Active true(커버이미지)를 삭제한 경우 Default이미지를 커버로 다시 등장시킨다.
-                    if check_discard_active_video == True:
-                        for dict_video_album in list_dict_video_album:
-                            if dict_video_album["id"] == 0:
-                                dict_video_album["active"] = 'true'
-                                dict_video_album["discard"] = 'false'
-                    # Query 저장 프로세스
-                    data = {'list_dict_video_album': list_dict_video_album}
-                    Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
-                    q_video_album_selected.refresh_from_db() 
 
         # 업로드 타이틀 정보 저장하기
         if input_text_title_str is not None and input_text_title_str != '':
@@ -1632,7 +1725,7 @@ def hans_ent_video_album_upload_modal(request):
         
         if q_actor is not None:
             selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
-
+            
         jsondata = {
             'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
             'BASE_DIR_VIDEO': BASE_DIR_VIDEO,
