@@ -523,9 +523,7 @@ def save_picture_album_images(q_picture_album_selected, images):
     
 
 
-
-
-# Video Album 이미지/썸네일 저장하기
+# Video Album 커버이미지 저장하기
 def save_video_album_images(q_video_album_selected, images):
     """
         Video Album은
@@ -609,10 +607,7 @@ def save_video_album_images(q_video_album_selected, images):
     return True
 
 
-
-
-
-# Video Album Video / Still image 저장하기
+# Video Album Video 저장하기
 def save_video_album_videos(q_video_album_selected, videos):
     print('# Video Album Video / Still image 저장하기')
     """
@@ -681,7 +676,7 @@ def save_video_album_videos(q_video_album_selected, videos):
     return True
 
 
-
+# Video Album Still image 저장하기
 def save_video_album_video_still_images(q_video_album_selected, dict_video_album):
     # get base info
     hashcode = q_video_album_selected.hashcode
@@ -736,12 +731,15 @@ def save_video_album_video_still_images(q_video_album_selected, dict_video_album
         # Save
         if ret:
             # Save the frame as an image file
-            video_still_path = f'{hashcode}-s-{video_id}-{j}.jpg'
-            file_still_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_still_path)
-            # save Frame
-            cv2.imwrite(file_still_path, frame)
-            timestamp = (j*unit_frame) // fps
-            return {"time":timestamp, "path":video_still_path}
+            try:
+                video_still_path = f'{hashcode}-s-{video_id}-{j}.jpg'
+                file_still_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_still_path)
+                # save Frame
+                cv2.imwrite(file_still_path, frame)
+                timestamp = (j*unit_frame) // fps
+                return {"time":timestamp, "path":video_still_path}
+            except:
+                return None
         else:
             return None
         
@@ -759,7 +757,10 @@ def save_video_album_video_still_images(q_video_album_selected, dict_video_album
             j = 1
             while j < 6:
                 print('j', j)
-                return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
+                try:
+                    return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
+                except:
+                    pass
                 if return_value is not None:
                     list_still.append(return_value)
                 j = j + 1
@@ -769,7 +770,10 @@ def save_video_album_video_still_images(q_video_album_selected, dict_video_album
             j = 1
             while j < 11:
                 print('j', j)
-                return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
+                try:
+                    return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
+                except:
+                    pass
                 if return_value is not None:
                     list_still.append(return_value)
                 j = j + 1
@@ -779,7 +783,10 @@ def save_video_album_video_still_images(q_video_album_selected, dict_video_album
             j = 1
             while j < 16:
                 print('j', j)
-                return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
+                try:
+                    return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
+                except:
+                    pass
                 if return_value is not None:
                     list_still.append(return_value)
                 j = j + 1
@@ -789,7 +796,10 @@ def save_video_album_video_still_images(q_video_album_selected, dict_video_album
             j = 1
             while j < 21:
                 print('j', j)
-                return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
+                try:
+                    return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
+                except:
+                    pass
                 if return_value is not None:
                     list_still.append(return_value)
                 j = j + 1

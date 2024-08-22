@@ -353,7 +353,7 @@ def hans_ent_actor_upload_modal(request):
         input_text_name_str = request.POST.get('input_text_name')
         input_text_synonyms_str = request.POST.get('input_text_synonyms')
         input_date_birthday_str = request.POST.get('input_date_birthday')
-        input_text_height_str = request.POST.get('input_text_height')
+        input_number_height_str = request.POST.get('input_number_height')
         input_info_site_name_str = request.POST.get('input_info_site_name')
         input_info_site_url_str = request.POST.get('input_info_site_url')
         input_text_tag_str = request.POST.get('input_text_tag')
@@ -365,7 +365,7 @@ def hans_ent_actor_upload_modal(request):
         input_text_name_str = None if input_text_name_str in LIST_STR_NONE_SERIES else input_text_name_str
         input_text_synonyms_str = None if input_text_synonyms_str in LIST_STR_NONE_SERIES else input_text_synonyms_str
         input_date_birthday_str = None if input_date_birthday_str in LIST_STR_NONE_SERIES else input_date_birthday_str
-        input_text_height_str = None if input_text_height_str in LIST_STR_NONE_SERIES else input_text_height_str
+        input_number_height_str = None if input_number_height_str in LIST_STR_NONE_SERIES else input_number_height_str
         input_info_site_name_str = None if input_info_site_name_str in LIST_STR_NONE_SERIES else input_info_site_name_str
         input_info_site_url_str = None if input_info_site_url_str in LIST_STR_NONE_SERIES else input_info_site_url_str
         input_text_tag_str = None if input_text_tag_str in LIST_STR_NONE_SERIES else input_text_tag_str
@@ -376,7 +376,9 @@ def hans_ent_actor_upload_modal(request):
             q_actor = Actor.objects.get(id=selected_actor_id)
         else:
             q_actor = None 
-        
+            # Actor 쿼리 생성하기
+            if request.POST.get('button') == 'create_or_update':
+                q_actor = create_actor()
         print('q_actor', q_actor)
 
         # 앨범 커버 이미지 변경하기
@@ -517,12 +519,12 @@ def hans_ent_actor_upload_modal(request):
             q_actor.refresh_from_db()
         
         # 키 저장하기
-        if input_text_height_str is not None and input_text_height_str != '':
+        if input_number_height_str is not None and input_number_height_str != '':
             if q_actor is None:
                 q_actor = create_actor()
-            input_text_height_int = int(input_text_height_str)
+            input_number_height_int = int(input_number_height_str)
             data = {
-                'height': input_text_height_int,
+                'height': input_number_height_int,
             }
             Actor.objects.filter(id=q_actor.id).update(**data)
             q_actor.refresh_from_db()
@@ -561,12 +563,11 @@ def hans_ent_actor_upload_modal(request):
 
         # Actor Profile 이미지 업로드 저장하기
         if request.FILES:
-            if q_actor is None:
-                q_actor = create_actor()
-            # 앨범 갤러이 이미지 저장하기
-            images = request.FILES.getlist('images')
-            if images is not None and len(images) > 0:
-                save_actor_profile_images(q_actor, images)
+            if q_actor is not None:
+                # 앨범 갤러이 이미지 저장하기
+                images = request.FILES.getlist('images')
+                if images is not None and len(images) > 0:
+                    save_actor_profile_images(q_actor, images)
 
         # 선택 모델 삭제하기
         if request.POST.get('button') == 'actor_delete':

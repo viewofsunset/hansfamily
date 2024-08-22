@@ -69,7 +69,7 @@
 									[[ data_actor.name ]]
 								</strong>
 								<br>
-								<input type="text" @input="f_input_text_name" class="form-control" enabled id="id-input-text-name">
+								<input type="text" @input="f_input_text_name" class="form-control" enabled id="id-input-text-name" ref="ref_input_text_name">
 							</td>
                             <th  width="15%" style="background-color:rgb(240,240,240,0.5)">
 								나이 (생일) [[ input_date_birthday ]]
@@ -79,7 +79,7 @@
 									[[ data_actor.age ]] ([[ data_actor.date_birth ]])
 								</strong>
 								<br>
-								<input type="date" @input="f_input_date_birthday" class="form-control" enabled id="id-input-date-birthday">
+								<input type="date" @input="f_input_date_birthday" class="form-control" enabled id="id-input-date-birthday" ref="ref_input_date_birthday">
 							</td>
 						</tr>
 
@@ -93,17 +93,17 @@
                                     [[ item ]]
 								</strong>
 								<br>
-								<input type="text" @input="f_input_text_synonyms" class="form-control" enabled id="id-input-text-synonyms">
+								<input type="text" @input="f_input_text_synonyms" class="form-control" enabled id="id-input-text-synonyms" ref="ref_input_text_synonyms">
 							</td>
                             <th style="background-color:rgb(240,240,240,0.5)">
-								키 [[ input_text_height ]]
+								키 [[ input_number_height ]]
 							</th>
                             <td style="background-color:rgb(255,255,255,0.05)">
                                 <strong>
 									[[ data_actor.height ]]
 								</strong>
 								<br>
-								<input type="number" @input="f_input_text_height" class="form-control" enabled id="id-input-text-height">
+								<input type="number" @input="f_input_number_height" class="form-control" enabled id="id-input-number-height" ref="ref_input_number_height">
                             </td>
 						</tr>
 
@@ -113,9 +113,9 @@
 							<th style="background-color:rgb(240,240,240,0.5)">
 								관련 사이트
 								<br>
-								<input type="text" @input="f_input_info_site_name" class="form-control" enabled id="id-input-info-site-name">
+								<input type="text" @input="f_input_info_site_name" class="form-control" enabled id="id-input-info-site-name" ref="ref_input_info_site_name">
 								<br>
-								<input type="text" @input="f_input_info_site_url" class="form-control" enabled id="id-input-info-site-url">
+								<input type="text" @input="f_input_info_site_url" class="form-control" enabled id="id-input-info-site-url" ref="ref_input_info_site_url">
 							</th>
 							<td style="background-color:rgb(255,255,255,0.05)">
                                 <div v-for="item in data_actor.list_dict_info_url" class="card" >
@@ -127,7 +127,7 @@
                             <th style="background-color:rgb(240,240,240,0.5)">
 								Tag
 								<br>
-								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id-input-text-tag">
+								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id-input-text-tag" ref="ref_input_text_tag">
 							</th>
                             <td style="background-color:rgb(255,255,255,0.05)">
                                 <div v-for="item in data_actor.tags" class="card" >
@@ -201,7 +201,12 @@
 								</div>
 							</td>
 							<td style="background-color:rgb(255,255,255,0.05)">
-								<input type="file" @change="f_file_actor_images_select" multiple class="form-control" id="id_upload_album_image_to_db">
+								<div v-if="status_create == true">
+									배우 생성을 먼저 하세요
+								</div>
+								<div v-else>
+									<input type="file" @change="f_file_actor_images_select" multiple class="form-control" id="id_input_file_images" ref="ref_input_file_images">
+								</div>
 							</td>
 						</tr>
 					</table>
@@ -237,30 +242,29 @@
 					</button>
 				</div>
 				<!-- Registered Images -->
-				 <div v-if="list_dict_profile_album != null">
-					<div class="grid-container-picture-album-picture">
-						
-						<div v-for="(dict_profile_album, index) in total_list_dict_profile_album" :key="index" class="box-picture-album-picture">
-							<div v-if="status_cover_image_change === true && status_profile_album_picture_remove === false" >
-								<button @click="f_select_picture_as_cover(dict_profile_album.id)">
-									<img v-bind:src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
-									
-								</button>
-							</div>
-							<div v-else-if="status_cover_image_change === false && status_profile_album_picture_remove === true" >
-								<button @click="f_select_picture_to_remove(dict_profile_album.id)">
-									<img v-bind:src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
-								</button>
-							</div>
-							<div v-else>
-								<a :href="BASE_DIR_ACTOR+dict_profile_album.original" target="_blank">
-									<img v-bind:src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
-								</a>
-							</div>
+				<div class="grid-container-picture-album-picture">
+					
+					<div v-for="(dict_profile_album, index) in total_list_dict_profile_album" :key="index" class="box-picture-album-picture">
+						<div v-if="status_cover_image_change === true && status_profile_album_picture_remove === false" >
+							<button @click="f_select_picture_as_cover(dict_profile_album.id)">
+								<img v-bind:src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
+								
+							</button>
 						</div>
-						
+						<div v-else-if="status_cover_image_change === false && status_profile_album_picture_remove === true" >
+							<button @click="f_select_picture_to_remove(dict_profile_album.id)">
+								<img v-bind:src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
+							</button>
+						</div>
+						<div v-else>
+							<a :href="BASE_DIR_ACTOR+dict_profile_album.original" target="_blank">
+								<img v-bind:src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
+							</a>
+						</div>
 					</div>
+					
 				</div>
+				
 			
 			</div>
 
@@ -293,8 +297,8 @@
 			data_actor: {},
             list_dict_info_url: [],
 			list_dict_profile_album: [],
-			
 			list_serialized_data_actor: [],
+			
 			selected_actor_id: '',
 			selected_profile_album_id: '',
 			selected_profile_album_picture_id: '',
@@ -304,7 +308,7 @@
 			input_info_site_name: '',
 			input_info_site_url: '',
 			input_date_birthday: '',
-			input_text_height: '',
+			input_number_height: '',
 			input_text_tag: '',
 			
 			images:'',
@@ -346,8 +350,8 @@
 				this.data_actor = {}
 				this.list_dict_info_url = []
 				this.list_dict_profile_album = []
-				
 				this.list_serialized_data_actor = []
+				
 				this.selected_actor_id = ''
 				this.selected_profile_album_id = ''
 				this.selected_profile_album_picture_id = ''
@@ -357,7 +361,7 @@
 				this.input_info_site_name = ''
 				this.input_info_site_url = ''
 				this.input_date_birthday = ''
-				this.input_text_height = ''
+				this.input_number_height = ''
 				this.input_text_tag = ''
 				
 				this.images =''
@@ -371,14 +375,14 @@
 				this.status_profile_album_picture_remove = false 
 				this.status_create = false
 
-				$('#id-input-text-name').val("");
-				$('#id-input-date-birthday').val("");
-				$('#id-input-text-synonyms').val("");
-				$('#id-input-text-height').val("");
-				$('#id-input-info-site-name').val("");
-				$('#id-input-info-site-url').val("");
-				$('#id-input-text-tag').val("");
-				$('#id_upload_album_image_to_db').val("");
+				this.$refs.ref_input_text_name.value = '';
+				this.$refs.ref_input_date_birthday.value = '';
+				this.$refs.ref_input_text_synonyms.value = '';
+				this.$refs.ref_input_number_height.value = '';
+				this.$refs.ref_input_info_site_name.value = '';
+				this.$refs.ref_input_info_site_url.value = '';
+				this.$refs.ref_input_text_tag.value = '';
+				this.$refs.ref_input_file_images.value = '';
 				
 			},
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -409,9 +413,13 @@
                 .then((response) => {
 					this.status_cover_image_change = false
 					this.selected_profile_album_picture_id = ''
-					console.log(response.data)
+					
 					this.data_actor = response.data['selected_serialized_data_actor']
-					this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+					if (Object.keys(this.data_actor).length > 0 ) {
+						this.list_dict_info_url = this.data_actor['list_dict_info_url']
+						this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+						this.selected_actor_id = this.data_actor['id']
+					}
                 })
                 .catch(() => {
                     console.log('Error! f_select_picture_as_cover')
@@ -446,9 +454,13 @@
                 .then((response) => {
 					this.status_profile_album_picture_remove = false
 					this.selected_profile_album_picture_id = ''
-					console.log(response.data)
+					
 					this.data_actor = response.data['selected_serialized_data_actor']
-					this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+					if (Object.keys(this.data_actor).length > 0 ) {
+						this.list_dict_info_url = this.data_actor['list_dict_info_url']
+						this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+						this.selected_actor_id = this.data_actor['id']
+					}
                 })
                 .catch(() => {
                     console.log('Error! f_select_picture_to_remove')
@@ -478,7 +490,11 @@
 					})
 					.then((response) => {
 						this.data_actor = response.data['selected_serialized_data_actor']
-						this.selected_actor_id = this.data_actor['id']
+						if (Object.keys(this.data_actor).length > 0 ) {
+							this.list_dict_info_url = this.data_actor['list_dict_info_url']
+							this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+							this.selected_actor_id = this.data_actor['id']
+						}
 					})
 					.catch(() => {
 						console.log('Error! f_hans_ent_actor_profile_modal')
@@ -525,18 +541,6 @@
 				this.list_serialized_data_actor = null
 			},
 
-			// Actor 검색
-			f_actor_search_by_name(event) {
-				this.input_text_name = event.target.value
-				searchData = this.input_text_name
-                axios.get('/hans_ent_album_upload_actor_search/?keyword='+searchData)
-                .then((response) => {
-                    this.list_serialized_data_actor = response.data['list_serialized_data_actor']
-                })
-                .catch(() => {
-                    console.log('Error! f_search_keyword_update')
-                })
-			},
 			
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // 이미지 및 기타 정보 저장
@@ -555,8 +559,8 @@
 				this.input_date_birthday = event.target.value
 			},
 		
-			f_input_text_height(event) {
-				this.input_text_height = event.target.value
+			f_input_number_height(event) {
+				this.input_number_height = event.target.value
 			},
 
 			f_input_info_site_name(event) {
@@ -581,19 +585,16 @@
 					for (let i = 0; i < this.images.length; i++) {
 						formData.append('images', this.images[i]);
 				}}
+				formData.append('button', 'create_or_update');
 				formData.append('selected_actor_id', this.selected_actor_id);
 				formData.append('input_text_name', this.input_text_name)
 				formData.append('input_text_synonyms', this.input_text_synonyms)
 				formData.append('input_date_birthday', this.input_date_birthday)
-				formData.append('input_text_height', this.input_text_height)
+				formData.append('input_number_height', this.input_number_height)
 				formData.append('input_info_site_name', this.input_info_site_name)
 				formData.append('input_info_site_url', this.input_info_site_url)
 				formData.append('input_text_tag', this.input_text_tag)
-				
 				this.show_progress = true;
-
-				if (this.images == null) {
-				}
 
 				try {
 					await axios.post('/hans_ent_actor_upload_modal/', formData, {
@@ -606,10 +607,15 @@
 					})
 					.then((response) => {
 						this.f_reset_return()
+						this.status_create = false 
 						this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
 						this.data_actor = response.data['selected_serialized_data_actor']
-						this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
-						console.log('모델 정보 업로드완료! ', response.data)
+						
+						if (Object.keys(this.data_actor).length > 0 ) {
+							this.selected_actor_id = this.data_actor['id']
+							this.selected_actor_id = this.data_actor['id']
+							this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+						}
                     })
 					alert('Upload successful');
 				} catch (error) {
