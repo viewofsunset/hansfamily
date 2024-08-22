@@ -249,7 +249,12 @@
 								</div>
 							</td>
 							<td style="background-color:rgb(255,255,255,0.05)">
-								<input type="file" @change="f_file_album_images_select" multiple class="form-control" id="id_upload_album_image_to_db" ref="ref_upload_album_image_file">
+								<div v-if="status_create == false">
+									<input type="file" @change="f_file_album_images_select" multiple class="form-control" id="id_upload_album_image_to_db" ref="ref_upload_album_image_file">
+								</div>
+								<div v-else>
+									비디오 앨범을 먼저 생성하세요.
+								</div>
 							</td>
 						</tr>
 					</table>
@@ -269,7 +274,12 @@
 								</div>
 							</td>
 							<td style="background-color:rgb(255,255,255,0.05)">
-								<input type="file" @change="f_file_album_video_select" multiple class="form-control" id="id_upload_album_video_to_db" ref="ref_upload_album_video_file">
+								<div v-if="status_create == false">
+									<input type="file" @change="f_file_album_video_select" multiple class="form-control" id="id_upload_album_video_to_db" ref="ref_upload_album_video_file">
+								</div>
+								<div v-else>
+									비디오 앨범을 먼저 생성하세요.
+								</div>
 							</td>
 						</tr>
 					</table>
@@ -893,6 +903,7 @@
 						formData.append('videos', this.videos[i]);
 				}} else {}
 
+				formData.append('button', 'create_or_update');
 				formData.append('selected_video_album_id', this.selected_video_album_id);
 				formData.append('selected_actor_id', this.selected_actor_id);
 				formData.append('input_text_title', this.input_text_title);

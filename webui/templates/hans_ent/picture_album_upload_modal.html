@@ -710,7 +710,8 @@
 					for (let i = 0; i < this.videos.length; i++) {
 						formData.append('videos', this.videos[i]);
 				}} else {}
-
+				
+				formData.append('button', 'create_or_update');
 				formData.append('selected_picture_album_id', this.selected_picture_album_id);
 				formData.append('selected_actor_id', this.selected_actor_id);
 				formData.append('input_text_title', this.input_text_title);

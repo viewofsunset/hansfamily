@@ -55,9 +55,7 @@
 				<hr>
 				[[ total_list_dict_video_album ]]
 				<!-- Selected Video Player -->
-
-				<div class="container">
-				
+				<div class="video_container">
 					<div v-if="selected_video_album_video_id == 0"> 
 						<!-- 리스트에서 앨범 대표 영상으로 접속 -->
 						<div v-for="(item, index) in active_list_dict_video_album" :key="index">
@@ -99,10 +97,8 @@
 							</div>
 						</div>
 					</div>
-
 				</div>
 
-				
 
 				<!-- Registered Videos -->
 				
@@ -120,7 +116,6 @@
 					</div>
 				</div>
 
-
 			</div>
 
 			<div class="modal-footer">
@@ -135,6 +130,7 @@
 
 
 <script>
+	
 	var post_hans_ent_video_album_gallery_modal = createApp({
 		delimiters: ["[[", "]]"],
 		data() {
@@ -151,13 +147,16 @@
 			selected_video_album_video_id: '',
 			
 			selected_video_file_path: '',
+			startTime: '',
 			youtube_player: '',
 
 			gallery_status_origin: false,
 			check_video_player_expand: true,
 		}
 		},
+
 		methods: {
+				
 			refreshData() {
 				console.log('open modal for video create!!')
 				axios.get('/hans_ent_video_album_gallery_modal/')
@@ -189,6 +188,10 @@
 					this.list_dict_picture_album = this.data_video_album['list_dict_picture_album']
                     this.list_dict_video_album = this.data_video_album['list_dict_video_album']
 				}
+
+				// $("video")[0] == Video 택 안에 있는 myVideo
+				
+				// $($("video")[0])[0] == Video 택 안에 있는 첫 번째 소스
 
 				// $($("video")[0])[0].plyr.media.src=this.selected_video_file_path
                 console.log('Video Album Gallery Modal로 정보 전송 완료', data)
@@ -240,7 +243,6 @@
             // 비디오 기능 수행
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			
 			f_video_player_close() {
 				$("video")[0].pause();
 			},
@@ -256,6 +258,7 @@
 
 			f_video_still_image_selected(event) {
 				this.startTime = parseInt(event);
+				
 				if (!isNaN(this.startTime) && this.startTime >= 0 && this.startTime <= $("video")[0].duration) {
 					$("video")[0].currentTime = this.startTime; // Set the current time to the specified time
 					$("video")[0].play(); // Play the video
@@ -380,7 +383,7 @@
 			
 
 			f_modal_close() {
-				this.f_video_player_close()
+				$("video")[0].pause();
 			},
 		},
 
@@ -407,6 +410,9 @@
 		
 		mounted: function() {
 			this.refreshData()
+			
+			// Initialize Plyr
+			this.initPlyr();
 		}
 
 	}).mount('#app-hans-ent-video-album-gallery-modal')
@@ -417,7 +423,6 @@
 		// post_hans_ent_video_album_gallery_modal.f_reset_return()
 		// post_hans_ent_video_album_list.refreshData()
 		// console.log('앨범 갤러리 모달창 닫혔음!')
-		
 		$("video")[0].pause();
 	});
 
@@ -426,7 +431,10 @@
 
 
 <style>
-    
+    .video_container {
+		margin: 50px auto;
+		max-width: 500px;
+	}
     .image-center {
     display: block;
     margin-left: auto;
