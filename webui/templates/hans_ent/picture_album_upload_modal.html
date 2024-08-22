@@ -687,12 +687,7 @@
 			f_file_album_images_select(event) {
 				this.images = event.target.files;
 				if (this.images.length > 100) {
-					// const isImagesOver100 = window.confirm("등록하려는 사진은 한 번에 100장 이상 불가능 합니다.");
-					// console.log('100장이 넘었습니다.')
-					// trimmedList(images)
 					alert("over 100 picture cannot save!");
-					// this.images = images.slice(0, 99);
-					// console.log(this.images.length)
 					this.images = null;
 				}
 				console.log(this.images)

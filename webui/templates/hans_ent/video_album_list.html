@@ -219,6 +219,7 @@
                 // 비디오 갤러리 모달창으로 정보 보내기
                 f_hans_ent_video_album_gallery_modal(event) {
                     this.selected_video_album_id = event
+                    console.log('selected video album id ', event)
                     axios.post('/hans_ent_video_album_gallery_modal/', {
                         'selected_video_album_id': this.selected_video_album_id,
                     }, {
@@ -232,7 +233,7 @@
                         post_hans_ent_video_album_gallery_modal.f_sync_data_to_video_album_gallery_modal(response.data);
                     })
                     .catch(() => {
-                        console.log('Error! f_hans_ent_video_album_gallery_modal')
+                        console.log('Error! // 비디오 갤러리 모달창으로 정보 보내기')
                     })
                 },
 

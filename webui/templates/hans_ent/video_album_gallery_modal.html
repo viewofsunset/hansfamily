@@ -61,8 +61,8 @@
 					<div v-if="selected_video_album_video_id == 0"> 
 						<!-- 리스트에서 앨범 대표 영상으로 접속 -->
 						<div v-for="(item, index) in active_list_dict_video_album" :key="index">
-							<video width="1080" height="650" :poster="BASE_DIR_VIDEO+item.thumbnail" id="selected_video" controls crossorigin playsinline id="myVideo">
-								<source :src="BASE_DIR_VIDEO+item.video" type="video/mp4" id="player">
+							<video width="1080" height="650" :poster="BASE_DIR_VIDEO+item.thumbnail" controls crossorigin playsinline id="id_myVideo">
+								<source :src="BASE_DIR_VIDEO+item.video" type="video/mp4" id="id_myVideo_source">
 							</video>   
 
 							<hr v-if="check_video_player_expand == true">
@@ -82,8 +82,8 @@
 						<!-- 앨범 내 특정 영상을 클릭하여 접속 -->
 						<div v-for="(item, index) in total_list_dict_video_album" :key="index">
 							<div v-if="item.id == selected_video_album_video_id">
-								<video width="1080" height="650" :poster="BASE_DIR_VIDEO+item.thumbnail" id="selected_video" controls crossorigin playsinline id="myVideo">
-									<source :src="BASE_DIR_VIDEO+item.video" type="video/mp4" id="player">
+								<video width="1080" height="650" :poster="BASE_DIR_VIDEO+item.thumbnail" controls crossorigin playsinline id="id_myVideo">
+									<source :src="BASE_DIR_VIDEO+item.video" type="video/mp4" id="id_myVideo_source">
 								</video>   
 
 								<hr v-if="check_video_player_expand == true">
@@ -135,6 +135,12 @@
 
 
 <script>
+
+	// const player = new Plyr('video', {captions: {active: true}});
+	// window.player = player;
+
+	// var video = $("video")[0];
+	
 	var post_hans_ent_video_album_gallery_modal = createApp({
 		delimiters: ["[[", "]]"],
 		data() {
@@ -152,6 +158,7 @@
 			
 			selected_video_file_path: '',
 			youtube_player: '',
+			startTime: 0,
 
 			gallery_status_origin: false,
 			check_video_player_expand: true,
@@ -190,8 +197,9 @@
                     this.list_dict_video_album = this.data_video_album['list_dict_video_album']
 				}
 
-				// $($("video")[0])[0].plyr.media.src=this.selected_video_file_path
-                console.log('Video Album Gallery Modal로 정보 전송 완료', data)
+				this.f_remove_video_source()
+				this.f_load_video_source(this.list_dict_video_album)
+				console.log('Video Album Gallery Modal로 정보 전송 완료')
 			},
 
 			f_select_video_album_video(event) {
@@ -243,6 +251,7 @@
 			
 			f_video_player_close() {
 				$("video")[0].pause();
+				this.startTime = 0
 			},
 			
 			f_video_player_expand(event) {
@@ -262,6 +271,28 @@
 				} else {
 					alert('Please enter a valid time within the video duration.');
 				}
+			},
+
+			f_remove_video_source() {
+				// $("video")[0].pause();
+				// $($("video")[0]).find("source").remove();
+				var videoElement = document.getElementById('id_myVideo');
+				videoElement.pause();
+				videoElement.removeAttribute('src'); // empty source
+				videoElement.load();
+				this.startTime = 0
+				console.log('비디오 종료!')
+			},
+
+			
+			f_load_video_source(event) {
+				console.log('비디오 로딩!', this.BASE_DIR_VIDEO+event.filter(item => item.active === "true" && item.discard === "false")[0]['video'])
+				var videoElement = document.getElementById('id_myVideo');
+				// Create a new source element
+				var source = document.createElement('id_myVideo_source');
+				source.setAttribute('src', this.BASE_DIR_VIDEO+event.filter(item => item.active === "true" && item.discard === "false")[0]['video']);
+				source.setAttribute('type', 'video/mp4');
+				videoElement.appendChild(source);
 			},
 
 
@@ -414,11 +445,8 @@
     // modal 화면에서 숨겨진 상태가 되면 실행되는 함수
 
     $('#app-hans-ent-video-album-gallery-modal').on('hidden.bs.modal', function () {
-		// post_hans_ent_video_album_gallery_modal.f_reset_return()
-		// post_hans_ent_video_album_list.refreshData()
-		// console.log('앨범 갤러리 모달창 닫혔음!')
-		
-		$("video")[0].pause();
+		// $("video")[0].pause();
+		post_hans_ent_video_album_gallery_modal.f_remove_video_source()
 	});
 
 	
