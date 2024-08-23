@@ -866,10 +866,12 @@ def hans_ent_picture_album_upload_modal(request):
                     q_actor = q_picture_album_selected.main_actor
         else:
             q_picture_album_selected = None 
-            # Pictuer Album 쿼리 생성하기
-            if request.POST.get('button') == 'create_or_update':
+       
+        # Pictuer Album 쿼리 생성하기
+        if request.POST.get('button') == 'create_or_update':
+            if q_picture_album_selected is None:
                 q_picture_album_selected = create_picture_album()
-        
+
         # 앨범 통으로 삭제하기
         if request.POST.get('button') == 'picture_album_delete':
             print('# 앨범 통으로 삭제하기', q_picture_album_selected)
@@ -1110,10 +1112,15 @@ def hans_ent_picture_album_upload_modal(request):
             }
             MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
             q_mysettings_hansent.refresh_from_db()
-        
+
+            # main actor 등록
+            if q_picture_album_selected.main_actor is None:
+                data = {"main_actor": q_actor}
+                Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
+                q_picture_album_selected.refresh_from_db()
+
             # Data Serialize
             selected_serialized_data_picture_album = Picture_Album_Serializer(q_picture_album_selected, many=False).data
-            # dict_album_key_fullsize_value_thumbnail_image_path = get_dict_album_key_fullsize_value_thumbnail_image_path(q_picture_album_selected)  # 앨범에 등록된 이미지 표시정보(Path) 획득하기
         
         if q_actor is not None:
             selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
@@ -1410,8 +1417,10 @@ def hans_ent_video_album_upload_modal(request):
                     q_actor = q_video_album_selected.main_actor
         else:
             q_video_album_selected = None 
-            # Pictuer Album 쿼리 생성하기
-            if request.POST.get('button') == 'create_or_update':
+
+        # Pictuer Album 쿼리 생성하기
+        if request.POST.get('button') == 'create_or_update':
+            if q_video_album_selected is None:
                 q_video_album_selected = create_video_album()
         
         # 앨범 비디오 Still 이미지 생성하기
@@ -1683,7 +1692,6 @@ def hans_ent_video_album_upload_modal(request):
             Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
             q_video_album_selected.refresh_from_db()
 
-
         # 모델 선택하기
         if request.POST.get('button') == 'actor_select':
             if q_video_album_selected is None:
@@ -1713,6 +1721,7 @@ def hans_ent_video_album_upload_modal(request):
             if q_video_album_selected is not None:
                 # 앨범 갤러이 이미지 저장하기
                 images = request.FILES.getlist('images')
+                images = None if images in LIST_STR_NONE_SERIES else images
                 if images is not None and len(images) > 0:
                     save_video_album_images(q_video_album_selected, images)
 
@@ -1722,16 +1731,10 @@ def hans_ent_video_album_upload_modal(request):
             if q_video_album_selected is not None:
                 # 비디오 저장하기
                 videos = request.FILES.getlist('videos')
+                videos = None if videos in LIST_STR_NONE_SERIES else videos
                 if videos is not None and len(videos) > 0:
                     print('# 비디오 저장하기')
                     save_video_album_videos(q_video_album_selected, videos)
-
-        # 신규 Video Album 생성
-        if request.POST.get('button') == 'create_video_album':
-            q_actor = None 
-            q_video_album_selected = None
-            print('good luck~!')
-            pass
 
         # Data Serialization
         if q_video_album_selected is not None:
@@ -1747,7 +1750,13 @@ def hans_ent_video_album_upload_modal(request):
             }
             MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
             q_mysettings_hansent.refresh_from_db()
-        
+
+            # main actor 등록
+            if q_video_album_selected.main_actor is None:
+                data = {"main_actor": q_actor}
+                Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+                q_video_album_selected.refresh_from_db()
+            
             # Data Serialize
             selected_serialized_data_video_album = Video_Album_Serializer(q_video_album_selected, many=False).data
         
@@ -2279,7 +2288,13 @@ def hans_ent_music_album_upload_modal(request):
             }
             MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
             q_mysettings_hansent.refresh_from_db()
-        
+            
+            # main actor 등록
+            if q_music_album_selected.main_actor is None:
+                data = {"main_actor": q_actor}
+                Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+                q_music_album_selected.refresh_from_db()
+
             # Data Serialize
             selected_serialized_data_music_album = Music_Album_Serializer(q_music_album_selected, many=False).data
             # dict_album_key_fullsize_value_thumbnail_image_path = get_dict_album_key_fullsize_value_thumbnail_image_path(q_music_album_selected)  # 앨범에 등록된 이미지 표시정보(Path) 획득하기

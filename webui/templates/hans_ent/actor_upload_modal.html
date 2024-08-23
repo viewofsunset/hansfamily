@@ -69,7 +69,7 @@
 									[[ data_actor.name ]]
 								</strong>
 								<br>
-								<input type="text" @input="f_input_text_name" class="form-control" enabled id="id-input-text-name" ref="ref_input_text_name">
+								<input type="text" @input="f_input_text_name" class="form-control" enabled id="id_input_text_name" ref="ref_input_text_name">
 							</td>
                             <th  width="15%" style="background-color:rgb(240,240,240,0.5)">
 								나이 (생일) [[ input_date_birthday ]]
@@ -79,7 +79,7 @@
 									[[ data_actor.age ]] ([[ data_actor.date_birth ]])
 								</strong>
 								<br>
-								<input type="date" @input="f_input_date_birthday" class="form-control" enabled id="id-input-date-birthday" ref="ref_input_date_birthday">
+								<input type="date" @input="f_input_date_birthday" class="form-control" enabled id="id_input_date_birthday" ref="ref_input_date_birthday">
 							</td>
 						</tr>
 
@@ -93,7 +93,7 @@
                                     [[ item ]]
 								</strong>
 								<br>
-								<input type="text" @input="f_input_text_synonyms" class="form-control" enabled id="id-input-text-synonyms" ref="ref_input_text_synonyms">
+								<input type="text" @input="f_input_text_synonyms" class="form-control" enabled id="id_input_text_synonyms" ref="ref_input_text_synonyms">
 							</td>
                             <th style="background-color:rgb(240,240,240,0.5)">
 								키 [[ input_number_height ]]
@@ -103,7 +103,7 @@
 									[[ data_actor.height ]]
 								</strong>
 								<br>
-								<input type="number" @input="f_input_number_height" class="form-control" enabled id="id-input-number-height" ref="ref_input_number_height">
+								<input type="number" @input="f_input_number_height" class="form-control" enabled id="id_input_number_height" ref="ref_input_number_height">
                             </td>
 						</tr>
 
@@ -113,9 +113,9 @@
 							<th style="background-color:rgb(240,240,240,0.5)">
 								관련 사이트
 								<br>
-								<input type="text" @input="f_input_info_site_name" class="form-control" enabled id="id-input-info-site-name" ref="ref_input_info_site_name">
+								<input type="text" @input="f_input_info_site_name" class="form-control" enabled id="id_input_info_site_name" ref="ref_input_info_site_name">
 								<br>
-								<input type="text" @input="f_input_info_site_url" class="form-control" enabled id="id-input-info-site-url" ref="ref_input_info_site_url">
+								<input type="text" @input="f_input_info_site_url" class="form-control" enabled id="id_input_info_site_url" ref="ref_input_info_site_url">
 							</th>
 							<td style="background-color:rgb(255,255,255,0.05)">
                                 <div v-for="item in data_actor.list_dict_info_url" class="card" >
@@ -127,7 +127,7 @@
                             <th style="background-color:rgb(240,240,240,0.5)">
 								Tag
 								<br>
-								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id-input-text-tag" ref="ref_input_text_tag">
+								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id_input_text_tag" ref="ref_input_text_tag">
 							</th>
                             <td style="background-color:rgb(255,255,255,0.05)">
                                 <div v-for="item in data_actor.tags" class="card" >
@@ -226,9 +226,23 @@
 						</div>
 					</div>
 				</div>
+				
+				<!--
+					모달창 제어 버튼 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div class="modal-footer">
+					<div v-if="status_create == false">
+						<button type="button" class="btn btn-warning"  @click="f_select_actor_to_delete(selected_actor_id)" data-bs-dismiss="modal">Delete</button>
+					</div>
+					<button type="button" class="btn btn-secondary" @click="f_modal_close" data-bs-dismiss="modal">Close</button>
+					<div v-if="status_create == true">
+						<button type="button" class="btn btn-primary"  @click="f_upload_form" >Create</button>
+					</div>
+					<div v-else>
+						<button type="button" class="btn btn-primary"  @click="f_upload_form" >Upload</button>
+					</div>
+				</div>
 
-				
-				
 				
 				<!--
 					Actor Profile에 등록한 이미지 표시 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -268,18 +282,6 @@
 			
 			</div>
 
-			<div class="modal-footer">
-				<div v-if="status_create == false">
-					<button type="button" class="btn btn-warning"  @click="f_select_actor_to_delete(selected_actor_id)" data-bs-dismiss="modal">Delete</button>
-				</div>
-				<button type="button" class="btn btn-secondary" @click="f_modal_close" data-bs-dismiss="modal">Close</button>
-				<div v-if="status_create == true">
-					<button type="button" class="btn btn-primary"  @click="f_upload_form" >Create</button>
-				</div>
-				<div v-else>
-					<button type="button" class="btn btn-primary"  @click="f_upload_form" >Upload</button>
-				</div>
-			</div>
 		
 		</div>
 	</div>
@@ -606,8 +608,20 @@
 					this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
 					})
 					.then((response) => {
-						this.f_reset_return()
-						this.status_create = false 
+						this.progress_value = 0
+						this.progress_max = 100
+						this.progress_min = 0
+						this.show_progress = false
+						this.status_create = false
+						
+						$("#id_input_text_name").val("");
+						$("#id_input_date_birthday").val("");
+						$("#id_input_text_synonyms").val("");
+						$("#id_input_number_height").val("");
+						$("#id_input_info_site_name").val("");
+						$("#id_input_info_site_url").val("");
+						$("#id_input_text_tag").val("");
+
 						this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
 						this.data_actor = response.data['selected_serialized_data_actor']
 						

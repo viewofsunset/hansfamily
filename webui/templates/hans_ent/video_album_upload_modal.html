@@ -81,7 +81,7 @@
 									[[ data_video_album.title ]]
 								</strong>
 								<br>
-								<input type="text" @input="f_input_text_title" class="form-control" enabled id="id-input-text-title" ref="ref_input_text_title">
+								<input type="text" @input="f_input_text_title" class="form-control" enabled id="id_input_text_title_video" ref="ref_input_text_title">
 							</td>
 							<th style="background-color:rgb(240,240,240,0.5)" >
 								Score
@@ -97,7 +97,7 @@
 						-->
 						<tr>
 							<th style="background-color:rgb(240,240,240,0.5)">
-								Name [[ input_text_name ]]
+								Name [[ input_text_search_actor ]]
 							
 								<!-- Actor 커버 이미지 변경하기 -->
 								
@@ -127,13 +127,21 @@
 									Selected Model:
 									<strong> <h5>[[ data_actor.name ]] </h5> </strong>
 								</div>
-								<input type="text" @keyup.enter="f_actor_search_by_name" v-model="input_text_name" class="form-control" placeholder="Hit Enter Key for Search" id="id_input_text_search_actor_select" ref="ref_input_text_search_actor_select">
+								
+								<div v-if="status_create == false">
+									<input type="text" @keyup.enter="f_actor_search_by_name" v-model="input_text_search_actor" class="form-control" placeholder="Hit Enter Key for Search" id="id_input_text_search_actor_select" ref="ref_input_text_search_actor_select">
+								</div>
+								<div v-else>
+									비디오 앨범을 먼저 생성하세요.
+								</div>
 							</td>
 							<th style="background-color:rgb(240,240,240,0.5)">
 								등록된 Album 수
 							</th>
 							<td>
-								 
+								사진앨범: [[ total_list_dict_picture_album.length ]]
+								<br>
+								비디오앨범: [[ total_list_dict_video_album.length ]]
 							</td>
 						</tr>
 
@@ -149,7 +157,7 @@
 									[[ data_video_album.studio ]]
 								</strong>
 								<br>
-								<input type="text" @input="f_input_text_studio" class="form-control" enabled id="id-input-text-studio" ref="ref_input_text_studio">
+								<input type="text" @input="f_input_text_studio" class="form-control" enabled id="id_input_text_studio_video" ref="ref_input_text_studio">
 							</td>
 							<th style="background-color:rgb(240,240,240,0.5)">
 								Release Date [[ input_date_released ]]
@@ -159,7 +167,7 @@
 									[[ data_video_album.date_released ]]
 								</strong>
 								<br>
-								<input type="date" @input="f_input_date_released" class="form-control" enabled id="id-input-date-released" ref="ref_input_date_released">	
+								<input type="date" @input="f_input_date_released" class="form-control" enabled id="id_input_date_released_video" ref="ref_input_date_released">	
 							</td>
 						</tr>
 						
@@ -177,7 +185,7 @@
                                     [[ item ]]
                                 </div>
 								<br>
-								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id-input-text-tag" ref="ref_input_text_tag">
+								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id_input_text_tag_video" ref="ref_input_text_tag">
 							</td>
 
 							
@@ -250,7 +258,7 @@
 							</td>
 							<td style="background-color:rgb(255,255,255,0.05)">
 								<div v-if="status_create == false">
-									<input type="file" @change="f_file_album_images_select" multiple class="form-control" id="id_upload_album_image_to_db" ref="ref_upload_album_image_file">
+									<input type="file" @change="f_file_album_images_select" v-model="images" multiple class="form-control" id="id_input_file_images_upload" ref="ref_upload_album_image_file">
 								</div>
 								<div v-else>
 									비디오 앨범을 먼저 생성하세요.
@@ -275,7 +283,7 @@
 							</td>
 							<td style="background-color:rgb(255,255,255,0.05)">
 								<div v-if="status_create == false">
-									<input type="file" @change="f_file_album_video_select" multiple class="form-control" id="id_upload_album_video_to_db" ref="ref_upload_album_video_file">
+									<input type="file" @change="f_file_album_video_select" multiple class="form-control" id="id_input_file_videos_upload" ref="ref_upload_album_video_file">
 								</div>
 								<div v-else>
 									비디오 앨범을 먼저 생성하세요.
@@ -435,7 +443,7 @@
 			selected_actor_id: '',
 
 			input_text_title: '',
-			input_text_name: '',
+			input_text_search_actor: '',
 			input_text_studio: '',
 			input_date_released: '',
 			input_date_birthday: '',
@@ -464,6 +472,7 @@
 				console.log('actor upload GET!')
 				axios.get('/hans_ent_video_album_upload_modal/')
 				.then((response) => {
+					console.log('response from refreshData()', response.data)
 					this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
 					this.BASE_DIR_VIDEO = response.data['BASE_DIR_VIDEO']
 					this.data_actor = response.data['selected_serialized_data_actor']
@@ -515,7 +524,7 @@
 				this.selected_actor_id = ''
 
 				this.input_text_title = ''
-				this.input_text_name = ''
+				this.input_text_search_actor = ''
 				this.input_text_studio = ''
 				this.input_date_released = ''
 				this.input_date_birthday = ''
@@ -761,12 +770,13 @@
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// Actor 검색
 			f_actor_search_by_name(event) {
-				this.input_text_name = event.target.value
-				searchData = this.input_text_name
+				this.input_text_search_actor = event.target.value
+				searchData = this.input_text_search_actor
                 axios.get('/hans_ent_video_album_upload_modal_actor_search/?keyword='+searchData)
                 .then((response) => {
-					console.log(response.data['list_serialized_data_actor'])
+					this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
                     this.list_serialized_data_actor = response.data['list_serialized_data_actor']
+					this.input_text_search_actor = '';
                 })
                 .catch(() => {
                     console.log('Error! f_search_keyword_update')
@@ -788,10 +798,10 @@
                 }
                 })
                 .then((response) => {
-					this.input_text_name = '';
-					$('#id_input_text_search_actor_select').val("");
+					this.input_text_search_actor = '';
 					console.log(response.data)
 					this.data_actor = response.data['selected_serialized_data_actor']
+					this.list_serialized_data_actor = []
                 })
                 .catch(() => {
                     console.log('Error! f_actor_select_for_album_upload')
@@ -800,8 +810,7 @@
 
 			// 검색결과 리셋
 			f_fold_searched_actor_list() {
-				this.input_text_name = '';
-				$('#id_input_text_search_actor_select').val("");
+				this.input_text_search_actor = '';
 				this.list_serialized_data_actor = []
 			},
 
@@ -890,9 +899,11 @@
 				console.log(this.videos)
 			},
 
+
 			async f_upload_album_form() {
 				let formData = new FormData();
 				console.log('upload files!')
+				
 				if (this.images != null) {
 					for (let i = 0; i < this.images.length; i++) {
 						formData.append('images', this.images[i]);
@@ -907,16 +918,12 @@
 				formData.append('selected_video_album_id', this.selected_video_album_id);
 				formData.append('selected_actor_id', this.selected_actor_id);
 				formData.append('input_text_title', this.input_text_title);
-				formData.append('input_text_name', this.input_text_name);
 				formData.append('input_text_studio', this.input_text_studio);
 				formData.append('input_date_released', this.input_date_released);
 				formData.append('input_text_tag', this.input_text_tag);
 				// formData.append('selected_video_sub_type', this.selected_video_sub_type)
 				this.show_progress = true;
 				
-				if (this.images == null) {
-				}
-
 				try {
 					await axios.post('/hans_ent_video_album_upload_modal/', formData, {
 					headers: {
@@ -927,8 +934,20 @@
 					this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
 					})
 					.then((response) => {
-						this.f_reset_return()
-						
+						console.log('response', response.data)
+
+						this.progress_value = 0
+						this.progress_max = 100
+						this.progress_min = 0
+						this.show_progress = false
+						this.status_create = false
+
+						$("#id_input_text_title_video").val("");
+						$("#id_input_text_studio_video").val("");
+						$("#id_input_date_released_video").val("");
+						$("#id_input_text_tag_video").val("");
+
+
 						this.data_actor = response.data['selected_serialized_data_actor']
 						this.data_video_album = response.data['selected_serialized_data_video_album']
 						
@@ -975,24 +994,24 @@
 
 			// 비디오 갤러리 모달창으로 정보 보내기
 			f_hans_ent_video_album_gallery_modal(event) {
-					this.selected_video_album_video_id = event
-                    axios.post('/hans_ent_video_album_gallery_modal/', {
-                        'selected_video_album_id': this.selected_video_album_id,
-						'selected_video_album_video_id': event,
-                    }, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'X-CSRFToken': "{{ csrf_token }}"
-                    }
-                    })
-                    .then((response) => {
-                        console.log('###################### to Video Album Gallery Modal')
-                        post_hans_ent_video_album_gallery_modal.f_sync_data_to_video_album_gallery_modal(response.data);
-                    })
-                    .catch(() => {
-                        console.log('Error! f_hans_ent_video_album_gallery_modal')
-                    })
-                },
+				this.selected_video_album_video_id = event
+				axios.post('/hans_ent_video_album_gallery_modal/', {
+					'selected_video_album_id': this.selected_video_album_id,
+					'selected_video_album_video_id': event,
+				}, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+					'X-CSRFToken': "{{ csrf_token }}"
+				}
+				})
+				.then((response) => {
+					console.log('###################### to Video Album Gallery Modal')
+					post_hans_ent_video_album_gallery_modal.f_sync_data_to_video_album_gallery_modal(response.data);
+				})
+				.catch(() => {
+					console.log('Error! f_hans_ent_video_album_gallery_modal')
+				})
+			},
 
 
             f_hans_ent_video_album_upload_modal(event) {

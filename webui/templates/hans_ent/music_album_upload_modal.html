@@ -700,9 +700,6 @@
 				formData.append('selected_music_sub_type', this.selected_music_sub_type)
 				this.show_progress = true;
 				
-				if (this.images == null) {
-				}
-
 				try {
 					await axios.post('/hans_ent_music_album_upload_modal/', formData, {
 					headers: {
@@ -713,8 +710,12 @@
 					this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
 					})
 					.then((response) => {
-						$("#id_upload_album_image_to_db").val("");
-						this.f_reset_return()
+						this.progress_value = 0
+						this.progress_max = 100
+						this.progress_min = 0
+						this.show_progress = false
+						this.status_create = false
+						
 						this.data_actor = response.data['selected_serialized_data_actor']
 						this.data_music_album = response.data['selected_serialized_data_music_album']
 
