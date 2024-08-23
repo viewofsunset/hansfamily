@@ -156,11 +156,11 @@
 
                 <div v-if="status_picture_gallery_close == false">
                     <div class="gallery-container">
-                        <div v-for="(data_picture_album, index) in list_data_picture_album" :key="index"class="card" >
+                        <div v-for="(item, index) in list_data_picture_album" :key="index"class="card" >
                             <div class="box" id="picture-picture_album-box">
                                 <div class="card-body">
 
-                                    <div v-for="(dict_picture_album, index) in data_picture_album.list_dict_picture_album" :key="index">
+                                    <div v-for="(dict_picture_album, index) in item.list_dict_picture_album" :key="index">
                                         <div v-if="dict_picture_album.active == 'true'">
                                             <button @click="f_hans_ent_picture_album_gallery_modal(data_picture_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-gallery-modal">
                                                 <img :src="BASE_DIR_PICTURE+dict_picture_album.thumbnail" width="140">
@@ -168,12 +168,12 @@
                                         </div>
                                     </div>
                                             
-                                    <div class="text-overlay">[[ data_picture_album.id ]]</div>
+                                    <div class="text-overlay">[[ item.id ]]</div>
                                     <div class="text-center">
                                         <strong>
-                                            [[ data_picture_album.title ]]
-                                            <span v-if="data_picture_album.code">
-                                                ([[ data_picture_album.code ]])
+                                            [[ item.title ]]
+                                            <span v-if="item.code">
+                                                ([[ item.code ]])
                                             </span> 
                                         </strong>
                                         <br>
@@ -244,33 +244,25 @@
 
                 <div v-if="status_video_gallery_close == false">
                     <div class="gallery-container">
-                        <div v-for="(data_video_album, index) in list_data_video_album" :key="index"class="card" >
+                        <div v-for="(item, index) in list_data_video_album" :key="index"class="card" >
                             <div class="box" id="picture-video_album-box">
                                 <div class="card-body">
                                     
-                                    <button @click="f_hans_ent_video_album_gallery_modal(data_video_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-video-album-gallery-modal">
-                                        <div v-if="data_video_album.image_thumbnail">
-                                            <img :src="api_url_fixed+data_video_album.image_thumbnail" width="200">
-                                            <div class="text-overlay">[[ data_video_album.name ]]</div>
+                                    <div v-for="(dict_picture_album, index) in item.list_dict_picture_album" :key="index">
+                                        <div v-if="dict_picture_album.active == 'true'">
+                                            <button @click="f_hans_ent_video_album_gallery_modal(item.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-video-album-gallery-modal">
+                                                <img :src="BASE_DIR_PICTURE+dict_picture_album.thumbnail" width="140">
+                                            </button>
                                         </div>
-                                        <div v-else>
-                                            <img :src="[[ data_video_album.cover_image_url ]]" width="200">
-                                            <div class="text-overlay">[[ data_video_album.name ]]</div>
-                                        </div>
-                                        
-                                    </button>
-                                            
-                                    <div class="text-overlay">[[ data_video_album.id ]]</div>
+                                    </div>
                                     <div class="text-center">
-                                        
                                         <strong>
-                                             [[ data_video_album.title ]]
+                                             [[ item.title ]]
                                         </strong>
-                                        <span v-if="data_video_album.code">
-                                            ([[ data_video_album.code ]])
+                                        <span v-if="item.code">
+                                            ([[ item.code ]])
                                         </span> 
                                         <br>
-                                        
                                     </div> 
                                 </div>
                             </div>
@@ -303,10 +295,15 @@
             BASE_DIR_MUSIC: '',
 
 			data_actor: {},
+            list_dict_profile_album: [],
+
+            data_picture: {},
+            data_video: {},
+            data_music: {},
+
             list_data_picture_album: [],
             list_data_video_album: [],
             list_data_music_album: [],
-            list_dict_profile_album: [],
             
             selected_actor_id: '',
             selected_video_album_id: '',
@@ -332,28 +329,35 @@
                 this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
                 this.BASE_DIR_VIDEO = data['BASE_DIR_VIDEO']
                 this.BASE_DIR_MUSIC = data['BASE_DIR_MUSIC']
+                
                 this.data_actor = data['selected_serialized_data_actor']
+                this.data_picture = data['selected_serialized_data_picture']
+                this.data_video = data['selected_serialized_data_video']
+                this.data_music = data['selected_serialized_data_music']
+
                 this.list_data_picture_album = data['list_serialized_data_picture_album']
                 this.list_data_video_album = data['list_serialized_data_video_album']
                 this.list_data_music_album = data['list_serialized_data_music_album']
-                this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
-
-                // this.selected_actor_id = this.data_actor['id']
                 
                 if (Object.keys(this.data_actor).length > 0 ) {
 					this.selected_actor_id = this.data_actor['id']
+                    this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
 				}
-
                 console.log('Actor Profile Modal로 Data 수신완료', data)
 			},
             
 			f_reset_return() {
 				data_actor = {}
+                list_dict_profile_album = []
+
+                data_picture = {}
+                data_video = {}
+                data_music = {}
+
                 list_data_picture_album = []
                 list_data_video_album = []
                 list_data_music_album = []
-                list_dict_profile_album = []
-                
+
                 selected_actor_id = ''
                 selected_video_album_id = ''
                 selected_picture_album_id = ''
@@ -537,7 +541,7 @@
                 })
                 .then((response) => {
                     console.log('비디오앨범업로드모달창으로 전송시작', response.data)
-                    post_streaming_video_album_upload_modal.f_sync_data_to_video_album_upload_modal(response.data);
+                    post_hans_ent_video_album_upload_modal.f_sync_data_to_video_album_upload_modal(response.data);
                 })
                 .catch(() => {
                     console.log('Error! f_hans_ent_video_album_upload_modal_by_actor_id')
@@ -559,7 +563,7 @@
                 })
                 .then((response) => {
                     console.log('Adult Video Album 정보 전송 시작', response.data)
-                    post_streaming_video_album_gallery_modal.f_sync_data_to_video_album_gallery_modal(response.data);
+                    post_hans_ent_video_album_gallery_modal.f_sync_data_to_video_album_gallery_modal(response.data);
                 })
                 .catch(() => {
                     console.log('Error! f_hans_ent_video_album_gallery_modal')

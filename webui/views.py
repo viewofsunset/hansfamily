@@ -273,6 +273,9 @@ def hans_ent_actor_profile_modal(request):
         """
         print(request.POST,)
         selected_serialized_data_actor = {}
+        selected_serialized_data_picture = {}
+        selected_serialized_data_video = {}
+        selected_serialized_data_music = {}
         list_serialized_data_picture_album = []
         list_serialized_data_video_album = []
         list_serialized_data_music_album = []
@@ -308,24 +311,46 @@ def hans_ent_actor_profile_modal(request):
         else:
             q_video_album = None
         print('q_video_album: ', q_video_album)
+    
+        selected_music_album_id_str = request.POST.get('selected_music_album_id')
+        selected_music_album_id_str = None if selected_music_album_id_str in LIST_STR_NONE_SERIES else selected_music_album_id_str
+        if selected_music_album_id_str is not None and selected_music_album_id_str != '':
+            selected_music_album_id = int(selected_music_album_id_str)
+            q_music_album = Music_Album.objects.get(id=selected_music_album_id)
+            if q_music_album is not None:
+                q_actor = q_music_album.main_actor
+        else:
+            q_music_album = None
+        print('q_music_album: ', q_music_album)
 
         # 보내야 하는 정보 수집하기 ###############################################################
         if q_actor is not None:
             print('보내는 Data 수집')
             selected_serialized_data_actor = Actor_Serializer(q_actor, many=False).data
-            qs_video_album = Video_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
             qs_picture_album = Picture_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
+            qs_video_album = Video_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
+            qs_music_album = Music_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
             if qs_picture_album is not None and len(qs_picture_album) > 0:
                 list_serialized_data_picture_album = Picture_Album_Serializer(qs_picture_album, many=True).data
-            # if qs_video_album is not None and len(qs_video_album) > 0:
-            #     list_serialized_data_video_album = Video_Album_Detail_Serializer(qs_video_album, many=True).data
-            
+            if qs_video_album is not None and len(qs_video_album) > 0:
+                list_serialized_data_video_album = Video_Album_Serializer(qs_video_album, many=True).data
+            if qs_music_album is not None and len(qs_music_album) > 0:
+                list_serialized_data_video_album = Music_Album_Serializer(qs_video_album, many=True).data
+        if q_picture_album:
+            selected_serialized_data_picture = Picture_Album_Serializer(q_picture_album, many=False).data
+        if q_video_album:
+            selected_serialized_data_video = Video_Album_Serializer(q_video_album, many=False).data
+        if q_music_album:
+            selected_serialized_data_music = Music_Album_Serializer(q_music_album, many=False).data
         jsondata = {
             'BASE_DIR_ACTOR': BASE_DIR_ACTOR,
             'BASE_DIR_PICTURE': BASE_DIR_PICTURE,
             'BASE_DIR_VIDEO': BASE_DIR_VIDEO,
             'BASE_DIR_MUSIC': BASE_DIR_MUSIC,
             'selected_serialized_data_actor': selected_serialized_data_actor,
+            'selected_serialized_data_picture': selected_serialized_data_picture,
+            'selected_serialized_data_video': selected_serialized_data_video,
+            'selected_serialized_data_music': selected_serialized_data_music,
             'list_serialized_data_picture_album': list_serialized_data_picture_album,
             'list_serialized_data_video_album': list_serialized_data_video_album,
             'list_serialized_data_music_album': list_serialized_data_music_album,
