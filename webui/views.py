@@ -3155,6 +3155,8 @@ def hans_ent_picture_album_list(request):
                 print('선택된 앨범이 없습니다. !!.')
                 pass
         
+
+        
         # Delete Duplicated Albums (중복 앨범 모두 삭제하기)
         if request.POST.get('button') == 'delete_duplicated_picture_album':
             # 1. 중복된 title 찾기
