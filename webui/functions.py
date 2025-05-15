@@ -3,28 +3,499 @@ import os
 import io
 import cv2
 
-from pathlib import Path
-from PIL import Image
+from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
+
+from pathlib import Path
+from PIL import Image
+from PIL import ImageSequence
+from tinytag import TinyTag
+
+# text handling
+import re
+import spacy  
+import datetime
+import multiprocessing
+import time
+import pathlib
+import shutil
+import requests
+
 from hans_ent.models import *
+from hans_ent.tasks import *
+from webui.models import LIST_STR_NONE_SERIES
+from study.models import *
 
 
 
 #############################################################################################################################################
 #############################################################################################################################################
 #
-#                                                       공통
+#                                                       시스템 유틸리티 (공통)
 #
 #############################################################################################################################################
 #############################################################################################################################################
 
 
-def count_page_number_down(request, q_mysettings_hansent):
-    print('min')
+#----------------------------------------------------------------------------------------------------------------------------------------
+
+# CPU 개수 파악
+def get_cpu_count():
+    cpu_count = os.cpu_count()
+    if cpu_count is None:
+        print("Unable to determine CPU count")
+        cpu_count = 1  # Default to 1 if count cannot be determined
+    print(f"Number of CPUs: {cpu_count}")
+    return cpu_count
+
+
+# Chrome Driver 띄우기
+def boot_google_chrome_driver():
+    print('# 외부사이트 Update용 # Chrome Driver 띄우기')
+    os_name = platform.system()
+        
+    # Check if the OS is Linux or Windows
+    if os_name == 'Linux':
+        print("The operating system is Linux.")
+        CHROME_DRIVER_PATH = '/usr/local/bin/chromedriver'
+        service = Service(executable_path=CHROME_DRIVER_PATH)
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # Runs Chrome in headless mode.
+        chrome_options.add_argument('--no-sandbox')  # Bypass OS security model
+        chrome_options.add_argument('--disable-dev-shm-usage')  # Overcome limited resource problems
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+    elif os_name == 'Windows':
+        print("The operating system is Windows.")
+        driver = webdriver.Chrome()
+    return driver 
+
+
+
+# Storage Monitoring
+def storage_monitoring():
+    q_systemsettings_hansent = SystemSettings_HansEnt.objects.filter(check_discard=False).last()
+    list_dict_stoage_status = q_systemsettings_hansent.list_dict_stoage_status
+    if list_dict_stoage_status is None:
+        list_dict_stoage_status = []
+
+    for VAULT in LIST_VAULT:
+        print(VAULT)
+        path=f"/django-project/site/public/media/{VAULT}/"
+        total, used, free = shutil.disk_usage(path)
+        total_volume = round(total / (1024 ** 3), 1)
+        used_volume = round(used / (1024 ** 3), 1)
+        free_volume = round(free / (1024 ** 3), 1)
+        occupant = round(used_volume/total_volume, 3)*100
+        disk_info = {'name': VAULT, 'path': path, 'total_volume': total_volume, 'used_volume': used_volume, 'free_volume': free_volume, 'occupant': occupant}
+        print('disk_info', disk_info)
+        print(f"경로: {path}")
+        print(f"총 용량: {total_volume:.2f} GB")
+        print(f"사용 중: {used_volume:.2f} GB")
+        print(f"남은 용량: {free_volume:.2f} GB")
+        print(f"사용량: {occupant} %")
+
+        if len(list_dict_stoage_status) > 0:
+            check_vault_exist = False
+            for dict_stoage_status in list_dict_stoage_status:
+                if dict_stoage_status['name'] == VAULT:
+                    dict_stoage_status['path'] = path
+                    dict_stoage_status['total_volume'] = total_volume
+                    dict_stoage_status['used_volume'] = used_volume
+                    dict_stoage_status['free_volume'] = free_volume
+                    dict_stoage_status['occupant'] = occupant
+                    check_vault_exist = True
+                    break 
+            if check_vault_exist == False:
+                list_dict_stoage_status.append(disk_info)
+        else:
+            list_dict_stoage_status.append(disk_info)
+
+    data = {
+        'list_dict_stoage_status': list_dict_stoage_status,
+    }
+    SystemSettings_HansEnt.objects.filter(id=q_systemsettings_hansent.id).update(**data)
+    return list_dict_stoage_status
+
+
+
+
+#############################################################################################################################################
+#############################################################################################################################################
+#
+#                                                       텍스트 핸들링 유틸리티 (공통)
+#
+#############################################################################################################################################
+#############################################################################################################################################
+
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------
+# Text 핸들링
+#----------------------------------------------------------------------------------------------------------------------------------------
+# Text가 영어인지 판독독
+def is_english(text):
+    try:
+        # Try encoding the string to ASCII
+        text.encode('ascii')
+    except UnicodeEncodeError:
+        # If there's a UnicodeEncodeError, the text is not ASCII (hence not English)
+        return False
+    return True
+
+
+# 파일 이름 클리닝
+def file_name_cleaner(file_name):
+    try:
+        print('1')
+        file_name = str(file_name)
+        if is_english(file_name):
+            print('English')
+            pass 
+        else:
+            print('not English')
+            # file_name = file_name.encode('utf-8')
+            try:
+                file_name = file_name.encode('latin1').decode('euc-kr') 
+            except:
+                pass
+            print('file_name', file_name)
+
+        file_name = file_name.replace('.', '_')
+        file_name = file_name.replace(',', '_')
+        file_name = file_name.replace(' ', '')
+        file_name = file_name.replace('(', '')
+        file_name = file_name.replace(')', '')
+        file_name = file_name.replace('"', '')
+        file_name = file_name.replace("'", "")
+        file_name = file_name.replace('/', '')
+        file_name = file_name.replace('!', '')
+        file_name = file_name.replace('$', '')
+        file_name = file_name.replace('&', '')
+        file_name = file_name.replace('%', '')
+        file_name = file_name.replace('^', '')
+        file_name = file_name.replace('*', '')
+        file_name = file_name.replace('[', '')
+        file_name = file_name.replace(']', '')
+        file_name = file_name.replace('@', '')
+        file_name = file_name.replace('#', '')
+        file_name = file_name.replace('+', '')
+        file_name = file_name.replace('~', '')
+        file_name = file_name.replace('{', '')
+        file_name = file_name.replace('}', '')
+        file_name = file_name.replace('|', '')
+        file_name = file_name.replace('?', '')
+        file_name = file_name.replace('>', '')
+        file_name = file_name.replace('=', '')
+        file_name = file_name.replace('__', '_')
+        if '_mp4' in file_name:
+            file_name = file_name.replace('_mp4', '.mp4')
+        elif '_mp3' in file_name:
+            file_name = file_name.replace('_mp3', '.mp3')
+        elif '_avi' in file_name:
+            file_name = file_name.replace('_avi', '.avi')
+        elif '_mkv' in file_name:
+            file_name = file_name.replace('_mkv', '.mkv')
+        elif '_srt' in file_name:
+            file_name = file_name.replace('_srt', '.srt') 
+        elif '_smi' in file_name:
+            file_name = file_name.replace('_smi', '.smi')
+        elif '_vtt' in file_name:
+            file_name = file_name.replace('_vtt', '.vtt') 
+        elif '_jpg' in file_name:
+            file_name = file_name.replace('_jpg', '.jpg') 
+        elif '_jpeg' in file_name:
+            file_name = file_name.replace('_jpeg', '.jpeg')
+        elif '_png' in file_name:
+            file_name = file_name.replace('_png', '.png') 
+        # elif '_gif' in file_name:
+        #     file_name = file_name.replace('_gif', '.gif') 
+        else:
+            file_name = file_name
+    except:
+        print('9')
+        file_name = 'unknown'
+    return file_name
+
+
+# 파일 이름 클리닝 for keywords
+def file_name_cleaner_for_keywords(file_name):
+    try:
+        print('1')
+        file_name = str(file_name)
+        if is_english(file_name):
+            print('English')
+            pass 
+        else:
+            print('not English')
+            # file_name = file_name.encode('utf-8')
+            try:
+                file_name = file_name.encode('latin1').decode('euc-kr') 
+            except:
+                pass
+            print('file_name', file_name)
+        file_name = file_name.replace('.', ' ')
+        file_name = file_name.replace(', ', ' ')
+        file_name = file_name.replace(',', ' ')
+        file_name = file_name.replace('_', ' ')
+        file_name = file_name.replace('__', ' ')
+        
+        file_name = file_name.replace('(', '')
+        file_name = file_name.replace(')', '')
+        file_name = file_name.replace('"', '')
+        file_name = file_name.replace("'", "")
+        file_name = file_name.replace('/', '')
+        file_name = file_name.replace('!', '')
+        file_name = file_name.replace('$', '')
+        file_name = file_name.replace('&', '')
+        file_name = file_name.replace('%', '')
+        file_name = file_name.replace('^', '')
+        file_name = file_name.replace('*', '')
+        file_name = file_name.replace('[', '')
+        file_name = file_name.replace(']', '')
+        file_name = file_name.replace('@', '')
+        file_name = file_name.replace('#', '')
+        file_name = file_name.replace('+', '')
+        file_name = file_name.replace('~', '')
+        file_name = file_name.replace('{', '')
+        file_name = file_name.replace('}', '')
+        file_name = file_name.replace('|', '')
+        file_name = file_name.replace('?', '')
+        file_name = file_name.replace('>', '')
+        file_name = file_name.replace('=', '')
+        file_name = file_name.replace(':', '')
+        file_name = file_name.replace(';', '')
+        file_name = file_name.replace('`', '')
+    except:
+        print('9')
+        file_name = None
+    return file_name
+
+
+# 텍스트 클리닝 하기
+def text_cleaning(text):
+    text = text.replace('.mp4', '')
+    text = text.replace('.jpg', '')
+    text = text.replace('.png', '')
+    text = text.replace('.avi', '')
+    text = text.replace('.', ' ')
+    text = text.replace(',', ' ')
+    text = text.replace('-', ' ')
+    text = text.replace('_', ' ')
+    text = text.replace('「', ' ')
+    text = text.replace('」', ' ')
+    text = text.replace('【', ' ')
+    text = text.replace('】', ' ')
+    text = text.replace('[', '')
+    text = text.replace(']', '')
+    text = text.replace('(', '')
+    text = text.replace(')', '')
+    text = text.replace('!', '')
+    text = text.replace('@', '')
+    text = text.replace('#', '')
+    text = text.replace('$', '')
+    text = text.replace('%', '')
+    text = text.replace('^', '')
+    text = text.replace('&', '')
+    text = text.replace('*', '')
+    text = text.replace('=', '')
+    text = text.replace('+', '')
+    text = text.replace('/', '')
+    text = text.replace('~', '')
+    
+    # print('text', text)
+    return text
+
+
+# 클리닝된 텍스트 뭉치에서 단어 분리 => 단어 리스트화
+def text_to_list_word(file_name_cleaned):
+    list_file_name_split = file_name_cleaned.split(' ')
+    list_file_name_split = [x for x in list_file_name_split if len(x) != 1] # 길이가 1개짜리 element 제거
+    return list_file_name_split
+
+
+# 클리닝된 텍스트 뭉치에서 이름름 분리 => 단어 리스트화
+def text_to_list_name(file_name_cleaned):
+    list_file_name_split = file_name_cleaned.split('aka')
+    list_file_name_split = [x for x in list_file_name_split if len(x) != 1] # 길이가 1개짜리 element 제거
+    return list_file_name_split
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------
+# 한글 초성으로 Ordering 하기
+def get_chosung(char):
+    CHOSUNG_LIST = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ']
+    code = ord(char) - 0xAC00
+    if code < 0 or code > 11171:
+        return char
+    chosung = code // 588
+    return CHOSUNG_LIST[chosung]
+
+
+def sort_queryset_by_korean_title(queryset, field_ascending_str):
+    if field_ascending_str == True:
+        print('No reverse')
+        return sorted(queryset, key=lambda obj: get_chosung(obj.title[0]))
+    if field_ascending_str == False:
+        print('Reverse')
+        return sorted(queryset, key=lambda obj: get_chosung(obj.title[0]), reverse=True)
+    
+
+def sort_list_dict_by_chosung(list_dict):
+    """한글 초성 기준으로 정렬"""
+    return sorted(
+        list_dict,
+        key=lambda x: get_chosung(x['title'][0])
+    )
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------
+
+# 단어 리스트에서 Tag으로 쓸만한 단어 수집
+def collect_tag_element_from_text(list_file_name_split):
+    # 이름에서 Tag 수집
+    list_collected_tags = []
+    if list_file_name_split is not None and len(list_file_name_split) > 0:
+        for item in list_file_name_split:
+            # print('item', item)
+            check_tag_available = True
+            # 숫자들 제외
+            try:
+                item = int(item)
+                check_tag_available = False
+            except:
+                item = item
+            # 단어 하나당 길이가 2 이하인 것은 제외
+            try:
+                if len(item) < 3: 
+                    check_tag_available = False
+            except:
+                pass
+
+            if check_tag_available == True:
+                list_collected_tags.append(item)
+    return list_collected_tags
+
+
+
+# 단어 개수 최대치 제한하기
+def truncate_words_regex(text, max_words):
+    import re
+    try:
+        match = re.match(r'^(\S+(?:\s+\S+){0,' + str(max_words-1) + r'})', text)
+        return match.group(1) + '…' if match and len(match.group(1).split()) < len(text.split()) else text
+    except:
+        return None
+
+
+
+# 단어 리스트에서 Title 반환
+def list_word_joining_for_title(list_word):
+    # print('# 사용자 입력 title이 없는 경우')
+    # print('# file 이름이 하나의 의미없는 암화화된 긴 단어 형태이면 입력값 타이틀에서 차용한다.')
+    list_word_short = []
+    title_item = None
+    # title로 쓰기 적합하게 길이 조정
+    for item in list_word:
+        if len(item) < 30: # 단어 하나당 길이가 30 이하인 것만
+            list_word_short.append(item)
+    # 길이 30 이하인 단어들을 활용하여 타이틀 선정
+    try:
+        if len(list_word_short) == 0:
+            # print('# 단어길이 30 이하가 하나도 없는 경우 == 30 이상의 엄청 긴 길이의 단어로 이루어진 경우')
+            # print('# 앨범 타이틀도 없고 파일 암호화이름인 경우, 처음 10 letter만 따온다.')
+            text = list_word[0]
+            # Extract only alphabetic characters
+            letters = [char for char in text if char.isalpha()]
+            # Join the first 30 letters
+            title_item = ''.join(letters[:30])
+            title_item = title_item + '…'
+        else:
+            # print('# 적절한 단어(단어길이 30 이하)가 하나 이상 있는 경우 == 타이틀로 쓸 단어가 1개 이상 있는 경우')
+            # print('# 단어들끼리 스페이스 넣고 붙힌다.')
+            # Convert all items to strings
+            str_items = map(str, list_word_short)
+            space_separator = ' '
+            text = space_separator.join(str_items)
+            # 단어 개수 최대치 제한하기
+            title_item = truncate_words_regex(text, max_words=7)
+    except:
+        pass 
+    return title_item
+    
+
+# 이름 리스트에서 Name과 Synonyms 반환
+def classify_name_and_synonyms_from_list_word(list_word):
+    synonyms = []
+    list_word_short = []
+    for item in list_word:
+        if len(item) < 30: # 단어 하나당 길이가 30 이하인 것만
+            list_word_short.append(item)
+    i = 0
+    for item in list_word_short:
+        if i == 0:
+            name = item
+        else:
+            synonyms(item)
+    if len(synonyms) == 0:
+        synonyms = None
+    return name, synonyms 
+
+#----------------------------------------------------------------------------------------------------------------------------------------
+
+
+# #############################################################################################################################################
+# #############################################################################################################################################
+# #
+# #                                                       Study 웹화면 기능 서포트
+# #
+# #############################################################################################################################################
+# #############################################################################################################################################
+
+def study_count_page_number_reset(q_mysettings_study):
+    menu_selected = q_mysettings_study.menu_selected
+    data = {}
+    MySettings_Study.objects.filter(id=q_mysettings_study.id).update(**data)
+    q_mysettings_study.refresh_from_db()
+    return True
+
+
+def hans_ent_count_page_number_reset(q_mysettings_hansent):
+    print('reset')
+    menu_selected = q_mysettings_hansent.menu_selected
+    data = {
+        'count_page_number_actor': 1,
+        'count_page_number_picture': 1,
+        'count_page_number_manga': 1,
+        'count_page_number_video': 1,
+        'count_page_number_music': 1,
+    }
+    MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
+    q_mysettings_hansent.refresh_from_db()
+    return True
+
+
+
+
+
+# #############################################################################################################################################
+# #############################################################################################################################################
+# #
+# #                                                       Hans Ent 웹화면 기능 서포트
+# #
+# #############################################################################################################################################
+# #############################################################################################################################################
+
+
+def hans_ent_count_page_number_down(request, q_mysettings_hansent):
     menu_selected = q_mysettings_hansent.menu_selected
     count_page_number_str = request.POST.get('count_page_number')
-    count_page_number = int(count_page_number_str)
+    count_page_number_str = None if count_page_number_str in LIST_STR_NONE_SERIES else count_page_number_str
+    if count_page_number_str is not None:
+        count_page_number = int(count_page_number_str)
+    else:
+        count_page_number = None
+    
     if count_page_number is not None and count_page_number > 1:
         count_page_number = int(count_page_number)
         if menu_selected == LIST_MENU_HANS_ENT[0][0]:
@@ -32,19 +503,29 @@ def count_page_number_down(request, q_mysettings_hansent):
         elif menu_selected == LIST_MENU_HANS_ENT[1][0]:
             data = {'count_page_number_picture': count_page_number - 1}
         elif menu_selected == LIST_MENU_HANS_ENT[2][0]:
+            data = {'count_page_number_manga': count_page_number - 1}
+        elif menu_selected == LIST_MENU_HANS_ENT[3][0]:
             data = {'count_page_number_video': count_page_number - 1}
+        elif menu_selected == LIST_MENU_HANS_ENT[4][0]:
+            data = {'count_page_number_music': count_page_number - 1}
         MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
         q_mysettings_hansent.refresh_from_db()
     return True
 
 
 
-def count_page_number_up(request, q_mysettings_hansent, total_num_registered_item):
+def hans_ent_count_page_number_up(request, q_mysettings_hansent, total_num_registered_item):
     menu_selected = q_mysettings_hansent.menu_selected
-    count_page_number_str = request.POST.get('count_page_number')
-    count_page_number = int(count_page_number_str)
     count_page_number_max = total_num_registered_item // LIST_NUM_DISPLAY_IN_PAGE
     count_page_number_max = count_page_number_max + 1
+    
+    count_page_number_str = request.POST.get('count_page_number')
+    count_page_number_str = None if count_page_number_str in LIST_STR_NONE_SERIES else count_page_number_str
+    if count_page_number_str is not None:
+        count_page_number = int(count_page_number_str)
+    else:
+        count_page_number = None
+    
     if count_page_number is not None and count_page_number < count_page_number_max:
         count_page_number = int(count_page_number)
         if menu_selected == LIST_MENU_HANS_ENT[0][0]:
@@ -52,123 +533,55 @@ def count_page_number_up(request, q_mysettings_hansent, total_num_registered_ite
         elif menu_selected == LIST_MENU_HANS_ENT[1][0]:
             data = {'count_page_number_picture': count_page_number + 1}
         elif menu_selected == LIST_MENU_HANS_ENT[2][0]:
+            data = {'count_page_number_manga': count_page_number + 1}
+        elif menu_selected == LIST_MENU_HANS_ENT[3][0]:
             data = {'count_page_number_video': count_page_number + 1}
+        elif menu_selected == LIST_MENU_HANS_ENT[4][0]:
+            data = {'count_page_number_music': count_page_number + 1}
         MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
         q_mysettings_hansent.refresh_from_db()
     return True
 
 
 
-def hashcode_generator():
-    # Generate a random UUID
-    random_uuid = uuid.uuid4()
-    # Convert it to a string (this will give you a 32-character hexadecimal string)
-    hash_code = str(random_uuid)
-    print("UUID4 Hash:", hash_code)
-    return hash_code
+def get_score_album(album_type, dict_score_history):
+    """
+    # Picture Album의 favorite 점수 == Rating 1로 설정. Shot하면 Rating + 1
+    # Manga Album의 favorite_sum 점수 == 앨범 안에 들어있는 Volume들이 받은 Favoite == True 개수의 합
+    # Video Album의 favorite_sum 점수 == 앨범 안에 들어있는 Volume들이 받은 Favoite == True 개수의 합
+    # Music Album의 favorite_sum 점수 == 앨범 안에 들어있는 Volume들이 받은 Favoite == True 개수의 합
 
-#############################################################################################################################################
-#############################################################################################################################################
-#
-#                                                       Hans Ent
-#
-#############################################################################################################################################
-#############################################################################################################################################
+    """
+    if album_type == 'actor':
+        try:
+            score = (dict_score_history['rating'] * dict_score_history['total_visit_album'] * 0.1) * dict_score_history['user_multiple']
+        except:
+            score = 0
+    elif album_type == 'picture':
+        try:
+            score = (dict_score_history['rating'] * dict_score_history['total_visit_album'] * 0.1) * dict_score_history['user_multiple']
+        except:
+            score = 0
+    elif album_type == 'manga':
+        try:
+            score = (dict_score_history['favorite_sum'] * 1 + dict_score_history['total_visit_album'] * 0.1) * dict_score_history['rating'] * dict_score_history['user_multiple']
+        except:
+            score = 0
+    elif album_type == 'video':
+        try:
+            score = (dict_score_history['favorite_sum'] + dict_score_history['total_visit_album']) * dict_score_history['user_multiple']
+        except:
+            score = 0
+    elif album_type == 'music':
+        try:
+            score = (dict_score_history['favorite_sum'] + dict_score_history['total_visit_album']) * dict_score_history['user_multiple']
+        except:
+            score = 0
+    else:
+        score = 0
+    score = round(score, 3)
+    return score
 
-# Mysettings Reset하기
-def reset_hans_ent_actor_list(q_mysettings_hansent):
-    data = {
-        'actor_selected': None,
-        # 'actor_pic_selected': None,
-        'selected_field_actor': LIST_ACTOR_FIELD[0],
-        'check_field_ascending_actor': True,
-        'count_page_number_actor': 1,
-        'list_searched_actor_id': None,
-    }
-    MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
-    return True
-
-def reset_hans_ent_picture_album_list(q_mysettings_hansent):
-    data = {
-        'picture_album_selected': None,
-        'selected_field_picture': LIST_PICTURE_FIELD[0],
-        'check_field_ascending_picture': True,
-        'count_page_number_picture': 1,
-        'list_searched_picture_album_id': None,
-    }
-    MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
-    return True
-
-def reset_hans_ent_video_album_list(q_mysettings_hansent):
-    data = {
-        'video_album_selected': None,
-        'selected_field_video': LIST_VIDEO_FIELD[0],
-        'check_field_ascending_video': True,
-        'count_page_number_video': 1,
-        'list_searched_video_album_id': None,
-    }
-    MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
-    return True
-
-def reset_hans_ent_music_album_list(q_mysettings_hansent):
-    data = {
-        'music_album_selected': None,
-        'selected_field_music': LIST_MUSIC_FIELD[0],
-        'check_field_ascending_music': True,
-        'count_page_number_music': 1,
-        'list_searched_music_album_id': None,
-    }
-    MySettings_HansEnt.objects.filter(id=q_mysettings_hansent.id).update(**data)
-    return True
-
-
-
-
-# Default 배우 쿼리 생성
-def create_actor():
-    hashcode = hashcode_generator()
-    data = {
-        'hashcode': hashcode,
-        'list_dict_profile_album':DEFAULT_LIST_DICT_PROFILE_ALBUM,
-    }
-    q_actor = Actor.objects.create(**data)
-    print('Actor 신규 생성!', q_actor)
-    return q_actor
-
-# Default Picture Album 쿼리 생성
-def create_picture_album():
-    hashcode = hashcode_generator()
-    data = {
-        'hashcode': hashcode,
-        'list_dict_picture_album':DEFAULT_LIST_DICT_PICTURE_ALBUM,
-    }
-    q_picture_album = Picture_Album.objects.create(**data)
-    print('Picture Album 신규 생성!', q_picture_album)
-    return q_picture_album
-
-# Default Video Album 쿼리 생성
-def create_video_album():
-    hashcode = hashcode_generator()
-    data = {
-        'hashcode': hashcode,
-        'list_dict_picture_album':DEFAULT_LIST_DICT_PICTURE_ALBUM,
-        'list_dict_video_album': DEFAULT_LIST_DICT_VIDEO_ALBUM,
-    }
-    q_video_album = Video_Album.objects.create(**data)
-    print('Video Album 신규 생성!', q_video_album)
-    return q_video_album
-
-# Default Music Album 쿼리 생성
-def create_music_album():
-    hashcode = hashcode_generator()
-    data = {
-        'hashcode': hashcode,
-        'list_dict_picture_album':DEFAULT_LIST_DICT_PICTURE_ALBUM,
-        'list_dict_video_album': DEFAULT_LIST_DICT_VIDEO_ALBUM,
-    }
-    q_music_album = Music_Album.objects.create(**data)
-    print('Music Album 신규 생성!', q_music_album)
-    return q_music_album
 
 
 
@@ -274,541 +687,16 @@ def merge_two_actor_into_one(q_actor, q_actor_s):
 
 
 
-# 이미지 저장하기
-""" 
-입력값은 PIL object. 그러면 알아서 커버이미지, 썸네일이미지 두가지 모두 출력
-    PIL image, 
-    커버이미지 == Landscape 비율
-    썸네일이미지 == Portrait 비율
-            
-    Width	Height	Name
-    640	    360	    nHD
-    854	    480	    FWVGA
-    960	    540	    qHD
-    1024	576	    WSVGA
-    1280	720	    HD
-    1366	768	    FWXGA
-    1600	900	    HD+
-    1920	1080	Full HD
-    2560	1440	QHD
-    3200	1800	QHD+
-    3840	2160	4K UHD
-    5120	2880	5K
-    7680	4320	8K UHD
-"""
-
-"""
-    image naming $ size rules
-    thumbnail image: hashcode-t.xxx  // size: 260px by 320px
-    cover image: hashcode-c.xxx  // size: 520px by 640px
-    original image: hashcode-o.xxx  // size: 그대로
-    still image: hashcode-s-<order number>.xxx  // size: 65px by 80px
-"""    
-
-def resize_with_padding(image, target_width, target_height):
-    # Resize the image while maintaining aspect ratio
-    color=(255, 255, 255)
-    image.thumbnail((target_width, target_height))
-    # Calculate padding
-    width, height = image.size
-    pad_width = (target_width - width) // 2
-    pad_height = (target_height - height) // 2
-
-    # Create a new image with the target size and specified background color
-    new_image = Image.new("RGB", (target_width, target_height), color)
-
-    # Paste the resized image onto the new image, centered
-    new_image.paste(image, (pad_width, pad_height))
-    return new_image
-
-def resize_pil_image_for_cover_and_thumbnail_pil(img):
-    
-    resized_image_c = resize_with_padding(img, 520, 640)  # Target size: 300x300 with white background
-    resized_image_t = resize_with_padding(img, 260, 320)  # Target size: 300x300 with white background
-
-    # Get the original dimensions
-    # original_width, original_height = img.size
-    # original_max_size = max(original_width, original_height)
-    # cover_output_image_size = (520, 640)
-    # cover_max_size = 640
-    # thumbnail_output_image_size = (260, 320)
-    # thumbnail_max_size = 320
-   
 
 
-    # cover_img = img.resize((cover_new_width, cover_new_height), Image.Resampling.LANCZOS)
-    # thumbnail_img = img.resize((thumbnail_new_width, thumbnail_new_height), Image.Resampling.LANCZOS)
-
-    # # Calculate the scaling factor for width and height
-    # cover_width_scale = cover_max_size / original_width
-    # cover_height_scale = cover_max_size / original_height
-    # thumbnail_width_scale = thumbnail_max_size / original_width
-    # thumbnail_height_scale = thumbnail_max_size / original_height
-    # # Choose the smaller of the two scales to maintain aspect ratio
-    # cover_scale = min(cover_width_scale, cover_height_scale)
-    # thumbnail_scale = min(thumbnail_width_scale, thumbnail_height_scale)
-    # # Calculate the new dimensions
-    # cover_new_width = int(original_width * cover_scale)
-    # cover_new_height = int(original_height * cover_scale)
-    # thumbnail_new_width = int(original_width * thumbnail_scale)
-    # thumbnail_new_height = int(original_height * thumbnail_scale)
-    # # Resize the image
-    # cover_img = img.resize((cover_new_width, cover_new_height), Image.Resampling.LANCZOS)
-    # thumbnail_img = img.resize((thumbnail_new_width, thumbnail_new_height), Image.Resampling.LANCZOS)
-
-    # thumbnail_img_width, thumbnail_img_heigh = thumbnail_img.size
-    # thumb_center_x = thumbnail_img_width / 2
-    # thumb_center_y = thumbnail_img_heigh / 2
-    # center_x = cover_output_image_size[0] / 2
-    # center_y = cover_output_image_size[1] / 2
-    # # Calculate cropping box coordinates for cover image
-    # left = center_x - cover_output_image_size[0] / 2
-    # top = center_y - cover_output_image_size[1] / 2
-    # right = center_x + cover_output_image_size[0] / 2
-    # bottom = center_y + cover_output_image_size[1] / 2
-    # # Crop the image
-    # cover_img = cover_img.crop((left, top, right, bottom))
-    # # Calculate cropping box coordinates for thumbnail
-    # left = thumb_center_x - thumbnail_output_image_size[0] / 2
-    # top = thumb_center_y - thumbnail_output_image_size[1] / 2
-    # right = thumb_center_x + thumbnail_output_image_size[0] / 2
-    # bottom = thumb_center_y + thumbnail_output_image_size[1] / 2
-    # # Crop the image
-    # thumbnail_img = thumbnail_img.crop((left, top, right, bottom))
-    return resized_image_c, resized_image_t
-
-    
-# 배우 갤러리 이미지/썸네일 저장하기
-def save_actor_profile_images(q_actor, images):
-    """
-        이미지를 PIL 객체로 변환한 뒤
-        편집을 수행
-        원본사이즈 이미지 저장 
-        사이즈 조정
-        썸네일 저장
-    """
-    # reset active to false
-    list_dict_profile_album = q_actor.list_dict_profile_album
-    if list_dict_profile_album is not None and len(list_dict_profile_album) > 0:
-        for dict_profile_album in list_dict_profile_album:
-            dict_profile_album["active"] = "false"
-        data = {
-                'list_dict_profile_album': list_dict_profile_album,
-        }
-        Actor.objects.filter(id=q_actor.id).update(**data)
-        q_actor.refresh_from_db()
-    else:
-        list_dict_profile_album = []
-    num_profile_image = len(list_dict_profile_album)
-    # get base info
-    hashcode = q_actor.hashcode
-    total_image_number = len(images)
-    i = 0
-    for image_file in images:   
-        image_file_name = image_file.name
-        file_extension = image_file_name.split('.')[-1]
-        print('file_extension', file_extension)
-        # convert file to PIL object
-        image_pil = Image.open(image_file)
-        # Remove Alpah channel befor saving
-        image_pil = image_pil.convert('RGB')
-        # 원본 이미지 저장
-        image_name_original = f'{hashcode}-o-{num_profile_image}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_original)
-        image_pil.save(file_path)
-        
-        # Get Thumbnail, Cover size PIL objects
-        cover_pil, thumbnail_pil = resize_pil_image_for_cover_and_thumbnail_pil(image_pil)
-        # 커버이미지 저장
-        image_name_cover = f'{hashcode}-c-{num_profile_image}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_cover)
-        cover_pil.save(file_path)
-        # 썸네일 이미지 저장
-        image_name_thumbnail = f'{hashcode}-t-{num_profile_image}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, image_name_thumbnail)
-        thumbnail_pil.save(file_path)
-        # List 업데이트
-        if total_image_number == i + 1:
-            list_dict_profile_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"true", "discard":"false"})
-        else:
-            list_dict_profile_album.append({"id": num_profile_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"false", "discard":"false"})
-        i = i + 1
-        num_profile_image = num_profile_image + 1
-    # default 이미지 discard 하기
-    for dict_profile_album in list_dict_profile_album:
-        if dict_profile_album["id"] == 0:
-            dict_profile_album["active"] = 'false'
-            dict_profile_album["discard"] = 'true'
-    # db save and refresh  
-    data = {
-        'list_dict_profile_album': list_dict_profile_album,
-    }
-    Actor.objects.filter(id=q_actor.id).update(**data)
-    q_actor.refresh_from_db()
-    return list_dict_profile_album
-    
-
-# Picture Album 이미지/썸네일 저장하기
-def save_picture_album_images(q_picture_album_selected, images):
-    """
-        Picture Album은
-        active: true 이면 대문(커버) 이미지로 할당한다는 의미
-        discard: true 이면 삭제한다는 의미
-        id == number of items로 표시, 
-        item 삭제시 파일은 삭제하고 리스트에서는 discard=true만 설정하고 item을 삭제하지는 않는다. ID 변경되지 않게 하려고
-    """
-    print('num of images', len(images))
-    # reset active to false
-    list_dict_picture_album = q_picture_album_selected.list_dict_picture_album
-    if list_dict_picture_album is not None and len(list_dict_picture_album) > 0:
-        for dict_picture_album in list_dict_picture_album:
-            dict_picture_album["active"] = "false"
-        data = {'list_dict_picture_album': list_dict_picture_album,}
-        Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
-        q_picture_album_selected.refresh_from_db()
-    else:
-        list_dict_picture_album = []
-    num_picture_album_image = len(list_dict_picture_album)
-    # get base info
-    hashcode = q_picture_album_selected.hashcode
-    if hashcode is None:
-        hashcode = hashcode_generator()
-        data = {'hashcode': hashcode}
-        Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
-        q_picture_album_selected.refresh_from_db()
-    total_image_number = len(images)
-    i = 0
-    for image_file in images:   
-        image_file_name = image_file.name
-        file_extension = image_file_name.split('.')[-1]
-        print('file_extension', file_extension)
-        # convert file to PIL object
-        image_pil = Image.open(image_file)
-        # Remove Alpah channel befor saving
-        image_pil = image_pil.convert('RGB')
-        # 원본 이미지 저장
-        image_name_original = f'{hashcode}-o-{num_picture_album_image}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_original)
-        image_pil.save(file_path)
-        
-        # Get Thumbnail, Cover size PIL objects
-        cover_pil, thumbnail_pil = resize_pil_image_for_cover_and_thumbnail_pil(image_pil)
-        # 커버이미지 저장
-        image_name_cover = f'{hashcode}-c-{num_picture_album_image}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_cover)
-        cover_pil.save(file_path)
-        # 썸네일 이미지 저장
-        image_name_thumbnail = f'{hashcode}-t-{num_picture_album_image}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE, image_name_thumbnail)
-        thumbnail_pil.save(file_path)
-        # List 업데이트
-        if total_image_number == i + 1:
-            list_dict_picture_album.append({"id": num_picture_album_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"true", "discard":"false"})
-        else:
-            list_dict_picture_album.append({"id": num_picture_album_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"false", "discard":"false"})
-        i = i + 1
-        num_picture_album_image = num_picture_album_image + 1
-    # default 이미지 discard 하기
-    for dict_picture_album in list_dict_picture_album:
-        if dict_picture_album["id"] == 0:
-            dict_picture_album["active"] = 'false'
-            dict_picture_album["discard"] = 'true'
-    # db save and refresh  
-    data = {
-        'list_dict_picture_album': list_dict_picture_album,
-    }
-    Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
-    q_picture_album_selected.refresh_from_db()
-    return list_dict_picture_album
-    
 
 
-# Video Album 커버이미지 저장하기
-def save_video_album_images(q_video_album_selected, images):
-    """
-        Video Album은
-        1개의 list_dict_picture_album과 1개의 list_dict_video_album 이 있음
-        list_dict_picture_album은 커버이미지들을 담당. Picture_Album의 list_dict_picture_album과 기능적으로 같다.
-        
-        [
-        {"id":"0", "thumbnail":"default-t.png", "cover":"default-c.png", "original":"default-o.png", "active":"true", "discard":"false"},
-        {"id":"1", "thumbnail":"abcd-p-t-1.png", "cover":"abcd-p-c-1.png", "original":"abcd-p-o-1.png", "active":"false", "discard":"false"},
-        {"id":"2", "thumbnail":"abcd-p-t-2.png", "cover":"abcd-p-c-2.png", "original":"abcd-p-o-2.png", "active":"false", "discard":"false"},
-        ]
-        abcd == hashcode
-        
-        active: true 이면 대문(커버) 이미지로 할당한다는 의미
-        discard: true 이면 삭제한다는 의미
-        id == number of items로 표시, 
-        item 삭제시 파일은 삭제하고 리스트에서는 discard=true만 설정하고 item을 삭제하지는 않는다. ID 변경되지 않게 하려고
-    """
-    print('num of images', len(images))
-    # get base info
-    hashcode = q_video_album_selected.hashcode
-    if hashcode is None:
-        hashcode = hashcode_generator()
-        data = {'hashcode': hashcode}
-        Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
-        q_video_album_selected.refresh_from_db()
-    # reset active to false
-    list_dict_picture_album = q_video_album_selected.list_dict_picture_album
-    if list_dict_picture_album is not None and len(list_dict_picture_album) > 0:
-        for dict_picture_album in list_dict_picture_album:
-            dict_picture_album["active"] = "false"
-        data = {'list_dict_picture_album': list_dict_picture_album,}
-        Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
-        q_video_album_selected.refresh_from_db()
-    else:
-        list_dict_picture_album = []
-    num_picture_album_image = len(list_dict_picture_album)
-    total_image_number = len(images)
-    i = 0
-    for image_file in images:   
-        image_file_name = image_file.name
-        file_extension = image_file_name.split('.')[-1]
-        print('file_extension', file_extension)
-        # convert file to PIL object
-        image_pil = Image.open(image_file)
-        # Remove Alpah channel befor saving
-        image_pil = image_pil.convert('RGB')
-        # 원본 이미지 저장
-        image_name_original = f'{hashcode}-o-{num_picture_album_image}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_original)
-        image_pil.save(file_path)
-        
-        # Get Thumbnail, Cover size PIL objects
-        cover_pil, thumbnail_pil = resize_pil_image_for_cover_and_thumbnail_pil(image_pil)
-        # 커버이미지 저장
-        image_name_cover = f'{hashcode}-c-{num_picture_album_image}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_cover)
-        cover_pil.save(file_path)
-        # 썸네일 이미지 저장
-        image_name_thumbnail = f'{hashcode}-t-{num_picture_album_image}.{file_extension}'
-        file_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, image_name_thumbnail)
-        thumbnail_pil.save(file_path)
-        # List 업데이트
-        if total_image_number == i + 1:
-            list_dict_picture_album.append({"id": num_picture_album_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"true", "discard":"false"})
-        else:
-            list_dict_picture_album.append({"id": num_picture_album_image, "original":image_name_original, "cover":image_name_cover, "thumbnail":image_name_thumbnail, "active":"false", "discard":"false"})
-        i = i + 1
-        num_picture_album_image = num_picture_album_image + 1
-    # default 이미지 discard 하기
-    for dict_picture_album in list_dict_picture_album:
-        if dict_picture_album["id"] == 0:
-            dict_picture_album["active"] = 'false'
-            dict_picture_album["discard"] = 'true'
-    # db save and refresh  
-    data = {
-        'list_dict_picture_album': list_dict_picture_album,
-    }
-    Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
-    q_video_album_selected.refresh_from_db()
-    return True
 
 
-# Video Album Video 저장하기
-def save_video_album_videos(q_video_album_selected, videos):
-    print('# Video Album Video / Still image 저장하기')
-    """
-     Video Album은
-        1개의 list_dict_picture_album과 1개의 list_dict_video_album 이 있음
-        list_dict_video_album은 video들을 담당
-
-        [
-        {"id":"0", "video":"default.mp4", "thumbnail":"default-t.png", "still":[{"time":1, "path":"default-s.png"}], "active":"true", "discard":"false"},
-        {"id":"1", "video":"abcd-v-1.mp4", "thumbnail":"abcd-v-s-1-1.png", "still":[{"time":10, "path":"abcd-s-1-1.png", "20":"abcd-s-1-2.png"}], "active":"false", "discard":"false"},
-        {"id":"2", "video":"abcd-v-2.mp4", "thumbnail":"abcd-v-s-1-2.png", "still":[{"time":10, "path":"abcd-s-2-1.png", "20":"abcd-s-2-2.png"}], "active":"false", "discard":"false"},
-        ]
-        abcd == hashcode
-
-        스틸이미지는 dictionary 형태로 시간값을 키값으로, 이미지패쓰를 밸류값으로 가진다.
-        thumbnail은 still image의 첫번째 항목을 디폴트값으로 넣어준다.
-    """
-    # get base info
-    hashcode = q_video_album_selected.hashcode
-    if hashcode is None:
-        hashcode = hashcode_generator()
-        data = {'hashcode': hashcode}
-        Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
-        q_video_album_selected.refresh_from_db()
-    # reset active to false
-    list_dict_video_album = q_video_album_selected.list_dict_video_album
-    if list_dict_video_album is not None and len(list_dict_video_album) > 0:
-        for dict_video_album in list_dict_video_album:
-            dict_video_album["active"] = "false"
-        data = {'list_dict_video_album': list_dict_video_album,}
-        Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
-        q_video_album_selected.refresh_from_db()
-    else:
-        list_dict_video_album = []
-    num_video_album_video = len(list_dict_video_album)
-    total_video_number = len(videos)
-
-    i = 0
-    for video_file in videos:   
-        print('i', i)
-        video_file_name = video_file.name
-        file_extension = video_file_name.split('.')[-1]
-        print('file_extension', file_extension)
-        # 원본 비디오 저장
-        video_name_original = f'{hashcode}-v-{num_video_album_video}.{file_extension}'
-        file_video_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_name_original)
-        with open(file_video_path, 'wb+') as destination:
-            for chunk in video_file.chunks():
-                destination.write(chunk)
-        # List 업데이트
-        if total_video_number == i + 1:
-            list_dict_video_album.append({"id": num_video_album_video, "video": video_name_original, "thumbnail":"default-t.png", "still":[{"time":0, "path":"default-t.png"}], "active":"true", "discard":"false"})
-        else:
-            list_dict_video_album.append({"id": num_video_album_video, "video": video_name_original, "thumbnail":"default-t.png", "still":[{"time":0, "path":"default-t.png"}], "active":"false", "discard":"false"})
-        i = i + 1
-        num_video_album_video = num_video_album_video + 1
-    # default 이미지 discard 하기
-    for dict_video_album in list_dict_video_album:
-        if dict_video_album["id"] == 0:
-            dict_video_album["active"] = 'false'
-            dict_video_album["discard"] = 'true'
-    # db save and refresh  
-    data = {'list_dict_video_album': list_dict_video_album,}
-    Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
-    q_video_album_selected.refresh_from_db()
-    return True
 
 
-# Video Album Still image 저장하기
-def save_video_album_video_still_images(q_video_album_selected, dict_video_album):
-    # get base info
-    hashcode = q_video_album_selected.hashcode
-    if hashcode is None:
-        hashcode = hashcode_generator()
-        data = {'hashcode': hashcode}
-        Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
-        q_video_album_selected.refresh_from_db()
-    file_video_name = dict_video_album["video"]
-    file_video_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, file_video_name)
-    video_id = dict_video_album["id"]
 
-    # Function to resize and pad the frame
-    def resize_and_pad(frame, target_width, target_height, pad_color):
-        # Get the original dimensions
-        original_height, original_width = frame.shape[:2]
-        # Compute the scaling factor and new dimensions
-        scale_width = target_width / original_width
-        scale_height = target_height / original_height
-        scale = min(scale_width, scale_height)
-        # Compute the new width and height to maintain aspect ratio
-        new_width = int(original_width * scale)
-        new_height = int(original_height * scale)
-        # Resize the frame
-        resized_frame = cv2.resize(frame, (new_width, new_height))
-        # Compute the padding for top/bottom and left/right
-        pad_left = (target_width - new_width) // 2
-        pad_right = target_width - new_width - pad_left
-        pad_top = (target_height - new_height) // 2
-        pad_bottom = target_height - new_height - pad_top
-        # Add padding
-        padded_frame = cv2.copyMakeBorder(
-            resized_frame,
-            pad_top,
-            pad_bottom,
-            pad_left,
-            pad_right,
-            cv2.BORDER_CONSTANT,
-            value=pad_color
-        )
-        return padded_frame
 
-    def still_image_save(j, unit_frame, hashcode, video_id, fps):
-        cap.set(cv2.CAP_PROP_POS_FRAMES, unit_frame*j)
-        ret, frame = cap.read()
-        # Padding color (black in this case)
-        pad_color = (255, 255, 255)  # (B, G, R)
-        target_width = 640
-        target_height = 360
-        # Resize and pad the frame
-        frame = resize_and_pad(frame, target_width, target_height, pad_color)
-        # Save
-        if ret:
-            # Save the frame as an image file
-            try:
-                video_still_path = f'{hashcode}-s-{video_id}-{j}.jpg'
-                file_still_path = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_still_path)
-                # save Frame
-                cv2.imwrite(file_still_path, frame)
-                timestamp = (j*unit_frame) // fps
-                return {"time":timestamp, "path":video_still_path}
-            except:
-                return None
-        else:
-            return None
-        
-    # Still 이미지 확보
-    list_still = []
-    cap = cv2.VideoCapture(file_video_path)
-    if cap.isOpened():
-        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        duration_seconds = total_frames / fps
-
-        if duration_seconds < 600: # 10 min under == 5 cut
-            unit_frame = total_frames // 5
-            print('5 unit_frame ', unit_frame)
-            j = 1
-            while j < 6:
-                print('j', j)
-                try:
-                    return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
-                except:
-                    pass
-                if return_value is not None:
-                    list_still.append(return_value)
-                j = j + 1
-        elif duration_seconds >= 600 and duration_seconds < 3000: # 10 ~ 30 min  == 10 cut
-            unit_frame = total_frames // 10
-            print('10 unit_frame ', unit_frame)
-            j = 1
-            while j < 11:
-                print('j', j)
-                try:
-                    return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
-                except:
-                    pass
-                if return_value is not None:
-                    list_still.append(return_value)
-                j = j + 1
-        elif duration_seconds >= 3000 and duration_seconds < 9000: # 30 ~ 90 min  == 15 cut
-            unit_frame = total_frames // 15
-            print('15 unit_frame ', unit_frame)
-            j = 1
-            while j < 16:
-                print('j', j)
-                try:
-                    return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
-                except:
-                    pass
-                if return_value is not None:
-                    list_still.append(return_value)
-                j = j + 1
-        else: # 90 min ~ Over == 20 cut
-            unit_frame = total_frames // 20
-            print('20 unit_frame ', unit_frame)
-            j = 1
-            while j < 21:
-                print('j', j)
-                try:
-                    return_value = still_image_save(j, unit_frame, hashcode, video_id, fps)
-                except:
-                    pass
-                if return_value is not None:
-                    list_still.append(return_value)
-                j = j + 1
-
-    # Dict_video_album 업데이트
-    dict_video_album["thumbnail"] = list_still[0]["path"]
-    dict_video_album["still"] = list_still
-    
-    return dict_video_album
 
 
 

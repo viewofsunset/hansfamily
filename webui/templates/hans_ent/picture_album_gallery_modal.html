@@ -5,330 +5,426 @@
 
 
 <!-- Modal -->
-<div class="modal fade modal-xl" id="app-hans-ent-picture-album-gallery-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h1 class="modal-title fs-4" id="exampleModalLabel">
-					[[ data_actor.id ]], [[ data_picture_album.id ]] Gallery: [[ data_picture_album.title ]] 
-					<span v-if="data_picture_album.code">
-						([[ data_picture_album.code ]])
-					</span> 
-				</h1>
-				
-				&nbsp; 
-				<button type="button" class="btn btn-primary btn-sm"  @click="f_hans_ent_picture_album_gallery_fullscreen_w_path" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-gallery-fullscreen-modal" >Fullscreen</button>
-				&nbsp; 
+<div class="modal fade modal-xl" id="app_hans_ent_picture_album_gallery_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" ref="ref_hans_ent_picture_album_gallery_modal">
 
-				<!--
-					아이콘들 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				-->
-				<div class="text-center">
-					<button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-profile-modal">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
-							<path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
-							<path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
-						</svg>                            
-					</button>
-					&nbsp;
-					<button @click="f_hans_ent_picture_album_upload_modal(data_picture_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-upload-modal">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-upload" viewBox="0 0 16 16">
-							<path fill-rule="evenodd" d="M4.406 1.342A5.53 5.53 0 0 1 8 0c2.69 0 4.923 2 5.166 4.579C14.758 4.804 16 6.137 16 7.773 16 9.569 14.502 11 12.687 11H10a.5.5 0 0 1 0-1h2.688C13.979 10 15 8.988 15 7.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 2.825 10.328 1 8 1a4.53 4.53 0 0 0-2.941 1.1c-.757.652-1.153 1.438-1.153 2.055v.448l-.445.049C2.064 4.805 1 5.952 1 7.318 1 8.785 2.23 10 3.781 10H6a.5.5 0 0 1 0 1H3.781C1.708 11 0 9.366 0 7.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383"/>
-							<path fill-rule="evenodd" d="M7.646 4.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V14.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708z"/>
-						</svg>
-					</button>
-					&nbsp;
-					<a v-if="data_picture_album.list_album_picture_id != null">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16">
-							<path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-						</svg>
-					</a>
-				</div> 
+    <div class="modal-dialog">
 
-				<button type="button" @click="f_modal_close" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-			</div>
-
-			<div class="modal-body">
+        <div class="modal-content" ref="ref_hans_ent_picture_album_gallery_modal_content">
 			
-				<!-- Registered Images -->
-				<div v-if="data_picture_album.list_dict_picture_album != null">
-					<div class="card">
-						
-                        <div v-for="(dict_picture_album, index) in total_list_dict_picture_album" :key="index"  >
-							<button @click="f_delete_picture_album_pic(key)" class="btn" >
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
-									<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-									<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+			<div class="modal-header">
+				<table class="table">
+					<tr>
+						<th class="alnleft" rowspan="2">
+							<h1 class="modal-title fs-4" id="modal_header_h1"> 
+								[[ data_picture.title ]]
+								<small>
+									<small>
+										<small>
+											<span v-if="data_picture.check_url_downloaded" class="badge bg-success">Downloaded</span>
+											<span v-if="data_picture.check_4k_uploaded" class="badge bg-warning">Uploaded</span>
+										</small>
+									</small>
+								</small>
+							</h1>
+						</th>
+						<td width="35%" class="alnright">
+							<!--
+								아이콘들 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							&nbsp;
+							<button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#app_hans_ent_picture_album_gallery_fullscreen_modal">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16">
+									<path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707m4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707m0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707m-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707"/>
 								</svg>
 							</button>
-                            <a :href="BASE_DIR_PICTURE+dict_picture_album.original" target="_blank" >
-                                <img :src="BASE_DIR_PICTURE+dict_picture_album.original" class="image-center">
-                            </a>
-                            <br>
-						</div>
 
+							&nbsp;
+							<button @click="f_hans_ent_actor_profile_modal_open_by_picture_album_id(data_picture.id)" class="btn" >
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
+									<path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
+									<path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+								</svg>                            
+							</button>
+
+							&nbsp;
+							<button @click="f_hans_ent_picture_album_update_modal_open(data_picture.id)" type="button" class="btn" data-bs-toggle="modal" data-bs-target="#app_hans_ent_picture_album_update_modal">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+									<path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+								</svg>
+							</button>
+
+							&nbsp;
+							<button  @click="f_status_change_favorite_picture_album(data_picture.id)" type="button" class="btn">
+								<div v-if="check_selected_picture_album_favorite == false">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+										<path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+									</svg>
+								</div>
+								<div v-else>
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16">
+										<path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+									</svg>
+								</div>
+							</button>
+							&nbsp;
+							<button  @click="f_add_rating_score_picture_album(data_picture.id)" type="button" class="btn">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-airplane-fill" viewBox="0 0 16 16">
+									<path d="M6.428 1.151C6.708.591 7.213 0 8 0s1.292.592 1.572 1.151C9.861 1.73 10 2.431 10 3v3.691l5.17 2.585a1.5 1.5 0 0 1 .83 1.342V12a.5.5 0 0 1-.582.493l-5.507-.918-.375 2.253 1.318 1.318A.5.5 0 0 1 10.5 16h-5a.5.5 0 0 1-.354-.854l1.319-1.318-.376-2.253-5.507.918A.5.5 0 0 1 0 12v-1.382a1.5 1.5 0 0 1 .83-1.342L6 6.691V3c0-.568.14-1.271.428-1.849"/>
+								</svg>
+							</button>
+							&nbsp; 
+ 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</td>
+					</tr>
+					<tr>
+						<td class="alnright">
+							<!--
+								아이콘들 2 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							&nbsp;
+							<button @click="f_hans_ent_picture_album_gallery_order_shift(data_picture.id)" class="btn" >
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-right" viewBox="0 0 16 16">
+									<path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5m14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5"/>
+								</svg>
+							</button>
+							
+							&nbsp;
+							<button @click="f_hans_ent_picture_album_gallery_order_shuffle(data_picture.id)" class="btn" >
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16">
+									<path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 7.556 8a9.6 9.6 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.6 9.6 0 0 0 6.444 8a9.6 9.6 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5"/>
+									<path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192"/>
+								</svg>
+							</button>
+							
+							&nbsp;
+							<button @click="f_hans_ent_picture_album_gallery_sort_clip(data_picture.id)" class="btn" >
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sort-down-alt" viewBox="0 0 16 16">
+									<path d="M3.5 3.5a.5.5 0 0 0-1 0v8.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L3.5 12.293zm4 .5a.5.5 0 0 1 0-1h1a.5.5 0 0 1 0 1zm0 3a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm0 3a.5.5 0 0 1 0-1h5a.5.5 0 0 1 0 1zM7 12.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 0-1h-7a.5.5 0 0 0-.5.5"/>
+								</svg>
+							</button>
+
+							&nbsp;
+							<button @click="f_hans_ent_picture_album_gallery_cover_select(data_picture.id)" class="btn" >
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2-square" viewBox="0 0 16 16">
+									<path d="M3 14.5A1.5 1.5 0 0 1 1.5 13V3A1.5 1.5 0 0 1 3 1.5h8a.5.5 0 0 1 0 1H3a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V8a.5.5 0 0 1 1 0v5a1.5 1.5 0 0 1-1.5 1.5z"/>
+									<path d="m8.354 10.354 7-7a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0"/>
+								</svg>
+							</button>
+
+							&nbsp;
+							<button @click="f_hans_ent_picture_album_gallery_order_change(data_picture.id)" class="btn" >
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dpad-fill" viewBox="0 0 16 16">
+									<path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v3a.5.5 0 0 1-.5.5h-3A1.5 1.5 0 0 0 0 6.5v3A1.5 1.5 0 0 0 1.5 11h3a.5.5 0 0 1 .5.5v3A1.5 1.5 0 0 0 6.5 16h3a1.5 1.5 0 0 0 1.5-1.5v-3a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 0 16 9.5v-3A1.5 1.5 0 0 0 14.5 5h-3a.5.5 0 0 1-.5-.5v-3A1.5 1.5 0 0 0 9.5 0zm1.288 2.34a.25.25 0 0 1 .424 0l.799 1.278A.25.25 0 0 1 8.799 4H7.201a.25.25 0 0 1-.212-.382zm0 11.32-.799-1.277A.25.25 0 0 1 7.201 12H8.8a.25.25 0 0 1 .212.383l-.799 1.278a.25.25 0 0 1-.424 0Zm-4.17-4.65-1.279-.798a.25.25 0 0 1 0-.424l1.279-.799A.25.25 0 0 1 4 7.201V8.8a.25.25 0 0 1-.382.212Zm10.043-.798-1.278.799A.25.25 0 0 1 12 8.799V7.2a.25.25 0 0 1 .383-.212l1.278.799a.25.25 0 0 1 0 .424Z"/>
+								</svg>
+							</button>
+
+							&nbsp;
+							<button @click="f_hans_ent_picture_album_gallery_order_reset(data_picture.id)" class="btn" >
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+									<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+									<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+								</svg>
+							</button>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<div class="modal-body" ref="ref_hans_ent_picture_album_gallery_modal_body">
+
+				<!-- Related Album info -->
+				<div>
+					<div v-for="(data_picture_album_collected, index) in list_serialized_data_picture_album_collected" :key="index" >
+						[[ data_picture_album_collected.id ]]
 					</div>
 				</div>
 
+				<span v-if="status_cover_image_select_on_gallery==true" class="image-grid-picture-gallery-cover-image ">
+					<div v-for="(dict_profile_album, index) in discardedItems_actor_profile_album" :key="index" class="grid-box-picture-gallery-cover-image" >
+						<button class="btn btn-sm" @click="f_hans_ent_picture_album_gallery_delete_image_for_cover(dict_profile_album.id)"
+						v-if="dict_profile_album.id != 0">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+								<path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+								<path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+								</svg>
+						</button>
+						
+						<img v-bind:src="BASE_DIR_ACTOR+dict_profile_album.cover" width="150">
+					
+					</div>
+					<hr>
+				</span>
+
+				<!-- Selected Album Pictures -->
+				<!-- <div>
+					<span v-if="total_list_dict_picture_album.length > 1" class="image-grid-picture-gallery">
+						<div v-for="(dict_picture_album, index) in total_list_dict_picture_album" :key="index" 
+						:class="status_cover_image_select_on_gallery ? 'grid-box-picture-gallery-unselected' : 'grid-box-picture-gallery'"
+						>
+							<span v-if="status_cover_image_select_on_gallery==true">
+								<button @click="f_hans_ent_picture_album_gallery_select_image_for_cover(dict_picture_album.id)">
+									<img v-bind:src="BASE_DIR_PICTURE+dict_picture_album.cover" >
+								</button>
+							</span>
+							<span v-else>
+								<a :href="BASE_DIR_PICTURE+dict_picture_album.original" target="_blank">
+									<img v-bind:src="BASE_DIR_PICTURE+dict_picture_album.cover" >
+								</a>
+							</span>
+						</div>
+					</span>
+
+					<span v-else >
+						<span v-if="list_picture_url_album != null">
+							<div v-if="list_picture_url_album.length != 0">
+								<span v-if="status_picture_album_order_ascending == true" class="image-grid-picture-gallery">
+									<div v-for="(picture_url, index) in list_picture_url_album" :key="index" 
+									:class="status_cover_image_select_on_gallery ? 'grid-box-picture-gallery-unselected' : 'grid-box-picture-gallery'"
+									>
+										<a :href="picture_url" target="_blank">
+											<img :src="picture_url" width="350">
+										</a>
+									</div>
+								</span>
+								<span v-else class="image-grid-picture-gallery">
+									<div v-for="(picture_url, index) in list_picture_url_album.slice().reverse()" :key="index" 
+									:class="status_cover_image_select_on_gallery ? 'grid-box-picture-gallery-unselected' : 'grid-box-picture-gallery'"
+									>
+										<a :href="picture_url" target="_blank">
+											<img :src="picture_url" width="350">
+										</a>
+									</div>
+								</span>
+								
+							</div>
+							<div v-else >
+								<div v-if="total_list_dict_picture_album.length > 1" class="image-grid-picture-gallery">
+									<div v-for="(dict_picture_album, index) in total_list_dict_picture_album" :key="index" 
+									:class="status_cover_image_select_on_gallery ? 'grid-box-picture-gallery-unselected' : 'grid-box-picture-gallery'"
+									>
+										<a :href="BASE_DIR_PICTURE+dict_picture_album.original" target="_blank">
+											<img v-bind:src="BASE_DIR_PICTURE+dict_picture_album.cover" >
+										</a>
+									</div>
+								</div>
+							</div>
+						</span>
+					</span>
+				</div> -->
+
+<!-- 				
+				<div>
+					<span v-if="total_list_dict_picture_album.length > 1" class="image-grid-picture-gallery">
+						<div v-for="(dict_picture_album, index) in total_list_dict_picture_album" :key="index" 
+						:class="['grid-box-picture-gallery', currentBorderClass]"
+						>
+							<span v-if="status_cover_image_select_on_gallery==true">
+								<button @click="f_hans_ent_picture_album_gallery_select_image_for_cover(dict_picture_album.id)">
+									<img v-bind:src="BASE_DIR_PICTURE+dict_picture_album.cover" >
+								</button>
+							</span>
+							<span v-else>
+								
+								<a :href="BASE_DIR_PICTURE+dict_picture_album.original" target="_blank">
+									<img v-bind:src="BASE_DIR_PICTURE+dict_picture_album.cover" >
+								</a>
+							</span>
+						</div>
+					</span>
+
+					<span v-else >
+						<span v-if="list_picture_url_album != null">
+							<div v-if="list_picture_url_album.length != 0">
+								<span v-if="status_picture_album_order_ascending == true" class="image-grid-picture-gallery">
+									<div v-for="(picture_url, index) in list_picture_url_album" :key="index" 
+									:class="['border-box', currentBorderClass]"
+									>
+										<a :href="picture_url" target="_blank">
+											<img :src="picture_url" width="350">
+										</a>
+									</div>
+								</span>
+								<span v-else class="image-grid-picture-gallery">
+									<div v-for="(picture_url, index) in list_picture_url_album.slice().reverse()" :key="index" 
+									:class="['border-box', currentBorderClass]"
+									>
+										<a :href="picture_url" target="_blank">
+											<img :src="picture_url" width="350">
+										</a>
+									</div>
+								</span>
+								
+							</div>
+							<div v-else >
+								<div v-if="total_list_dict_picture_album.length > 1" class="image-grid-picture-gallery">
+									<div v-for="(dict_picture_album, index) in total_list_dict_picture_album" :key="index" 
+									:class="['border-box', currentBorderClass]"
+									>
+										<a :href="BASE_DIR_PICTURE+dict_picture_album.original" target="_blank">
+											<img v-bind:src="BASE_DIR_PICTURE+dict_picture_album.cover" >
+										</a>
+									</div>
+								</div>
+							</div>
+						</span>
+					</span>
+				</div>
+				-->
+
+			
+				<div>
+					<span v-if="total_list_dict_picture_album.length > 0" class="image-grid-picture-gallery">
+						<!-- DB 이미지 로딩한 경우 -->
+						<div v-for="(dict_picture_album, index) in total_list_dict_picture_album" :key="index" 
+						:class="['grid-box-picture-gallery', currentBorderClass]"
+						>
+							<span v-if="status_cover_image_select_on_gallery==true">
+								<!-- Cover Image 선택용 Button -->
+								<button @click="f_hans_ent_picture_album_gallery_select_image_for_cover(dict_picture_album.id)">
+									<img v-bind:src="BASE_DIR_PICTURE+dict_picture_album.cover" >
+								</button>
+							</span>
+							<span v-else-if="status_image_order_change_on_gallery==true">
+								<input class="form-check-input select-checkbox" 
+								type="checkbox" 
+								@change="f_picture_album_image_multi_selection_checkbox(dict_picture_album.id)" 
+								v-model="list_picture_album_image_id_for_checkbox_selection"
+								:value="dict_picture_album.id" 
+								:id="'id_picture_album_multi_selection_checkbox-' + dict_picture_album.id"
+								>
+								<label class="form-check-label" :for="'id_picture_album_multi_selection_checkbox' + dict_picture_album.id">
+									&nbsp;[[ dict_picture_album.id ]]
+								</label>
+								<!-- Cover Image 선택용 Button -->
+									<img :src="BASE_DIR_PICTURE+dict_picture_album.cover" class="img-fluid" >
+									
+									<!-- Floating Left Button -->
+										<button
+										class="btn btn-secondary btn-floating-left-button"
+										@click="f_hans_ent_picture_album_gallery_select_image_for_order_prev(dict_picture_album.id)"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-square-fill" viewBox="0 0 16 16">
+											<path d="M16 14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2zm-4.5-6.5H5.707l2.147-2.146a.5.5 0 1 0-.708-.708l-3 3a.5.5 0 0 0 0 .708l3 3a.5.5 0 0 0 .708-.708L5.707 8.5H11.5a.5.5 0 0 0 0-1"/>
+										</svg>
+									</button>
+									
+									<!-- Floating Right Button -->
+									<button
+										class="btn btn-secondary btn-floating-right-button"
+										@click="f_hans_ent_picture_album_gallery_select_image_for_order_next(dict_picture_album.id)"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-square-fill" viewBox="0 0 16 16">
+											<path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"/>
+										</svg>
+									</button>
+
+									<!-- Floating Top Button -->
+									<button
+										class="btn btn-secondary btn-floating-top-button"
+										@click="f_hans_ent_picture_album_gallery_select_image_for_order_top(dict_picture_album.id)"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-square-fill" viewBox="0 0 16 16">
+											<path d="M2 16a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2zm6.5-4.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 1 0"/>
+										</svg>
+									</button>
+									<!-- Floating Bottom Button -->
+									<button
+										class="btn btn-secondary btn-floating-bottom-button"
+										@click="f_hans_ent_picture_album_gallery_select_image_for_order_bottom(dict_picture_album.id)"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-square-fill" viewBox="0 0 16 16">
+											<path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6.5 4.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5a.5.5 0 0 1 1 0"/>
+										</svg>
+									</button>
+							</span>
+							<span v-else>
+								
+								<a :href="BASE_DIR_PICTURE+dict_picture_album.original" target="_blank">
+									<img v-bind:src="BASE_DIR_PICTURE+dict_picture_album.cover" >
+								</a>
+							</span>
+						</div>
+					</span>
+
+					<span v-else >
+						<!-- URL 이미지 로딩한 경우 -->
+						<span v-if="list_picture_url_album != null">
+							<div v-if="list_picture_url_album.length != 0">
+								<span v-if="status_picture_album_order_ascending == true" class="image-grid-picture-gallery">
+									<div v-for="(picture_url, index) in list_picture_url_album" :key="index" 
+									:class="['border-box', currentBorderClass]"
+									>
+										<a :href="picture_url" target="_blank">
+											<img :src="picture_url" width="350">
+										</a>
+									</div>
+								</span>
+								<span v-else class="image-grid-picture-gallery">
+									<div v-for="(picture_url, index) in list_picture_url_album.slice().reverse()" :key="index" 
+									:class="['border-box', currentBorderClass]"
+									>
+										<a :href="picture_url" target="_blank">
+											<img :src="picture_url" width="350">
+										</a>
+									</div>
+								</span>
+								
+							</div>
+							<div v-else >
+								<div v-if="total_list_dict_picture_album.length > 1" class="image-grid-picture-gallery">
+									<div v-for="(dict_picture_album, index) in total_list_dict_picture_album" :key="index" 
+									:class="['border-box', currentBorderClass]"
+									>
+										<a :href="BASE_DIR_PICTURE+dict_picture_album.original" target="_blank">
+											<img v-bind:src="BASE_DIR_PICTURE+dict_picture_album.cover" >
+										</a>
+									</div>
+								</div>
+							</div>
+						</span>
+					</span>
+				</div>
+			
+
+
+			</div> 
+
+
+			<!-- Button bar at bottom -->
+			<div class="modal-footer" ref="ref_hans_ent_picture_album_gallery_fullscreen_modal_footer">
+				<button type="button" class="btn btn-sm" @click="scrollModalToTop_picture_gallery">Scroll to Top</button>
+				<!-- Add other buttons here (Save, Cancel, etc.) -->
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 			</div>
 
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" @click="f_modal_close" data-bs-dismiss="modal">Close</button>
-			</div>
-		</div>
+
+			<!-- The floating Scroll-to-Top button, always visible at bottom-right of the WINDOW -->
+			<button class="modal-floating-button-fullscreen" data-bs-toggle="modal" data-bs-target="#app_hans_ent_picture_album_gallery_fullscreen_modal">
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16">
+					<path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707m4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707m0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707m-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707"/>
+				</svg>
+			</button>
+			<button class="modal-floating-button-scroll-to-top" @click="scrollModalToTop_picture_gallery">
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up" viewBox="0 0 16 16">
+					<path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5"/>
+				</svg>
+			</button>
+			<button class="modal-floating-button-modal-close" data-bs-dismiss="modal">
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+					<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+				  </svg>
+			</button>
+			<button class="modal-floating-button-scroll-to-bottom" @click="scrollModalToBottom_picture_gallery">
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
+					<path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1"/>
+				</svg>
+			</button>
+			
+        </div>
+    
 	</div>
+
 </div>
 
 
 
-<script>
-	var post_hans_ent_picture_album_gallery_modal = createApp({
-		delimiters: ["[[", "]]"],
-		data() {
-		return {
-            BASE_DIR_PICTURE : '',
-			
-			data_actor: {},
-			data_picture_album: {},
-			list_dict_picture_album: [],
-            selected_picture_album_id: '',
-			selected_actor_id: '',
-			
-			selected_picture_id: '',
-			selected_picture_path:  '',
-			selected_dict_index: '',
-			input_text_title: '',
-
-			gallery_status_origin: false,
-
-            dict_album_key_fullsize_value_thumbnail_image_path: [],
-			list_album_thumbnail_url: [],
-		}
-		},
-		methods: {
-			refreshData() {
-				console.log('open modal for video create!!')
-				axios.get('/hans_ent_picture_album_gallery_modal/')
-				.then((response) => {
-					this.data_picture_album = response.data['selected_serialized_data_picture_album']
-					console.log("gallery modal refresh done")
-				})
-			},
-
-			f_gallery_status_switch() {
-				if (this.gallery_status_origin == false) {
-					this.gallery_status_origin = true
-				} else {
-					this.gallery_status_origin = false
-				}
-			},
-
-			f_sync_data_to_picture_album_gallery_modal(data) {
-                this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
-				this.data_actor = data['selected_serialized_data_actor']
-				this.data_picture_album = data['selected_serialized_data_picture_album']
-				
-                if (Object.keys(this.data_actor).length > 0 ) {
-					this.selected_actor_id = this.data_actor['id']
-				}
-                if (Object.keys(this.data_picture_album).length > 0 ) {
-					this.selected_picture_album_id = this.data_picture_album['id']
-                    this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
-				}
-				
-                console.log('Picture Album Gallery Modal로 정보 전송 완료', data)
-			},
-			
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // 정보 전송
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			// icon pannel Picture Album Gallery Fullscreen Modal로 정보 전송 by PATH data
-			f_hans_ent_picture_album_gallery_fullscreen_w_path() {
-				console.log('######################## 1', this.selected_actor_id, this.selected_picture_album_id)
-				axios.post('/hans_ent_picture_album_gallery_modal/', {
-                    'selected_picture_album_id': this.selected_picture_album_id,
-                    'selected_actor_id': this.selected_actor_id,
-                }, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'X-CSRFToken': "{{ csrf_token }}"
-                }
-                })
-                .then((response) => {
-                    console.log('######################## 사진 앨범 갤러리 풀스크린 모달창으로 전송', this.selected_actor_id)
-                    post_hans_ent_picture_album_gallery_fullscreen_modal.f_sync_data_to_picture_album_gallery_fullscreen_modal_w_path(response.data);
-                })
-                .catch(() => {
-                    console.log('Error! f_hans_ent_picture_album_gallery_fullscreen_w_path')
-                })
-			},
-
-            // icon pannel Picture Album Gallery Fullscreen Modal로 정보 전송 by URL data
-			f_hans_ent_picture_album_gallery_fullscreen_w_url() {
-				console.log('######################## 2')
-				post_hans_ent_picture_album_gallery_fullscreen_modal.f_sync_data_to_picture_album_gallery_fullscreen_modal_w_url(
-					{
-						'selected_serialized_data_actor': this.data_actor,
-						'selected_serialized_data_picture_album': this.data_picture_album,
-						'list_album_thumbnail_url': this.list_album_thumbnail_url,
-					}
-					)
-			},
-
-
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // 앨범 기능 수행
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			f_delete_picture_album_pic(event) {
-				console.log(event)
-				this.selected_picture_path = event
-				const isConfirmed = window.confirm("정말 삭제하시겠습니까?");
-				if (isConfirmed) {
-					axios.post('/hans_ent_picture_album_delete/', {
-						'button': 'remove_picture_album_pic',
-						'selected_picture_path': this.selected_picture_path,
-						'selected_picture_album_id': this.selected_picture_album_id,
-					}, {
-					headers: {
-						'Content-Type': 'multipart/form-data',
-						'X-CSRFToken': "{{ csrf_token }}"
-					}
-					})
-					.then((response) => {
-						this.data_picture_album = response.data['selected_serialized_data_picture_album']
-						this.data_actor = response.data['selected_serialized_data_actor']
-						this.dict_album_key_fullsize_value_thumbnail_image_path = response.data['dict_album_key_fullsize_value_thumbnail_image_path']
-						this.selected_picture_album_id = this.data_video_album['id']
-						this.selected_actor_id = this.data_actor['id']
-						console.log("사진 앨범 사진 삭제 완료", data)
-					})
-					.catch(() => {
-						console.log('Error! f_delete_picture_album_pic')
-					})
-				} else {
-					alert("삭제가 취소되었습니다.");
-				}
-			},
-
-			f_delete_picture_album_and_its_pic() {
-				console.log('delete selected id album: ', this.selected_picture_album_id)
-				const isConfirmed = window.confirm("앨범에 등록된 사진들도 모두 삭제됩니다. 정말 삭제하시겠습니까?");
-				if (isConfirmed) {
-                	axios.post('/hans_ent_picture_album_delete/', {
-						'button': 'remove_picture_album',
-						'selected_picture_album_id': this.selected_picture_album_id,
-					}, {
-					headers: {
-						'Content-Type': 'multipart/form-data',
-						'X-CSRFToken': "{{ csrf_token }}"
-					}
-					})
-					.then((response) => {
-						this.data_picture_album = response.data['selected_serialized_data_picture_album']
-						this.data_actor = response.data['selected_serialized_data_actor']
-						this.dict_album_key_fullsize_value_thumbnail_image_path = response.data['dict_album_key_fullsize_value_thumbnail_image_path']
-						this.selected_picture_album_id = this.data_video_album['id']
-						this.selected_actor_id = this.data_actor['id']
-						console.log("사진 앨범 삭제 완료", data)
-						post_hans_ent_picture_album_list.refreshData()
-					})
-					.catch(() => {
-						console.log('Error! 1-6')
-					})
-				} else {
-						alert("삭제가 취소되었습니다.");
-					}
-			},
-			
-			f_inputTextTitle(event) {
-				this.input_text_title = event.target.value
-			},
-
-			f_hans_ent_album_gallery_picture_modal(event) {},
-
-			
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // 정보 전송
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			// icon pannel Actor Profile Modal로 정보전송
-			f_hans_ent_actor_profile_modal(event) {
-                this.selected_actor_id = event
-				console.log('선택된 배우 아이디', this.selected_actor_id)
-                axios.post('/hans_ent_actor_profile_modal/', {
-                    'selected_actor_id': this.selected_actor_id,
-					'selected_picture_album_id': this.selected_picture_album_id,
-                }, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'X-CSRFToken': "{{ csrf_token }}"
-                }
-                })
-                .then((response) => {
-                    console.log('################### Actor Profile Modal로 정보 전송', response.data)
-                    post_hans_ent_actor_profile_modal.f_sync_data_to_actor_profile_modal(response.data);
-                })
-                .catch(() => {
-                    console.log('Error! f_hans_ent_album_upload_modal')
-                })
-            },
-            
-			// icon pannel Actor Picture Album Upload Modal로 정보전송
-            f_hans_ent_picture_album_upload_modal(event) {
-                this.selected_picture_album_id = event
-                console.log('선택된 사진 앨범 아이디', this.selected_picture_album_id)
-                axios.post('/hans_ent_picture_album_upload_modal/', {
-                    'selected_picture_album_id': this.selected_picture_album_id,
-					'selected_actor_id': this.selected_actor_id,
-                }, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'X-CSRFToken': "{{ csrf_token }}"
-                }
-                })
-                .then((response) => {
-                    post_hans_ent_picture_album_upload_modal.f_sync_data_to_picture_album_upload_modal(response.data);
-                })
-                .catch(() => {
-                    console.log('Error! f_hans_ent_picture_album_upload_modal')
-                })
-            },
-			
-		},
-        computed: {
-            active_list_dict_picture_album() {
-                return this.list_dict_picture_album.filter(item => item.active === "true" && item.discard === "false")
-            },
-			total_list_dict_picture_album() {
-                return this.list_dict_picture_album.filter(item => item.discard === "false")
-            },
-			c_hasItems_picture() {
-				return this.data_picture_album.list_dict_picture_album.length > 1;
-			}
-        },
-		mounted: function() {
-			this.refreshData()
-		}
-	}).mount('#app-hans-ent-picture-album-gallery-modal')
-
-    // modal 화면에서 숨겨진 상태가 되면 실행되는 함수
-
-    $('#app-hans-ent-picture-album-gallery-modal').on('hidden.bs.modal', function () {
-		// post_hans_ent_picture_album_gallery_modal.f_reset_return()
-		// post_hans_ent_picture_album_list.refreshData()
-		// console.log('앨범 갤러리 모달창 닫혔음!')
-	});
-
-</script>
-
-
-<style>
-    
-    .image-center {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 90%;
-    }
-</style>

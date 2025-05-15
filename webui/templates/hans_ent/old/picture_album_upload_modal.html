@@ -1,0 +1,954 @@
+
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+{% load static %}
+
+
+<!-- Modal -->
+<div class="modal fade modal-xl" id="app-hans-ent-picture-album-upload-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-4" id="exampleModalLabel"> 
+					<div v-if="status_create == true">
+						Create New Picture Album
+					</div>
+					<div v-else>
+						Upload Picture Album : [[ data_actor.name ]] [[ data_picture_album.title ]]  [[ data_actor ]] 
+					</div>
+				</h1>
+				&nbsp; 
+				<!-- 
+					Icons  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				--> 
+				&nbsp; 
+				<div class="text-center">
+					<button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-profile-modal">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
+							<path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
+							<path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+						</svg>                            
+					</button>
+					&nbsp;
+					<button @click="f_hans_ent_picture_album_gallery_modal(data_picture_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-gallery-modal">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-images" viewBox="0 0 16 16">
+							<path d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/>
+							<path d="M14.002 13a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2V5A2 2 0 0 1 2 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-1.998 2M14 2H4a1 1 0 0 0-1 1h9.002a2 2 0 0 1 2 2v7A1 1 0 0 0 15 11V3a1 1 0 0 0-1-1M2.002 4a1 1 0 0 0-1 1v8l2.646-2.354a.5.5 0 0 1 .63-.062l2.66 1.773 3.71-3.71a.5.5 0 0 1 .577-.094l1.777 1.947V5a1 1 0 0 0-1-1z"/>
+						</svg>
+					</button>
+
+					<a v-if="data_picture_album.list_dict_picture_album">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16">
+							<path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+						</svg>
+					</a>
+				</div> 
+				<button type="button" @click="f_modal_close" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+
+			<div class="modal-body">
+				<div>
+					<table class="table">
+						<tr>
+							<!--
+								앨범 커버 이미지 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							<td rowspan="4" width="30%">
+								<div class="text-end">
+									<button @click="f_replace_registered_picture_album_cover_image()" class="btn" >
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-recycle" viewBox="0 0 16 16">
+											<path d="M9.302 1.256a1.5 1.5 0 0 0-2.604 0l-1.704 2.98a.5.5 0 0 0 .869.497l1.703-2.981a.5.5 0 0 1 .868 0l2.54 4.444-1.256-.337a.5.5 0 1 0-.26.966l2.415.647a.5.5 0 0 0 .613-.353l.647-2.415a.5.5 0 1 0-.966-.259l-.333 1.242zM2.973 7.773l-1.255.337a.5.5 0 1 1-.26-.966l2.416-.647a.5.5 0 0 1 .612.353l.647 2.415a.5.5 0 0 1-.966.259l-.333-1.242-2.545 4.454a.5.5 0 0 0 .434.748H5a.5.5 0 0 1 0 1H1.723A1.5 1.5 0 0 1 .421 12.24zm10.89 1.463a.5.5 0 1 0-.868.496l1.716 3.004a.5.5 0 0 1-.434.748h-5.57l.647-.646a.5.5 0 1 0-.708-.707l-1.5 1.5a.5.5 0 0 0 0 .707l1.5 1.5a.5.5 0 1 0 .708-.707l-.647-.647h5.57a1.5 1.5 0 0 0 1.302-2.244z"/>
+										</svg>
+									</button>
+								</div>
+
+								<div v-for="item in active_list_dict_picture_album" :key="item.id">
+									<a :href="BASE_DIR_PICTURE+item.original" target="_blank">
+										<img :src="BASE_DIR_PICTURE+item.cover" width="300">
+									</a>
+                                </div>
+							</td>
+
+							<!--
+								앨범 Title 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							<th style="background-color:rgb(240,240,240,0.5)" width="15%">
+								Title [[ input_text_title ]]
+							</th>
+							<td width="25%">
+								<strong>
+									[[ data_picture_album.title ]]
+								</strong>
+								<br>
+								<input type="text" @input="f_input_text_title" class="form-control" enabled id="id_input_text_title" ref="ref_input_text_title">
+							</td>
+							<th style="background-color:rgb(240,240,240,0.5)" >
+								Score
+							</th>
+							<td>
+							</td>
+							
+						</tr>
+
+
+						<!--
+							앨범에 Actor 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						-->
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								Name [[ input_text_search_actor ]]
+								[[ selected_actor_id ]]
+								<!-- Actor 커버 이미지 변경하기 -->
+								
+								<div v-if="selected_actor_id != null ">
+									<button @click="f_deselect_selected_actor()" class="btn" >
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-slash" viewBox="0 0 16 16">
+											<path d="M13.879 10.414a2.501 2.501 0 0 0-3.465 3.465zm.707.707-3.465 3.465a2.501 2.501 0 0 0 3.465-3.465m-4.56-1.096a3.5 3.5 0 1 1 4.949 4.95 3.5 3.5 0 0 1-4.95-4.95ZM11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m.256 7a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z"/>
+										</svg>
+									</button>
+								</div>
+							</th>
+
+							<!-- 
+							    Actor 이름 등록 /////////////////////////////////////
+							-->
+							<td>
+								<div>
+									Selected Model:
+									<strong> <h5>[[ data_actor.name ]] </h5> </strong>
+								</div>
+
+								<div v-if="status_create == false">
+									<input type="text" @keyup.enter="f_actor_search_by_name" v-model="input_text_search_actor" class="form-control" placeholder="Hit Enter Key for Search" id="id_input_text_search_actor_select" ref="ref_input_text_search_actor_select">
+								</div>
+								<div v-else>
+									사진 앨범을 먼저 생성하세요.
+								</div>
+								
+							</td>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								등록된 Album 수
+							</th>
+							<td>
+								사진앨범: [[ total_list_dict_picture_album.length ]]
+							</td>
+						</tr>
+
+						<!--
+							앨범에 Studio / Release date 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						-->
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								Studio [[ input_text_studio ]]
+							</th>
+							<td>
+								<strong>
+									[[ data_picture_album.studio ]]
+								</strong>
+								<br>
+								<input type="text" @input="f_input_text_studio" class="form-control" enabled id="id_input_text_studio" ref="ref_input_text_studio">
+							</td>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								Release Date [[ input_date_released ]]
+							</th>
+							<td>
+								<strong>
+									[[ data_picture_album.date_released ]]
+								</strong>
+								<br>
+								<input type="date" @input="f_input_date_released" class="form-control" enabled id="id_input_date_released" ref="ref_input_date_released">	
+							</td>
+						</tr>
+						
+
+						<!--
+							앨범에 Tag 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						-->
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								Tag
+							</th>
+
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<div v-for="item in data_picture_album.tags" class="card" >
+                                    [[ item ]]
+                                </div>
+								<br>
+								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id_input_text_tag" ref="ref_input_text_tag">
+							</td>
+
+							
+							<th style="background-color:rgb(240,240,240,0.5)" width="15%">
+								이미지 수
+							</th>
+							<td width="25%">
+								<div v-if="list_dict_picture_album != null">
+									
+								</div>
+								<div v-else>
+									[[ list_dict_picture_album.length ]]
+								</div>
+							</td>
+						</tr>
+						
+					</table>
+				
+
+				</div>
+
+				
+				<!--
+					Actor 등록을 위한 검색 결과 표시 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<!-- 검색결과 매칭되는 모델 리스트 표시 -->
+				
+				<div class="text-end">
+					<button @click="f_fold_searched_actor_list()" class="btn" >
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+							<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+							<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+						</svg>
+					</button>
+				</div>
+				<div class="grid-container-picture-album-actor">
+					<div v-for="(item, index) in list_serialized_data_actor_searched" :key="index" >
+						<div class="box-picture-album-actor">
+							<div class="card-body">
+								<div v-for="(dict_profile_album, index) in item.list_dict_profile_album" :key="index">
+									<div v-if="dict_profile_album.active == 'true'">
+										<button @click="f_actor_select_for_album_upload(item.id)" class="btn" >
+											<img :src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
+										</button>
+									</div>
+								</div>
+								<div class="text-center">
+									<strong>
+										[[ item.name ]]
+									</strong>
+								</div>  
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!--
+					앨범에 이미지 파일 업로드  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div>
+					<table  class="table">
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								File 업로드
+							</th>
+							<td >
+								<div>
+									File을 업로드 하세요.
+								</div>
+							</td>
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<div v-if="status_create == false">
+									<input type="file" @change="f_file_album_images_select" multiple class="form-control" id="id_input_file_images_upload" ref="ref_upload_album_image_file">
+								</div>
+								<div v-else>
+									사진 앨범을 먼저 생성하세요.
+								</div>
+								
+							</td>
+						</tr>
+					</table>
+				</div>
+				
+				<!-- 
+					Progress Bar ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div v-if="show_progress==true" >
+					<div class="progress">
+						<div
+							class="progress-bar"
+							role="progressbar"
+							:style="'width: ' + progress_value+'%;'"
+							:aria-valuenow="progress_value"
+							aria-valuemin="0"
+							aria-valuemax="100">
+							[[ progress_value ]] %
+						</div>
+					</div>
+				</div>
+
+				<!--
+					모달창 제어 버튼 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div class="modal-footer">
+					<div v-if="status_create == false">
+						<button type="button" class="btn btn-warning"  @click="f_select_picture_album_to_delete(selected_picture_album_id)" data-bs-dismiss="modal">Delete</button>
+					</div>
+					<button type="button" class="btn btn-secondary" @click="f_modal_close" data-bs-dismiss="modal">Close</button>
+					<div v-if="status_create == true">
+						<button type="button" class="btn btn-primary"  @click="f_upload_album_form" >Create</button>
+					</div>
+					<div v-else>
+						<button type="button" class="btn btn-primary"  @click="f_upload_album_form" >Upload</button>
+					</div>
+				</div>
+
+	
+				<!--
+					앨범에 등록한 이미지 표시 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div class="text-end">
+					<button @click="f_remove_registered_picture_album_picture()" class="btn" >
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+							<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+							<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+						</svg>
+					</button>
+				</div>
+				<!-- Registered Images -->
+				 <div v-if="list_dict_picture_album != null">
+					<div class="grid-container-picture-album-picture">
+						
+						<div v-for="(dict_picture_album, index) in total_list_dict_picture_album" :key="index" class="box-picture-album-picture">
+							<div v-if="status_cover_image_change === true && status_picture_album_picture_remove === false" >
+								<button @click="f_select_picture_as_cover(dict_picture_album.id)">
+									<img v-bind:src="BASE_DIR_PICTURE+dict_picture_album.thumbnail" width="140">
+									
+								</button>
+							</div>
+							<div v-else-if="status_cover_image_change === false && status_picture_album_picture_remove === true" >
+								<button @click="f_select_picture_to_remove(dict_picture_album.id)">
+									<img v-bind:src="BASE_DIR_PICTURE+dict_picture_album.thumbnail" width="140">
+								</button>
+							</div>
+							<div v-else>
+								<a :href="BASE_DIR_PICTURE+dict_picture_album.original" target="_blank">
+									<img v-bind:src="BASE_DIR_PICTURE+dict_picture_album.thumbnail" width="140">
+								</a>
+							</div>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+			
+		
+		</div>
+	</div>
+</div>
+
+
+
+<script>
+	var post_hans_ent_picture_album_update_modal = createApp({
+		delimiters: ["[[", "]]"],
+		data() {
+		return {
+            BASE_DIR_ACTOR : '',
+			BASE_DIR_PICTURE: '',
+			
+			data_actor : {},
+			data_picture_album: {},
+            list_dict_picture_album: [],
+			list_serialized_data_actor_searched: [],
+						
+			selected_picture_album_id: '',
+			selected_picture_album_picture_id: '',
+			selected_actor_id: '',
+
+			input_text_title: '',
+			input_text_search_actor: '',
+			input_text_studio: '',
+			input_date_released: '',
+			input_text_tag: '',
+						
+			images:'',
+			
+			progress_value: 0,
+			progress_max: 100,
+			progress_min: 0,
+			show_progress: false,
+
+			status_cover_image_change: false, // True 커버이미지 변경을 위한 상태로 전환
+			status_picture_album_picture_remove: false,  // 등록된 사진 삭제 위한 상태로 전환
+			status_create: false,
+		}
+		},
+		methods: {
+			f_refreshData() {
+				console.log('actor upload GET!')
+				axios.get('/hans_ent_picture_album_update_modal/')
+				.then((response) => {
+					this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
+					this.BASE_DIR_PICTURE = response.data['BASE_DIR_PICTURE']
+					this.data_actor = response.data['selected_serialized_data_actor']
+					this.data_picture_album = response.data['selected_serialized_data_picture_album']
+					
+					if (Object.keys(this.data_actor).length > 0 ) {
+						this.selected_actor_id = this.data_actor['id']
+					}
+					if (Object.keys(this.data_picture_album).length > 0 ) {
+						this.selected_picture_album_id = this.data_picture_album['id']
+						this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+					}
+				})
+			},
+
+			f_sync_data_to_picture_album_update_modal(data) {
+				this.f_reset_return()
+                this.BASE_DIR_ACTOR = data['BASE_DIR_ACTOR']
+				this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
+				this.data_actor = data['selected_serialized_data_actor']
+				this.data_picture_album = data['selected_serialized_data_picture_album']
+				
+				if (Object.keys(this.data_actor).length > 0 ) {
+					this.selected_actor_id = this.data_actor['id']
+				} 
+                if (Object.keys(this.data_picture_album).length > 0 ) {
+					this.selected_picture_album_id = this.data_picture_album['id']
+					this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+				} else {
+					this.status_create = true
+				}
+				console.log('Picture Album Upload Modal로 데이터 수신 완료', this.selected_picture_album_id)
+			},
+			
+			f_reset_return() {
+				console.log('reset')
+
+				this.data_actor = {}
+				this.data_picture_album = {}
+				this.list_dict_picture_album = []
+				this.list_serialized_data_actor_searched = []
+
+				this.selected_picture_album_id = ''
+				this.selected_picture_album_picture_id = ''
+				this.selected_actor_id = ''
+
+				this.input_text_title = ''
+				this.input_text_search_actor = ''
+				this.input_text_studio = ''
+				this.input_date_released = ''
+				this.input_text_tag = ''
+
+				this.images =''
+
+				this.progress_value = 0
+				this.progress_max = 100
+				this.progress_min = 0
+				this.show_progress = false
+
+				this.status_cover_image_change = false
+				this.status_picture_album_picture_remove = false 
+				this.status_create = false
+
+				this.$refs.ref_input_text_title.value = '';
+				this.$refs.ref_input_text_search_actor_select.value = '';
+				this.$refs.ref_input_text_studio.value = '';
+				this.$refs.ref_input_date_released.value = '';
+				this.$refs.ref_input_text_tag.value = '';
+				this.$refs.ref_upload_album_image_file.value = '';
+			},
+
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // Cover image 선택/변경/
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			f_replace_registered_picture_album_cover_image() {
+				if (this.status_cover_image_change === true) {
+					this.status_cover_image_change = false
+				} else {
+					this.status_cover_image_change = true
+				}
+			},
+
+			f_select_picture_as_cover(event) {
+				console.log(event)
+				this.selected_picture_album_picture_id = event
+				axios.post('/hans_ent_picture_album_update_modal/', {
+                    'button': 'change_picture_album_cover_image',
+					'selected_picture_album_id': this.selected_picture_album_id,
+					'selected_picture_album_picture_id': this.selected_picture_album_picture_id,
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })
+                .then((response) => {
+					this.status_cover_image_change = false
+					this.selected_picture_album_picture_id = ''
+					
+					this.data_picture_album = response.data['selected_serialized_data_picture_album']
+					if (Object.keys(this.data_picture_album).length > 0 ) {
+						this.selected_picture_album_id = this.data_picture_album['id']
+						this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+					}
+                })
+                .catch(() => {
+                    console.log('Error! f_select_picture_as_cover')
+                })
+			},
+
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // 앨범 등록한 image 삭제
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			f_remove_registered_picture_album_picture() {
+				if (this.status_picture_album_picture_remove === true) {
+					this.status_picture_album_picture_remove = false
+				} else {
+					this.status_picture_album_picture_remove = true
+				}
+			},
+
+			f_select_picture_to_remove(event) {
+				console.log(event)
+				this.selected_picture_album_picture_id = event
+				axios.post('/hans_ent_picture_album_update_modal/', {
+                    'button': 'remove_picture_album_picture',
+					'selected_picture_album_id': this.selected_picture_album_id,
+					'selected_picture_album_picture_id': this.selected_picture_album_picture_id,
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })
+                .then((response) => {
+					this.status_picture_album_picture_remove = false
+					this.selected_picture_album_picture_id = ''
+
+					this.data_picture_album = response.data['selected_serialized_data_picture_album']
+					if (Object.keys(this.data_picture_album).length > 0 ) {
+						this.selected_picture_album_id = this.data_picture_album['id']
+						this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+					}
+                })
+                .catch(() => {
+                    console.log('Error! f_select_picture_to_remove')
+                })
+			},
+
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // 앨범 통으로 삭제
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			
+			f_select_picture_album_to_delete(event) {
+				console.log('selected picture album id', event)
+				this.selected_picture_album_id = event
+				const isConfirmed = window.confirm("정말 사진 앨범 정보를 삭제하시겠습니까?");
+				if (isConfirmed) {
+					alert("사진 앨범 삭제를 승인하였습니다.");
+					axios.post('/hans_ent_picture_album_update_modal/', {
+						'button': 'picture_album_delete',
+						'selected_picture_album_id': this.selected_picture_album_id,
+					}, {
+					headers: {
+						'Content-Type': 'multipart/form-data',
+						'X-CSRFToken': "{{ csrf_token }}"
+					}
+					})
+					.then((response) => {
+						this.f_modal_close();
+						post_hans_ent_picture_album_list.f_refreshData();
+					})
+					.catch(() => {
+						console.log('Error! f_select_picture_album_to_delete')
+					}) 
+				} else {
+					alert("삭제가 취소되었습니다.");
+				}
+			},
+
+			
+
+
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // Actor 선택
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// Actor 검색
+			f_actor_search_by_name(event) {
+				this.input_text_search_actor = event.target.value
+				searchData = this.input_text_search_actor
+                axios.get('/hans_ent_picture_album_update_modal_actor_search/?keyword='+searchData)
+                .then((response) => {
+					this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
+                    this.list_serialized_data_actor_searched = response.data['list_serialized_data_actor']
+					this.input_text_search_actor = '';
+                })
+                .catch(() => {
+                    console.log('Error! f_search_keyword_update')
+                })
+			},
+
+			// Actor 선택
+			f_actor_select_for_album_upload(event) {
+				this.selected_actor_id = event
+				console.log(event)
+				axios.post('/hans_ent_picture_album_update_modal/', {
+                    'button': 'actor_select',
+					'selected_actor_id': this.selected_actor_id,
+					'selected_picture_album_id': this.selected_picture_album_id,
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })
+                .then((response) => {
+					this.input_text_search_actor = '';
+					this.list_serialized_data_actor_searched = []
+					this.data_actor = response.data['selected_serialized_data_actor']
+					if (Object.keys(this.data_actor).length > 0 ) {
+						this.selected_actor_id = this.data_actor['id']
+					} 
+                })
+                .catch(() => {
+                    console.log('Error! f_actor_select_for_album_upload')
+                })
+			},
+
+			// 검색결과 리셋
+			f_fold_searched_actor_list() {
+				this.input_text_search_actor = '';
+				this.list_serialized_data_actor_searched = []
+			},
+
+			// 선택한 Actor 선택해제
+			f_deselect_selected_actor(event) {
+				this.data_actor = {}
+			},
+
+			// 선택한 Actor 삭제
+			f_remove_selected_actor(event) {
+				const isConfirmed = window.confirm("앨범 삭제를 승인하시겠습니까?");
+				if (isConfirmed) {
+					alert("앨범 삭제를 승인하였습니다.");
+					this.selected_picture_album_id = event
+					console.log(event)
+					axios.post('/hans_ent_picture_album_update_modal/', {
+						'button': 'actor_select_reset',
+						'selected_picture_album_id': this.selected_picture_album_id,
+						'status_new': this.status_new,
+						'check_under_uploading': this.check_under_uploading,
+					}, {
+					headers: {
+						'Content-Type': 'multipart/form-data',
+						'X-CSRFToken': "{{ csrf_token }}"
+					}
+					})
+					.then((response) => {
+						console.log(response.data)
+						this.data_picture_album = response.data['selected_serialized_data_picture_album']
+						if (Object.keys(this.data_picture_album).length > 0 ) {
+							this.selected_picture_album_id = this.data_picture_album['id']
+							this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+						} 
+						this.selected_serialized_data_actor = null
+					})
+					.catch(() => {
+						console.log('Error! f_remove_selected_actor')
+					})
+				}  else {
+					alert("앨범 삭제를 취소하였습니다.");
+					// Code to execute if user clicked "Cancel" (No)
+				}
+			},
+
+			f_fold_searched_actor_list() {
+				this.list_serialized_data_actor_searched = null
+			},
+
+
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // 이미지 및 기타 정보 저장
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			
+		    f_input_text_studio(event) {
+				this.input_text_studio = event.target.value
+			},
+
+			f_input_text_title(event) {
+				this.input_text_title = event.target.value
+			},
+
+			f_input_date_released(event) {
+				this.input_date_released = event.target.value
+			},
+
+			f_input_text_tag(event) {
+				this.input_text_tag = event.target.value
+			},
+
+			f_file_album_images_select(event) {
+				this.images = event.target.files;
+				if (this.images.length > 100) {
+					alert("over 100 picture cannot save!");
+					this.images = null;
+				}
+				console.log(this.images)
+			},
+
+			async f_upload_album_form() {
+				let formData = new FormData();
+				console.log('upload files!')
+				if (this.images != null) {
+					for (let i = 0; i < this.images.length; i++) {
+						formData.append('images', this.images[i]);
+				}} else {}
+
+				if (this.videos != null) {
+					for (let i = 0; i < this.videos.length; i++) {
+						formData.append('videos', this.videos[i]);
+				}} else {}
+				
+				formData.append('button', 'create_or_update');
+				formData.append('selected_picture_album_id', this.selected_picture_album_id);
+				formData.append('selected_actor_id', this.selected_actor_id);
+				formData.append('input_text_title', this.input_text_title);
+				formData.append('input_text_studio', this.input_text_studio);
+				formData.append('input_date_released', this.input_date_released);
+				formData.append('input_text_tag', this.input_text_tag);
+				this.show_progress = true;
+				
+				try {
+					await axios.post('/hans_ent_picture_album_update_modal/', formData, {
+					headers: {
+						'Content-Type': 'multipart/form-data',
+						'X-CSRFToken': "{{ csrf_token }}"
+					},
+					onUploadProgress: progressEvent => {
+					this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
+					})
+					.then((response) => {
+						this.progress_value = 0
+						this.progress_max = 100
+						this.progress_min = 0
+						this.show_progress = false
+						this.status_create = false
+
+						$("#id_input_text_title").val("");
+						$("#id_input_text_studio").val("");
+						$("#id_input_date_released").val("");
+						$("#id_input_text_tag").val("");
+
+						this.BASE_DIR_ACTOR = response.data['BASE_DIR_ACTOR']
+						this.BASE_DIR_PICTURE = response.data['BASE_DIR_PICTURE']
+						this.data_actor = response.data['selected_serialized_data_actor']
+						this.data_picture_album = response.data['selected_serialized_data_picture_album']
+
+						if (Object.keys(this.data_actor).length > 0 ) {
+							this.selected_actor_id = this.data_actor['id']
+						} 
+						if (Object.keys(this.data_picture_album).length > 0 ) {
+							this.selected_picture_album_id = this.data_picture_album['id']
+							this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+						} 
+                    })
+					alert('Upload successful');
+				} catch (error) {	
+					console.error('Error uploading images:', error);
+				}
+			},
+
+
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // 정보 전송
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			// icon pannel
+            f_hans_ent_picture_album_profile_modal(event) {
+                this.selected_picture_album_id = event
+                console.log('### Send Data to Actor Profile Modal with Selected Actor ID: ', this.selected_picture_album_id)
+                axios.post('/hans_ent_picture_album_profile_modal/', {
+                    'selected_picture_album_id': this.selected_picture_album_id,
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })
+                .then((response) => {
+                    post_hans_ent_picture_album_profile_modal.f_sync_data_to_picture_album_profile_modal(response.data);
+                    console.log('Actor Upload로부터 Actor Profile Modal로 Data 송신 완료', data)
+                })
+                .catch(() => {
+                    console.log('Error! Actor Upload로부터 Actor Profile Modal로 Data 송신 오류')
+                })
+            },
+
+            f_hans_ent_picture_album_gallery_modal(event) {
+                this.selected_picture_album_id = event
+                console.log(this.selected_picture_album_id)
+				axios.post('/hans_ent_picture_album_gallery_modal/', {
+                    'selected_picture_album_id': event,
+                    'modal': 'gallery'
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })  
+                .then((response) => {
+                    console.log('모델리스트에서 모델 갤러리로 정보 전송 시작', response.data)
+                    post_hans_ent_picture_album_gallery_modal.f_sync_data_picture_album_list_to_gallery(response.data)
+                })
+                .catch(() => {
+                    console.log('Error! f_hans_ent_picture_album_update_modal')
+                })
+            },
+
+            f_hans_ent_picture_album_update_modal(event) {
+                this.selected_picture_album_id = event
+                console.log(this.selected_picture_album_id)
+				axios.post('/hans_ent_picture_album_update_modal/', {
+                    'selected_picture_album_id': event,
+                    'modal': 'upload'
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })  
+                .then((response) => {
+                    console.log('모델리스트에서 모델 업로드로 정보 전송 시작', response.data)
+                    post_hans_ent_picture_album_update_modal.f_sync_data_picture_album_list_to_upload(response.data)
+                })
+                .catch(() => {
+                    console.log('Error! f_hans_ent_picture_album_update_modal')
+                })
+            },
+
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // Picture Album 합치기 / 삭제
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			f_remove_registered_picture_album_cover_image(event) {
+				this.selected_picture_album_id = event
+				console.log(event)
+				const isConfirmed = window.confirm("커버 이미지를 정말 삭제하시겠습니까?");
+				if (isConfirmed) {
+					axios.post('/hans_ent_picture_album_update_modal/', {
+						'button': 'remove_cover_image',
+						'selected_picture_album_id': this.selected_picture_album_id,
+					}, {
+					headers: {
+						'Content-Type': 'multipart/form-data',
+						'X-CSRFToken': "{{ csrf_token }}"
+					}
+					})
+					.then((response) => {
+						console.log(response.data)
+						this.data_actor = data['selected_serialized_data_actor']
+						this.data_picture_album = data['selected_serialized_data_picture_album']
+						
+						if (Object.keys(this.data_actor).length > 0 ) {
+							this.selected_actor_id = this.data_actor['id']
+						} 
+						if (Object.keys(this.data_picture_album).length > 0 ) {
+							this.selected_picture_album_id = this.data_picture_album['id']
+							this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+						}
+					})
+					.catch(() => {
+						console.log('Error! f_hans_ent_picture_album_profile_modal')
+					})
+				} else {
+					alert("삭제가 취소되었습니다.");
+				}
+				
+			},
+
+			f_select_picture_album_to_merge(event) {
+				console.log(event)
+				const isConfirmed = window.confirm("모델 정보 합치기를 승인하시겠습니까?");
+				if (isConfirmed) {
+					alert("모델 합치기를 승인하였습니다.");
+						axios.post('/hans_ent_picture_album_update_modal/', {
+						'alternative_picture_album_id': event,
+						'selected_picture_album_id': this.selected_picture_album_id,
+						'button': 'select_to_merge'
+					}, {
+					headers: {
+						'Content-Type': 'multipart/form-data',
+						'X-CSRFToken': "{{ csrf_token }}"
+					}
+					})
+					.then((response) => {
+						this.data_actor = data['selected_serialized_data_actor']
+						this.data_picture_album = data['selected_serialized_data_picture_album']
+						
+						if (Object.keys(this.data_actor).length > 0 ) {
+							this.selected_actor_id = this.data_actor['id']
+						} 
+						if (Object.keys(this.data_picture_album).length > 0 ) {
+							this.selected_picture_album_id = this.data_picture_album['id']
+							this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+						}
+					})
+					.catch(() => {
+						console.log('Error! f_hans_ent_picture_album_profile_modal')
+					})
+				} else {
+					alert("모델 합치기를 취소하였습니다.");
+					// Code to execute if user clicked "Cancel" (No)
+				}
+			},
+
+			f_modal_close() {
+				console.log('close button clicked.')
+			},
+
+		},
+		computed: {
+            active_list_dict_picture_album() {
+                return this.list_dict_picture_album.filter(item => item.active === "true" && item.discard === "false")
+            },
+			total_list_dict_picture_album() {
+                return this.list_dict_picture_album.filter(item => item.discard === "false")
+            },
+        },
+        mounted: function() {
+			this.f_refreshData()
+		}
+	}).mount('#app-hans-ent-picture-album-upload-modal')
+
+	
+    $('#app-hans-ent-picture-album-upload-modal').on('hidden.bs.modal', function () {
+		post_hans_ent_picture_album_list.f_refreshData()
+		post_hans_ent_picture_album_update_modal.f_reset_return()
+			console.log('Adult actor 업로드 모달창 닫혔음!')
+	});
+
+</script>
+
+
+
+<style>
+	.grid-container-picture-album-actor{
+			display: grid;
+			gap: 10px; /* Space between boxes */
+			grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Default: fit as many 150px boxes as possible */
+	}
+	
+	.box-picture-album-actor{
+		height: 220px; /* Fixed height for all boxes */
+		background-color: #f0f0f0; /* Example styling */
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	
+	.grid-container-picture-album-picture{
+			display: grid;
+			gap: 10px; /* Space between boxes */
+			grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Default: fit as many 150px boxes as possible */
+	}
+	
+	.box-picture-album-picture{
+		height: 220px; /* Fixed height for all boxes */
+		background-color: #f0f0f0; /* Example styling */
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	</style>

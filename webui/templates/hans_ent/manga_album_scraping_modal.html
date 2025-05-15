@@ -1,0 +1,210 @@
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+{% load static %}
+
+
+<!-- Modal -->
+<div class="modal fade modal-xl" id="app_hans_ent_manga_album_scraping_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h1 class="modal-title fs-4" id="modal_header_h1"> 
+                    Manga Album Scraping Control
+                </h1>
+                &nbsp; 
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div>
+                    <table  class="table">
+                        <!-- 문서 Title -->
+						<tr>
+							<!--
+								Manga 커버 이미지 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							<td rowspan="4" width="30%">
+								<a :href="data_systemsettings.parsing_base_url_manga" target="_blank">
+									<img :src="data_systemsettings.parsing_cover_img_url_manga">
+								</a>
+							</td>
+						
+							<!--
+								Manga Name 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							<th width="15%" style="background-color:rgb(240,240,240,0.5)">
+								제목 [[ input_text_title ]]
+							</th>
+							<td width="20%">
+								<input type="text" @input="f_input_text_title" class="form-control" enabled id="id_manga_parsing_input_text_title" ref="ref_manga_create_input_text_title">
+							</td>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								ID [[ input_number_parsing_id ]]
+							</th> 
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<input type="text" @input="f_input_number_parsing_id" class="form-control" enabled id="id_manga_parsing_input_number_parsing_id" ref="ref_manga_parsing_input_number_parsing_id">
+							</td>
+						</tr>
+						<tr>
+							<td colspan="4" class="right">
+								<button type="button" class="btn btn-primary" @click="f_manga_album_scraping_title_update_form" >Update</button>
+							</td>
+						</tr>
+
+						<!-- Scraping Base URL 관련-->
+                        <tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								Base URL Update
+								<br>
+								<button type="button"  class="btn" @click="f_manga_album_scraping_website_base_url('down')">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-square-fill" viewBox="0 0 16 16">
+										<path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm4 4a.5.5 0 0 0-.374.832l4 4.5a.5.5 0 0 0 .748 0l4-4.5A.5.5 0 0 0 12 6z"/>
+									</svg>
+								</button>
+								<button type="button"  class="btn" @click="f_manga_album_scraping_website_base_url('up')">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-up-square-fill" viewBox="0 0 16 16">
+										<path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm4 9h8a.5.5 0 0 0 .374-.832l-4-4.5a.5.5 0 0 0-.748 0l-4 4.5A.5.5 0 0 0 4 11"/>
+									</svg>
+								</button>
+							</th> 
+							<td style="background-color:rgb(255,255,255,0.05)">
+								Current: 
+								
+								<a :href="data_systemsettings.parsing_base_url_manga" target="_blank">[[ data_systemsettings.parsing_base_url_manga ]]</a>
+								
+								<br>
+								<input type="text" @input="f_input_text_url" class="form-control" enabled id="id_manga_parsing_input_text_url" ref="ref_manga_parsing_input_text_url">
+							</td>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								Cover Image Update
+							</th>
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<input type="text" @input="f_input_text_img_url" class="form-control" enabled id="id_manga_parsing_input_text_img_url" ref="ref_manga_parsing_input_text_img_url">
+							</td>
+						</tr>
+						<tr>
+							<td colspan="4" class="right">
+								<button type="button" class="btn btn-primary" @click="f_manga_album_scraping_website_update_form" >Update</button>
+							</td>
+						</tr>
+
+						
+								
+
+                    </table>
+                </div>
+
+				<div>
+					<label>
+						<h4>
+							Currently Registered Manga
+						</h4>
+					</label>
+
+					&emsp;
+
+					<span class="right">
+						<span v-if="status_visibility_list_incompleted===true">
+							<button  @click="f_status_visibility_list_incompleted" type="button" class="btn btn-primary">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-unlock" viewBox="0 0 16 16">
+									<path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2M3 8a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1z"/>
+								</svg>
+							</button>	
+						</span>
+						<span v-else>
+							<button  @click="f_status_visibility_list_incompleted" type="button" class="btn">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-unlock" viewBox="0 0 16 16">
+									<path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2M3 8a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1z"/>
+								</svg>
+							</button>	
+						</span>
+						
+						<span v-if="status_visibility_list_completed===true">
+							<button  @click="f_status_visibility_list_completed" type="button" class="btn btn-primary">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
+									<path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
+								</svg>
+							</button>
+						</span>
+						<span v-else>
+							<button  @click="f_status_visibility_list_completed" type="button" class="btn">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
+									<path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
+								</svg>
+							</button>
+						</span>
+						<span >
+							<button  @click="f_status_manga_parsing_list_refresh" type="button" class="btn ">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+									<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+									<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+								  </svg>
+							</button>
+						</span>
+						<button type="button" class="btn btn-danger btn-sm" @click="f_manga_album_scraping_start" >Scraping START</button>
+
+					</span>
+					
+					<hr>
+
+					<table class="table">
+						<tr>
+							<th>Index</th>
+							<th>Title</th>
+							<th>ID</th>
+							<th>Last Volume</th>
+							<th>Last Date Updated</th>
+							<th>Completed</th>
+							<th>Function</th>
+						</tr>
+						<tr v-for="(item, index) in active_list_dict_manga_info_for_parsing" :key="index">
+							<td>[[ index ]]</td>
+							<td>[[ item.title ]]
+								<span v-if="item.check_new_volume === 'true'">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-node-plus-fill" viewBox="0 0 16 16">
+										<path d="M11 13a5 5 0 1 0-4.975-5.5H4A1.5 1.5 0 0 0 2.5 6h-1A1.5 1.5 0 0 0 0 7.5v1A1.5 1.5 0 0 0 1.5 10h1A1.5 1.5 0 0 0 4 8.5h2.025A5 5 0 0 0 11 13m.5-7.5v2h2a.5.5 0 0 1 0 1h-2v2a.5.5 0 0 1-1 0v-2h-2a.5.5 0 0 1 0-1h2v-2a.5.5 0 0 1 1 0"/>
+									</svg>
+								</span>
+							</td>
+							<td>[[ item.id ]]</td>
+							<td>[[ item.last_volume ]]</td>
+							<td>[[ item.date_updated ]]</td>
+							<td>[[ item.completed ]]</td>
+							<td>
+								<button  @click="f_status_manga_for_parsing_completed(item.id)" type="button" class="btn">
+									<div v-if="item.completed == 'false'">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-unlock" viewBox="0 0 16 16">
+											<path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2M3 8a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1z"/>
+										</svg>
+									</div>
+									<div v-else>
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
+											<path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
+										</svg>
+									</div>
+								</button>
+							</td>
+						</tr>
+
+					</table>
+				</div>
+			</div>
+
+
+			<!--
+				모달창 제어 버튼 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			-->
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger btn-sm" @click="f_manga_album_scraping_start" >Scraping START</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+            
+        </div>
+    </div>
+</div>
+
+
+

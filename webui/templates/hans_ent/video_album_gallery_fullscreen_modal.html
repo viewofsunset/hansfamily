@@ -60,7 +60,7 @@
 		}
 		},
 		methods: {
-			refreshData() {
+			f_refreshData() {
 				console.log('open modal for video create!!')
 				axios.get(variables.API_URL+'hans_ent_album_gallery_fullscreen_modal/')
 				.then((response) => {
@@ -131,7 +131,7 @@
 			}
         },
 		mounted: function() {
-			this.refreshData()
+			this.f_refreshData()
 		}
 	}).mount('#app-hans-ent-video-album-gallery-fullscreen-modal')
 

@@ -1,0 +1,110 @@
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+{% load static %}
+
+
+<!-- Modal -->
+<div class="modal fade modal-xl" id="app_hans_ent_actor_create_modal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h1 class="modal-title fs-4" id="modal_header_h1"> 
+                    Create New Actor
+                </h1>
+                &nbsp; 
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div>
+                    <table  class="table">
+                        <!-- 문서 Title -->
+                        <tr>
+                            <!--
+                                Actor 커버 이미지 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            -->
+                            <td rowspan="4" width="30%">
+                            </td>
+                        
+                            <!--
+                                Actor Name 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            -->
+                            <th width="15%" style="background-color:rgb(240,240,240,0.5)">
+                                이름 [[ input_text_name ]]
+                            </th>
+                            <td width="20%">
+                                <strong>
+                                </strong>
+                                <br>
+                                <input type="text" @input="f_input_text_name" class="form-control" enabled id="id_actor_create_input_text_name" ref="ref_input_text_name">
+                            </td>
+                            <th  width="15%" style="background-color:rgb(240,240,240,0.5)">
+                                나이 (생일) [[ input_date_birthday ]]
+                            </th>
+                            <td  width="20%">
+                                <strong>
+                                </strong>
+                                <br>
+                                <input type="date" @input="f_input_date_birthday" class="form-control" enabled id="id_actor_create_input_date_birthday" ref="ref_input_date_birthday">
+                            </td>
+                        </tr>
+
+                        <!-- 추가정보 -->
+                        <tr>
+                            <th style="background-color:rgb(240,240,240,0.5)">
+                                다른이름
+                            </th>
+                            <td style="background-color:rgb(255,255,255,0.05)">
+                                <input type="text" @input="f_input_text_synonyms" class="form-control" enabled id="id_actor_create_input_text_synonyms" ref="ref_input_text_synonyms">
+                            </td>
+                            <th style="background-color:rgb(240,240,240,0.5)">
+                                키 [[ input_number_height ]]
+                            </th>
+                            <td style="background-color:rgb(255,255,255,0.05)">
+                                <strong>
+                                </strong>
+                                <br>
+                                <input type="number" @input="f_input_number_height" class="form-control" enabled id="id_actor_create_input_number_height" ref="ref_input_number_height">
+                            </td>
+                        </tr>
+
+                    </table>
+                </div>
+
+
+
+                <!-- Progress Bar -->
+                <div v-if="show_progress==true" >
+                    <div class="progress">
+                        <div
+                            class="progress-bar"
+                            role="progressbar"
+                            :style="'width: ' + progress_value+'%;'"
+                            :aria-valuenow="progress_value"
+                            aria-valuemin="0"
+                            aria-valuemax="100">
+                            [[ progress_value ]] %
+                        </div>
+                    </div>
+                </div>
+                
+                <!--
+                    모달창 제어 버튼 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                -->
+            </div>    
+                    
+                
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary"  @click="f_actor_create_form" >Create</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        
+        </div>
+    </div>
+</div>
+
+
+

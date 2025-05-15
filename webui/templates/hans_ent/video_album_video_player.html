@@ -1,0 +1,63 @@
+<!-- Selected Video Player -->
+
+<div class="container">
+    
+    <div v-if="selected_video_album_video_id == 0"> 
+        <!-- Default 영상만 있는 경우. 리스트에서 앨범 대표 영상으로 접속 -->
+        <div v-for="(item, index) in active_list_dict_video_album" :key="index" class="video-player-container">
+            <video width="1080" height="650" 
+            :poster="BASE_DIR_VIDEO+item.thumbnail" controls crossorigin playsinline 
+            id="id_videoPlayer"
+            ref="ref_videoPlayer"
+            @play="hideTitle"
+            @pause="showTitle"
+            @ended="onVideoEnded"
+            >
+                <source :src="BASE_DIR_VIDEO+item.video" type="video/mp4" id="id_videoPlayer_source ">
+            </video>   
+            <!-- Overlay title on the video screen -->
+            <div v-if="showVideoTitle" class="video-player-title-overlay">[[ item.title ]]</div>
+        </div>
+    </div>
+
+    <div v-else>
+        <!-- 영상이 비디오앨범에 업로드 된 경우.  앨범 내 특정 영상을 클릭하여 접속 -->
+        <div v-for="(item, index) in total_list_dict_video_album" :key="index" class="video-player-container">
+            <div v-if="item.id == selected_video_album_video_id">
+                <video width="1080" height="650" 
+                :poster="BASE_DIR_VIDEO+item.thumbnail" controls crossorigin playsinline 
+                id="id_videoPlayer"
+                ref="ref_videoPlayer"
+                @play="hideTitle"
+                @pause="showTitle"
+                @ended="onVideoEnded"
+                >
+                    <source :src="BASE_DIR_VIDEO+item.video" type="video/mp4" id="id_videoPlayer_source ">
+                </video>   
+                <!-- Overlay title on the video screen -->
+                <div v-if="showVideoTitle" class="video-player-title-overlay">[[ item.title ]]</div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+    <!-- Still images-->
+    <div>
+        <hr>
+        <h5 >Still Cuts in This Video</h5>
+       
+        
+        <div v-for="(item, index) in total_list_dict_video_album" :key="index"  >
+            <div v-if="item.id == selected_video_album_video_id" class="stillimage-container">
+                <div v-for="(item_sub, index) in item.still" :key="index" class="stillimage-box">
+                    <button @click="f_video_still_image_selected(item_sub.time)" class="btn">
+                        <img :src="BASE_DIR_VIDEO+item_sub.path"  width="110">
+                        [[ item_sub.time ]]
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+</div>

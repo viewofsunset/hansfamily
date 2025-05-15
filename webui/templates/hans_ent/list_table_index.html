@@ -31,6 +31,44 @@
                 Reset
             </button>
         </td>
+
+        <td>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Category
+                </button>
+                <ul class="dropdown-menu">
+    
+                    <li v-for="(item, index) in list_xxx_category" :key="index">
+                        <a class="dropdown-item" href="#"
+                        @click.prevent="f_selectCategory(item)"
+                        >[[ item[1] ]]</a>
+                    </li>
+                  
+                </ul>
+            </div>
+        </td>
+
+        <td v-if="menu_selected === '03'" >
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheck_manga_list_completed_hide"
+                @change="f_check_switch_manga_complete_hide_and_update_only"
+                v-model="check_switch_manga_complete_hide"
+                >
+                <label class="form-check-label" for="flexSwitchCheck_manga_list_completed_hide">연재완료감추기</label>
+                [[ check_switch_manga_complete_hide ]]
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheck_manga_list_new_volume_update_only"
+                @change="f_check_switch_manga_complete_hide_and_update_only"
+                v-model="check_switch_manga_new_volume_update_only"
+                >
+                <label class="form-check-label" for="flexSwitchCheck_manga_list_new_volume_update_only">신규업데이트만</label>
+            </div>
+        </td>
+        
+
+
         <!-- Sorting -->
         <td v-for="item, index in list_field_sorting" :key="index">
             <button type="button" @click="f_sorting_items(item)"  class="btn btn-link btn-sm">

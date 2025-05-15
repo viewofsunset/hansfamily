@@ -16,7 +16,14 @@
             </legend>
         </div>
         <div>
-            {{ key1 }}
+            {% for dict_stoage_status in list_dict_stoage_status %}
+                Name: {{ dict_stoage_status.name }} GB
+                Total: {{ dict_stoage_status.total_volume }} GB
+                Used: {{ dict_stoage_status.used_volume }} GB
+                Free: {{ dict_stoage_status.free_volume }} GB
+                Occupant: {{ dict_stoage_status.occupant }} %
+                <hr>
+            {% endfor %}
         </div>
         
     </div>

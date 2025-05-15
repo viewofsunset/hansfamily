@@ -1,0 +1,451 @@
+
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+{% load static %}
+
+
+<!-- Modal -->
+<div class="modal fade modal-xl" id="app_hans_ent_manga_album_update_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-4" id="exampleModalLabel"> 
+					Update Manga Album : [[ data_actor.name ]] [[ data_manga.title ]]  
+				</h1>
+				&nbsp; 
+				<!-- 
+					Icons  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				--> 
+
+					
+			
+				<button @click="f_hans_ent_manga_album_profile_modal_open(data_manga.id)" type="button" class="btn" data-bs-toggle="modal" data-bs-target="#app_hans_ent_manga_album_profile_modal">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
+						<path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
+						<path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+					</svg>                            
+				</button>
+
+				&nbsp;
+				
+
+				
+			
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+
+			<div class="modal-body">
+				<div>
+					<table class="table">
+						<tr>
+							<!--
+								앨범 커버 이미지 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							<td rowspan="6" width="30%">
+								
+								<div class="text-end">
+									<button @click="f_remove_registered_manga_album_cover_image()" class="btn" >
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+											<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+											<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+										</svg>
+									</button>
+								</div>
+
+
+								<div v-for="item in list_dict_manga_album" :key="item.id">
+									<div v-if="item.id===0">
+										<a :href="BASE_DIR_MANGA+item.original" target="_blank">
+											<img :src="BASE_DIR_MANGA+item.cover" width="300">
+										</a>
+									</div>
+                                </div>
+
+								<!-- <img :src="BASE_DIR_MANGA+data_manga.dict_manga_album_cover.cover" width="200"> -->
+								
+								<!-- <a :href="BASE_DIR_MANGA+data_manga.dict_manga_album_cover.original" target="_blank">
+									<img :src="BASE_DIR_MANGA+data_manga.dict_manga_album_cover.cover" width="300">
+								</a> -->
+								
+							</td>
+
+							<!--
+								앨범 Title 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							<th style="background-color:rgb(240,240,240,0.5)" width="15%">
+								Title [[ input_text_title ]]
+							</th>
+							<td width="25%">
+								<strong>
+									[[ data_manga.title ]]
+								</strong>
+								<br>
+								<input type="text" @input="f_input_text_title" class="form-control" enabled id="id_manga_update_input_text_title" ref="ref_manga_update_input_text_title">
+							</td>
+							<th style="background-color:rgb(240,240,240,0.5)" >
+								Score
+							</th>
+							<td>
+							</td>
+							
+						</tr>
+
+
+						<!--
+							앨범에 Actor 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						-->
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								Name [[ input_text_search_actor ]]
+							
+								<!-- Actor 커버 이미지 변경하기 -->
+								
+								<div v-if="Object.keys(this.data_actor).length > 0">
+									<button @click="f_deselect_selected_actor()" class="btn" >
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-slash" viewBox="0 0 16 16">
+											<path d="M13.879 10.414a2.501 2.501 0 0 0-3.465 3.465zm.707.707-3.465 3.465a2.501 2.501 0 0 0 3.465-3.465m-4.56-1.096a3.5 3.5 0 1 1 4.949 4.95 3.5 3.5 0 0 1-4.95-4.95ZM11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m.256 7a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z"/>
+										</svg>
+									</button>
+								</div>
+							</th>
+
+							<!-- 
+							    Actor 이름 등록 /////////////////////////////////////
+							-->
+							<td>
+								<div>
+									Selected Model:
+									<strong> <h5>[[ data_actor.name ]] </h5> </strong>
+								</div>
+
+								<div v-if="status_create == false">
+									<input type="text" @keyup.enter="f_actor_search_by_name" v-model="input_text_search_actor" class="form-control" placeholder="Hit Enter Key for Search" id="id_input_text_search_actor_select" ref="ref_input_text_search_actor_select">
+								</div>
+								<div v-else>
+									사진 앨범을 먼저 생성하세요.
+								</div>
+								
+							</td>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								등록된 Album 수
+							</th>
+							<td>
+								사진앨범: [[ total_list_dict_manga_album.length ]]
+							</td>
+						</tr>
+
+						<!--
+							앨범에 Studio / Release date 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						-->
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								Studio [[ input_text_studio ]]
+							</th>
+							<td>
+								<strong>
+									[[ data_manga.studio ]]
+								</strong>
+								<br>
+								<input type="text" @input="f_input_text_studio" class="form-control" enabled id="id_manga_update_input_text_studio" ref="ref_manga_update_input_text_studio">
+							</td>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								Release Date [[ input_date_released ]]
+							</th>
+							<td>
+								<strong>
+									[[ data_manga.date_released ]]
+								</strong>
+								<br>
+								<input type="date" @input="f_input_date_released" class="form-control" enabled id="id_manga_update_input_date_released" ref="ref_manga_update_input_date_released">	
+							</td>
+						</tr>
+						
+
+						<!-- 사이트 -->
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								관련 사이트 이름 / URL 
+								<br>
+								[[ input_info_site_name ]] / [[ input_info_site_url ]]
+								
+								
+							</th>
+							<td style="background-color:rgb(255,255,255,0.05)">
+                                <div v-for="item in data_manga.list_dict_info_url" class="card" >
+                                    <a :href="[[ item.url ]]" target="_blank">
+                                        [[ item.name ]]
+                                    </a>
+                                </div>
+								<br>
+								<input type="text" @input="f_input_info_site_name" class="form-control" enabled id="id_manga_update_input_info_site_name" ref="ref_input_info_site_name">
+								<br>
+								<input type="text" @input="f_input_info_site_url" class="form-control" enabled id="id_manga_update_input_info_site_url" ref="ref_input_info_site_url">
+							</td>
+                            <th style="background-color:rgb(240,240,240,0.5)">
+								Tag [[ input_text_tag ]]
+							</th>
+                            <td style="background-color:rgb(255,255,255,0.05)">
+                                <div v-for="(item, index) in data_manga.tags":key="index" class="card" >
+									<span  v-if="index < 10" >
+										[[ item ]]
+ 									</span>
+                                </div>
+								<br>
+								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id_manga_update_input_text_tag" ref="ref_input_text_tag">
+                            </td>
+						</tr>
+
+
+						<!--
+							앨범에 볼륨 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						-->
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								Volume : 최근호 [[ data_manga.volume ]]
+							</th>
+
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<input type="number" @input="f_input_number_volume" :value="data_manga.volume"  min=0  class="form-control" enabled id="id_manga_update_input_number_volume" ref="ref_manga_update_input_number_volume">
+							</td>
+
+							
+							<th style="background-color:rgb(240,240,240,0.5)" width="15%">
+								커버 이미지 등록시
+							</th>
+							<td width="25%">
+								
+								<div class="form-check form-switch">
+									<input class="form-check-input" type="checkbox" id="id_manga_update_checkbox_covoer_image_update" v-model="status_manga_update_checkbox_covoer_image_update">
+									<label class="form-check-label" for="checkbox">커버이미지 등록</label>
+								</div>
+								[[ status_manga_update_checkbox_covoer_image_update ]]
+							</td>
+						</tr>
+
+						<!-- 카테고리 -->
+						<tr>
+                            <th style="background-color:rgb(240,240,240,0.5)">
+                                카테고리 [[ selected_filtering_category_name ]]
+                            </th>
+                            <td style="background-color:rgb(255,255,255,0.05)">
+                                <div class="dropdown">
+									<span v-for="(item, index) in list_xxx_category" :key="index">
+										<strong 
+										v-if="data_manga.category === item[0]"
+										>[[ item[1] ]]</strong>
+									</span>
+									<br>
+                                    <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                      Category 
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li v-for="(item, index) in list_xxx_category" :key="index">
+											<a 
+                                            v-if="data_manga.category === item[0]"
+                                            class="dropdown-item" 
+                                            @click="f_select_category_album(item)"
+                                            aria-selected="true"
+											
+                                            >[[ item[1] ]]</a>
+                                        </li>
+
+										<li v-for="(item, index) in list_xxx_category" :key="index">
+											<a 
+                                            v-if="data_manga.category != item[0]"
+                                            class="dropdown-item" 
+                                            @click="f_select_category_album(item)"
+                                            aria-selected="false"
+                                            >[[ item[1] ]]</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <th style="background-color:rgb(240,240,240,0.5)">
+                                ???
+                            </th>
+                            <td style="background-color:rgb(255,255,255,0.05)">
+                                ???
+                            </td>
+                        </tr>
+						
+					</table>
+				
+
+				</div>
+
+				
+				<!--
+					Actor 등록을 위한 검색 결과 표시 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<!-- 검색결과 매칭되는 모델 리스트 표시 -->
+				
+				<div class="text-end">
+					<button @click="f_actor_search_by_name_reset()" class="btn" >
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-collapse" viewBox="0 0 16 16">
+							<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 8m7-8a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7.5 4.293V.5A.5.5 0 0 1 8 0m-.5 11.707-1.146 1.147a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 11.707V15.5a.5.5 0 0 1-1 0z"/>
+						  </svg>
+					</button>
+				</div>
+
+				<div class="grid-container-manga-album-actor">
+					<div v-for="(item, index) in list_serialized_data_actor_searched" :key="index" >
+						<div class="box-manga-album-actor">
+							<div class="card-body">
+								<div v-for="(dict_profile_album, index) in item.list_dict_profile_album" :key="index">
+									<div v-if="dict_profile_album.active == 'true'">
+										<button @click="f_actor_select_for_album_upload(item.id)" class="btn" >
+											<img :src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
+										</button>
+									</div>
+								</div>
+								<div class="text-center">
+									<strong>
+										[[ item.name ]]
+									</strong>
+								</div>  
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!--
+					앨범에 이미지 파일 업로드  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div>
+					<table  class="table">
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								File 업로드
+							</th>
+							<td >
+								<div>
+									이미지 File을 업로드 하세요.
+								</div>
+							</td>
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<div v-if="status_create == false">
+									<input type="file" @change="f_file_album_files_select" multiple class="form-control" id="id_manga_update_input_files_upload" ref="ref_manga_update_input_files_upload">
+								</div>
+								<div v-else>
+									사진 앨범을 먼저 생성하세요.
+								</div>
+								
+							</td>
+						</tr>
+					</table>
+				</div>
+				
+				<!-- 
+					Progress Bar ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div v-if="show_progress==true" >
+					<div class="progress">
+						<div
+							class="progress-bar"
+							role="progressbar"
+							:style="'width: ' + progress_value+'%;'"
+							:aria-valuenow="progress_value"
+							aria-valuemin="0"
+							aria-valuemax="100">
+							[[ progress_value ]] %
+						</div>
+					</div>
+				</div>
+
+				<!--
+					모달창 제어 버튼 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div class="modal-footer">
+					<button type="button" class="btn btn-warning"  @click="f_select_manga_album_to_delete(data_manga.id)" data-bs-dismiss="modal">Delete</button>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary"  @click="f_manga_album_update_form" >Update</button>
+				</div>
+
+	
+				<!--
+					앨범에 등록한 이미지 표시 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div class="text-end">
+					<button @click="f_remove_registered_manga_album_manga()" class="btn" >
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+							<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+							<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+						</svg>
+					</button>
+				</div>
+
+
+
+				<!-- Registered Manga Volume -->
+				<div v-if="list_dict_manga_album != null">
+					
+					<table class="table">
+						<tr>
+							<th>
+								Index
+							</th>
+							<th>
+								Title
+							</th>
+							<th>
+								Volume
+							</th>
+							<th>
+								# of images
+							</th>
+							<th>
+								Release Date
+							</th>
+							<th>
+								Function
+							</th>
+						</tr>
+						<tr v-for="(dict_volume_manga, index) in total_list_dict_volume_manga" :key="index">
+							<td>
+								[[ index ]]
+							</td>
+							<td>
+								[[ dict_volume_manga.title ]]
+							</td>
+							<td>
+								[[ dict_volume_manga.volume ]]
+							</td>
+							<td>
+								[[ dict_volume_manga.list_id.length ]]
+							</td>
+							<td>
+								[[ dict_volume_manga.date_released ]]
+							</td>
+							<td>
+								<button @click="f_hans_ent_manga_album_gallery_modal_open_by_volume_id(dict_volume_manga.volume)" class="btn" >
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-images" viewBox="0 0 16 16">
+										<path d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/>
+										<path d="M14.002 13a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2V5A2 2 0 0 1 2 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-1.998 2M14 2H4a1 1 0 0 0-1 1h9.002a2 2 0 0 1 2 2v7A1 1 0 0 0 15 11V3a1 1 0 0 0-1-1M2.002 4a1 1 0 0 0-1 1v8l2.646-2.354a.5.5 0 0 1 .63-.062l2.66 1.773 3.71-3.71a.5.5 0 0 1 .577-.094l1.777 1.947V5a1 1 0 0 0-1-1z"/>
+									</svg>
+								</button>
+								&nbsp;
+								<button @click="f_hans_ent_manga_album_gallery_fullscreen_modal_open_by_volume_id(dict_volume_manga.volume)" class="btn">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16">
+										<path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707m4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707m0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707m-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707"/>
+									</svg>
+								</button>
+							</td>
+						</tr>
+					</table>
+					
+					
+				</div>
+
+				
+
+
+
+			</div>
+			
+		
+		</div>
+	</div>
+</div>
+
+			
+		

@@ -5,332 +5,81 @@
 
 
 <!-- Modal -->
-<div class="modal fade modal-xl" id="app-hans-ent-music-album-gallery-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade modal-xl" id="app_hans_ent_music_album_gallery_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
+
 		<div class="modal-content">
+			
 			<div class="modal-header">
 				<h1 class="modal-title fs-4" id="exampleModalLabel">
-					[[ data_actor.id ]], [[ data_music_album.id ]] Gallery: [[ data_music_album.title ]] 
-					<span v-if="data_music_album.code">
-						([[ data_music_album.code ]])
+					[[ data_actor.id ]], [[ data_music.id ]] Video Album Gallery: [[ data_music.title ]] 
+					<span v-if="data_music.code">
+						([[ data_music.code ]])
 					</span> 
 				</h1>
 				
 				&nbsp; 
-				<button type="button" class="btn btn-primary btn-sm"  @click="f_hans_ent_music_album_gallery_fullscreen_w_path" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#app-hans-ent-music-album-gallery-fullscreen-modal" >Fullscreen</button>
-				&nbsp; 
-
 				<!--
 					아이콘들 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				-->
-				<div class="text-center">
-					<button @click="f_hans_ent_actor_profile_modal(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-profile-modal">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
-							<path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
-							<path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
-						</svg>                            
-					</button>
-					&nbsp;
-					<button @click="f_hans_ent_music_album_upload_modal(data_music_album.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-music-album-upload-modal">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-upload" viewBox="0 0 16 16">
-							<path fill-rule="evenodd" d="M4.406 1.342A5.53 5.53 0 0 1 8 0c2.69 0 4.923 2 5.166 4.579C14.758 4.804 16 6.137 16 7.773 16 9.569 14.502 11 12.687 11H10a.5.5 0 0 1 0-1h2.688C13.979 10 15 8.988 15 7.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 2.825 10.328 1 8 1a4.53 4.53 0 0 0-2.941 1.1c-.757.652-1.153 1.438-1.153 2.055v.448l-.445.049C2.064 4.805 1 5.952 1 7.318 1 8.785 2.23 10 3.781 10H6a.5.5 0 0 1 0 1H3.781C1.708 11 0 9.366 0 7.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383"/>
-							<path fill-rule="evenodd" d="M7.646 4.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V14.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708z"/>
-						</svg>
-					</button>
-					&nbsp;
-					<a v-if="data_music_album.list_album_music_id != null">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16">
-							<path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-						</svg>
-					</a>
-				</div> 
-
-				<button type="button" @click="f_modal_close" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			
+				<button @click="f_hans_ent_actor_profile_modal_open(data_actor.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-profile-modal">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
+						<path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
+						<path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+					</svg>                            
+				</button>
+				&nbsp;
+				<button @click="f_hans_ent_music_album_update_modal_open(data_music.id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-music-album-upload-modal">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+						<path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+					</svg>
+				</button>
+					
+				
+				&nbsp; 
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 
 			<div class="modal-body">
-			
-				<!-- Registered Images -->
-				<div v-if="data_music_album.list_dict_music_album != null">
-					<div class="card">
-						
-                        <div v-for="(dict_music_album, index) in total_list_dict_music_album" :key="index"  >
-							<button @click="f_delete_music_album_pic(key)" class="btn" >
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
-									<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-									<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-								</svg>
-							</button>
-                            <a :href="BASE_DIR_PICTURE+dict_music_album.original" target="_blank" >
-                                <img :src="BASE_DIR_PICTURE+dict_music_album.original" class="image-center">
-                            </a>
-                            <br>
-						</div>
 
+				<!-- Music Player -->
+				{% include 'hans_ent/music_album_music_player.html' %}
+
+				<hr>
+
+				<!-- Music Track List -->
+				{% include 'hans_ent/music_album_gallery_music_list.html' %}
+			
+				<hr>
+
+				<!-- Related Music in Album -->
+				<h5>
+					Related Music Albums
+				</h5>
+				
+				<!-- <div v-if="total_list_dict_music_album.length > 0">
+					<div class="cover-image-music-album-gallery-container">
+						<div v-for="(item, index) in total_list_dict_music_album" :key="index" class="cover-image-music-album-gallery-box" >
+							<button @click="f_select_music_album_video(item.id)" class="btn">
+								<span>
+									<img :src="BASE_DIR_MUSIC+item.thumbnail" width="200">
+								</span>
+								<div class="text-overlay">[[ item.id ]]</div>
+								[[ item.title ]]								
+							</button>
+							<br>
+						</div>
 					</div>
-				</div>
+				</div> -->
 
 			</div>
 
 			<div class="modal-footer">
-				<button type="button" class="btn btn-warning btn-sm"  @click="f_delete_music_album_and_its_pic" data-bs-dismiss="modal" >Album Delete</button>
-				&nbsp; 
-				<button type="button" class="btn btn-secondary" @click="f_modal_close" data-bs-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 			</div>
 		</div>
 	</div>
 </div>
 
 
-
-<script>
-	var post_hans_ent_music_album_gallery_modal = createApp({
-		delimiters: ["[[", "]]"],
-		data() {
-		return {
-            BASE_DIR_PICTURE : '',
-			
-			data_actor: {},
-			data_music_album: {},
-			list_dict_music_album: [],
-            selected_music_album_id: '',
-			selected_actor_id: '',
-			
-			selected_music_id: '',
-			selected_music_path:  '',
-			selected_dict_index: '',
-			input_text_title: '',
-
-			gallery_status_origin: false,
-
-            dict_album_key_fullsize_value_thumbnail_image_path: [],
-			list_album_thumbnail_url: [],
-		}
-		},
-		methods: {
-			refreshData() {
-				console.log('open modal for music create!!')
-				axios.get('/hans_ent_music_album_gallery_modal/')
-				.then((response) => {
-					this.data_music_album = response.data['selected_serialized_data_music_album']
-					console.log("gallery modal refresh done")
-				})
-			},
-
-			f_gallery_status_switch() {
-				if (this.gallery_status_origin == false) {
-					this.gallery_status_origin = true
-				} else {
-					this.gallery_status_origin = false
-				}
-			},
-
-			f_sync_data_to_music_album_gallery_modal(data) {
-                this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
-				this.data_actor = data['selected_serialized_data_actor']
-				this.data_music_album = data['selected_serialized_data_music_album']
-				
-                if (Object.keys(this.data_actor).length > 0 ) {
-					this.selected_actor_id = this.data_actor['id']
-				}
-                if (Object.keys(this.data_music_album).length > 0 ) {
-					this.selected_music_album_id = this.data_music_album['id']
-                    this.list_dict_music_album = this.data_music_album['list_dict_music_album']
-				}
-				
-                console.log('Music Album Gallery Modal로 정보 전송 완료', data)
-			},
-			
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // 정보 전송
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			// icon pannel Music Album Gallery Fullscreen Modal로 정보 전송 by PATH data
-			f_hans_ent_music_album_gallery_fullscreen_w_path() {
-				console.log('######################## 1', this.selected_actor_id, this.selected_music_album_id)
-				axios.post('/hans_ent_music_album_gallery_modal/', {
-                    'selected_music_album_id': this.selected_music_album_id,
-                    'selected_actor_id': this.selected_actor_id,
-                }, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'X-CSRFToken': "{{ csrf_token }}"
-                }
-                })
-                .then((response) => {
-                    console.log('######################## 사진 앨범 갤러리 풀스크린 모달창으로 전송', this.selected_actor_id)
-                    post_hans_ent_music_album_gallery_fullscreen_modal.f_sync_data_to_music_album_gallery_fullscreen_modal_w_path(response.data);
-                })
-                .catch(() => {
-                    console.log('Error! f_hans_ent_music_album_gallery_fullscreen_w_path')
-                })
-			},
-
-            // icon pannel Music Album Gallery Fullscreen Modal로 정보 전송 by URL data
-			f_hans_ent_music_album_gallery_fullscreen_w_url() {
-				console.log('######################## 2')
-				post_hans_ent_music_album_gallery_fullscreen_modal.f_sync_data_to_music_album_gallery_fullscreen_modal_w_url(
-					{
-						'selected_serialized_data_actor': this.data_actor,
-						'selected_serialized_data_music_album': this.data_music_album,
-						'list_album_thumbnail_url': this.list_album_thumbnail_url,
-					}
-					)
-			},
-
-
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // 앨범 기능 수행
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			f_delete_music_album_pic(event) {
-				console.log(event)
-				this.selected_music_path = event
-				const isConfirmed = window.confirm("정말 삭제하시겠습니까?");
-				if (isConfirmed) {
-					axios.post('/hans_ent_music_album_delete/', {
-						'button': 'remove_music_album_pic',
-						'selected_music_path': this.selected_music_path,
-						'selected_music_album_id': this.selected_music_album_id,
-					}, {
-					headers: {
-						'Content-Type': 'multipart/form-data',
-						'X-CSRFToken': "{{ csrf_token }}"
-					}
-					})
-					.then((response) => {
-						this.data_music_album = response.data['selected_serialized_data_music_album']
-						this.data_actor = response.data['selected_serialized_data_actor']
-						this.dict_album_key_fullsize_value_thumbnail_image_path = response.data['dict_album_key_fullsize_value_thumbnail_image_path']
-						this.selected_music_album_id = this.data_music_album['id']
-						this.selected_actor_id = this.data_actor['id']
-						console.log("사진 앨범 사진 삭제 완료", data)
-					})
-					.catch(() => {
-						console.log('Error! f_delete_music_album_pic')
-					})
-				} else {
-					alert("삭제가 취소되었습니다.");
-				}
-			},
-
-			f_delete_music_album_and_its_pic() {
-				console.log('delete selected id album: ', this.selected_music_album_id)
-				const isConfirmed = window.confirm("앨범에 등록된 사진들도 모두 삭제됩니다. 정말 삭제하시겠습니까?");
-				if (isConfirmed) {
-                	axios.post('/hans_ent_music_album_delete/', {
-						'button': 'remove_music_album',
-						'selected_music_album_id': this.selected_music_album_id,
-					}, {
-					headers: {
-						'Content-Type': 'multipart/form-data',
-						'X-CSRFToken': "{{ csrf_token }}"
-					}
-					})
-					.then((response) => {
-						this.data_music_album = response.data['selected_serialized_data_music_album']
-						this.data_actor = response.data['selected_serialized_data_actor']
-						this.dict_album_key_fullsize_value_thumbnail_image_path = response.data['dict_album_key_fullsize_value_thumbnail_image_path']
-						this.selected_music_album_id = this.data_music_album['id']
-						this.selected_actor_id = this.data_actor['id']
-						console.log("사진 앨범 삭제 완료", data)
-						post_hans_ent_music_album_list.refreshData()
-					})
-					.catch(() => {
-						console.log('Error! 1-6')
-					})
-				} else {
-						alert("삭제가 취소되었습니다.");
-					}
-			},
-			
-			f_inputTextTitle(event) {
-				this.input_text_title = event.target.value
-			},
-
-			f_hans_ent_album_gallery_music_modal(event) {},
-
-			
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // 정보 전송
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			// icon pannel Actor Profile Modal로 정보전송
-			f_hans_ent_actor_profile_modal(event) {
-                this.selected_actor_id = event
-				console.log('선택된 배우 아이디', this.selected_actor_id)
-                axios.post('/hans_ent_actor_profile_modal/', {
-                    'selected_actor_id': this.selected_actor_id,
-					'selected_music_album_id': this.selected_music_album_id,
-                }, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'X-CSRFToken': "{{ csrf_token }}"
-                }
-                })
-                .then((response) => {
-                    console.log('################### Actor Profile Modal로 정보 전송', response.data)
-                    post_hans_ent_actor_profile_modal.f_sync_data_to_actor_profile_modal(response.data);
-                })
-                .catch(() => {
-                    console.log('Error! f_hans_ent_album_upload_modal')
-                })
-            },
-            
-			// icon pannel Actor Music Album Upload Modal로 정보전송
-            f_hans_ent_music_album_upload_modal(event) {
-                this.selected_music_album_id = event
-                console.log('선택된 사진 앨범 아이디', this.selected_music_album_id)
-                axios.post('/hans_ent_music_album_upload_modal/', {
-                    'selected_music_album_id': this.selected_music_album_id,
-					'selected_actor_id': this.selected_actor_id,
-                }, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'X-CSRFToken': "{{ csrf_token }}"
-                }
-                })
-                .then((response) => {
-                    post_hans_ent_music_album_upload_modal.f_sync_data_to_music_album_upload_modal(response.data);
-                })
-                .catch(() => {
-                    console.log('Error! f_hans_ent_music_album_upload_modal')
-                })
-            },
-			
-		},
-        computed: {
-            active_list_dict_music_album() {
-                return this.list_dict_music_album.filter(item => item.active === "true" && item.discard === "false")
-            },
-			total_list_dict_music_album() {
-                return this.list_dict_music_album.filter(item => item.discard === "false")
-            },
-			c_hasItems_music() {
-				return this.data_music_album.list_dict_music_album.length > 1;
-			}
-        },
-		mounted: function() {
-			this.refreshData()
-		}
-	}).mount('#app-hans-ent-music-album-gallery-modal')
-
-    // modal 화면에서 숨겨진 상태가 되면 실행되는 함수
-
-    $('#app-hans-ent-music-album-gallery-modal').on('hidden.bs.modal', function () {
-		// post_hans_ent_music_album_gallery_modal.f_reset_return()
-		// post_hans_ent_music_album_list.refreshData()
-		// console.log('앨범 갤러리 모달창 닫혔음!')
-	});
-
-</script>
-
-
-<style>
-    
-    .image-center {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 90%;
-    }
-</style>

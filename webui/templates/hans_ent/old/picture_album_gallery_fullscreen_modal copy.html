@@ -1,0 +1,138 @@
+
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+{% load static %}
+
+
+
+<!-- Modal -->
+<div class="modal fade modal-xl" id="app-hans-ent-picture-album-gallery-fullscreen-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-fullscreen">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-4" id="exampleModalLabel">Fullscreen: [[ data_actor.name ]] </h1>
+				&nbsp; 
+				<button type="button" class="btn btn-primary btn-sm"  data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#app-hans-ent-picture-album-gallery-modal" >Thumbnail</button>
+				&nbsp; 
+				<div class="text-center">
+					
+				</div> 
+
+				<button type="button" @click="f_modal_close" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			
+
+			<div class="modal-body">
+
+                <div v-if="total_list_dict_picture_album != null">
+					<div class="container-fluid" >
+						<div v-for="(dict_pictuer_album, index) in total_list_dict_picture_album" :key="index" class="card" >
+							<img :src="BASE_DIR_PICTURE+dict_pictuer_album.original">
+						</div>
+					</div>
+				</div> 
+			</div> 
+		
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" @click="f_modal_close" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<script>
+	
+	
+	var post_hans_ent_picture_album_gallery_fullscreen_modal = createApp({
+		delimiters: ["[[", "]]"],
+		data() {
+		return {
+			BASE_DIR_PICTURE: '',
+			
+			data_actor: {},
+            selected_actor_id: '',
+			list_dict_picture_album: [],
+			list_album_thumbnail_url: [],
+
+			
+		}
+		},
+		methods: {
+			f_refreshData() {
+				console.log('open modal for video create!!')
+				axios.get(variables.API_URL+'hans_ent_album_gallery_fullscreen_modal/')
+				.then((response) => {
+				})
+			},
+
+			f_sync_data_to_picture_album_gallery_fullscreen_modal_w_path(data) {
+				console.log('Gallery Fullscreen Modal로 전송중', data)
+				this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
+				this.data_actor = data['selected_serialized_data_actor']
+				this.data_picture_album = data['selected_serialized_data_picture_album']
+                
+				if (Object.keys(this.data_actor).length > 0 ) {
+					this.selected_actor_id = this.data_actor['id']
+				}
+				if (Object.keys(this.data_picture_album).length > 0 ) {
+					this.selected_picture_album_id = this.data_picture_album['id']
+					this.list_dict_picture_album = this.data_picture_album['list_dict_picture_album']
+				}
+				console.log('Gallery Fullscreen Modal로 전송 완료', data)
+			},
+
+            f_sync_data_to_picture_album_gallery_fullscreen_modal_w_url(data) {
+				this.data_actor = data['selected_serialized_data_actor']
+                this.data_picture_album = data['selected_serialized_data_picture_album']
+                this.list_album_thumbnail_url = data['list_album_thumbnail_url']
+
+				this.selected_actor_id = this.data_actor['id']
+				this.selected_picture_album_id = this.data_picture_album['id']
+                console.log('Gallery Fullscreen Modal로 전송 완료', data)
+            },
+
+
+			// icon pannel
+            f_hans_ent_actor_profile_modal(event) {
+                this.selected_actor_id = event
+                console.log('Actor 프로필 모달 페이지로 가기, 선택한 배우 id', this.selected_actor_id)
+                axios.post(variables.API_URL+'hans_ent_actor_profile_modal/', {
+                    'selected_actor_id': this.selected_actor_id,
+                    'modal': 'profile'
+                }, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+                })
+                .then((response) => {
+                    console.log('모델 리스트에서 모델 프로필로 정보 전송 시작', response.data)
+                    post_hans_ent_actor_profile_modal.f_sync_data_to_actor_profile_modal(response.data);
+                    console.log('0')
+                })
+                .catch(() => {
+                    console.log('Error! f_hans_ent_actor_profile_modal')
+                })
+            },
+
+			
+		},
+		computed: {
+            active_list_dict_picture_album() {
+                return this.list_dict_picture_album.filter(item => item.active === "true" && item.discard === "false")
+            },
+			total_list_dict_picture_album() {
+                return this.list_dict_picture_album.filter(item => item.discard === "false")
+            },
+			c_hasItems_picture() {
+				return this.data_picture_album.list_dict_picture_album.length > 1;
+			}
+        },
+		mounted: function() {
+			this.f_refreshData()
+		}
+	}).mount('#app-hans-ent-picture-album-gallery-fullscreen-modal')
+
+</script>

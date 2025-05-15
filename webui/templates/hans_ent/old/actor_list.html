@@ -1,0 +1,1244 @@
+
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+{% load static %}
+    
+{% block content %}
+
+
+
+
+    <div class="row" id="app_hans_ent_actor_list">
+
+        
+        <!-- Actor Create Modal-->
+        {% include 'hans_ent/actor_create_modal.html' %}
+
+        <!-- Actor Update Modal-->
+        {% include 'hans_ent/actor_update_modal.html' %}
+
+        <!-- Actor Profile Modal-->
+        {% include 'hans_ent/actor_profile_modal.html' %}
+
+        <!-- Picture Album Gallery Modal-->
+        {% include 'hans_ent/picture_album_gallery_modal.html' %}
+
+        <!-- Picture Album Gallery Modal-->
+        {% include 'hans_ent/picture_album_gallery_fullscreen_modal.html' %}
+        
+
+        <div class="col-md-10">
+            
+            <div>
+                {% include 'hans_ent/list_table_index.html' %}
+            </div>
+            
+            <div class="grid-container">
+                <div v-for="(data_actor, index) in list_serialized_data_actor" :key="index" class="card" >
+                    <div class="box">
+                        <div class="card-body">
+                            
+                            <button @click="f_hans_ent_actor_profile_modal_open(data_actor.id)" type="button" class="btn" data-bs-toggle="modal" data-bs-target="#app_hans_ent_actor_profile_modal">
+                                <div v-for="(dict_profile_album, index) in data_actor.list_dict_profile_album" :key="index" >
+                                    <div v-if="dict_profile_album.active == 'true'">
+                                        <img :src="BASE_DIR_ACTOR+dict_profile_album.cover" width="200">
+                                    </div>
+                                </div>
+                            </button>
+                            
+                            <div class="text-center">
+                                <strong>
+                                    [[ data_actor.name ]]
+                                </strong>
+                                [[ data_actor.id ]]
+                                <br>
+                               
+                                <div class="text-center">
+                                    <button @click="f_hans_ent_actor_profile_modal_open(data_actor.id)" type="button" class="btn" data-bs-toggle="modal" data-bs-target="#app_hans_ent_actor_profile_modal">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
+                                            <path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
+                                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                                        </svg> 
+                                    </button>
+
+                                    &nbsp;
+                                    <button @click="f_hans_ent_actor_update_modal_open(data_actor.id)" type="button" class="btn" data-bs-toggle="modal" data-bs-target="#app_hans_ent_actor_update_modal">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                                        </svg>
+                                    </button>
+
+                                </div> 
+                                
+                                
+                            </div>  
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COL 2 (화면 우측)-->
+        <div class="col-md-2" id="app-hans_ent-actor-list-right" >
+            <!-- Button to trigger the modal -->
+            <button type="button" @click="f_hans_ent_actor_create_modal_oepn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#app_hans_ent_actor_create_modal">
+                Actor Create
+            </button>
+        </div>
+
+
+        <!-- Button trigger modal -->
+    
+        
+        <!-- Modal -->
+        
+
+
+    </div> 
+
+
+     
+    <script>
+        
+
+        var app_hans_ent_actor_list = createApp({
+            delimiters: ["[[", "]]"],
+            
+            data() {
+            return {
+                BASE_DIR_ACTOR: '',
+                BASE_DIR_PICTURE: '',
+                BASE_DIR_VIDEO: '',
+                BASE_DIR_MUSIC: '',
+                
+                data_actor: {},
+                data_picture: {},
+                data_video: {},
+                data_music: {},
+
+                
+			    list_serialized_data_actor: [],
+                list_serialized_data_picture_album: [],
+                list_serialized_data_video_album: [],
+                list_serialized_data_music_album: [],
+
+                list_serialized_data_picture_album_by_actor: [],
+                list_serialized_data_video_album_by_actor: [],
+                list_serialized_data_music_album_by_actor: [],
+
+                list_serialized_data_searched_actor: [],
+
+                list_dict_profile_album: [],
+                list_dict_picture_album: [],
+                list_dict_video_album: [],
+                list_dict_music_album: [],
+
+                list_dict_actor_info_url: [],
+                list_dict_picture_info_url: [],
+                list_dict_video_info_url: [],
+                list_dict_music_info_url: [],
+
+                selected_actor_id: '',
+                selected_video_album_id: '',
+                selected_picture_album_id: '',
+                selected_music_album_id: '',
+
+                selected_profile_album_id: '',
+			    selected_profile_album_picture_id: '',
+
+
+                list_menu_type: [],
+                list_field_sorting: [],
+                list_dict_history_actor_select: [],
+
+                selected_sorting_field: '',
+
+                // update
+                input_text_name: '',
+                input_text_synonyms: '',
+                input_info_site_name: '',
+                input_info_site_url: '',
+                input_date_birthday: '',
+                input_number_height: '',
+                input_text_tag: '',
+
+                images: '',
+                files: '',
+                
+                // search bar
+                inputTextKeyword: '',
+                searchData: '',
+
+                total_num_registered_item: '',
+                total_num_searched_item: '',
+                count_page_number_min: '',
+                count_page_number_max: '',
+                count_page_number: '',
+
+                status_picture_gallery_close: false,
+                status_video_gallery_close: false,
+                status_music_gallery_close: false,
+
+                // Upload Form
+                progress_value: 0,
+                progress_max: 100,
+                progress_min: 0,
+                show_progress: false,
+
+                status_cover_image_change: false,
+			    status_profile_album_picture_remove: false,
+                status_picture_album_picture_order_switch: false,
+                status_picture_album_picture_remove: false,
+			    status_create: false,
+
+                message:'',
+            }
+            },
+            methods: {
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Actor List 정보 획득
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                f_refreshData_actor_list() {
+                    axios.get('/hans_ent_actor_list/')
+                    .then((response) => {
+                        this.BASE_DIR_ACTOR = response.data["BASE_DIR_ACTOR"]
+                        this.BASE_DIR_PICTURE = response.data["BASE_DIR_PICTURE"]
+                        this.BASE_DIR_VIDEO = response.data["BASE_DIR_VIDEO"]
+                        this.BASE_DIR_MUSIC = response.data["BASE_DIR_MUSIC"]
+
+                        this.list_field_sorting = response.data['LIST_ACTOR_SORTING_FIELD']
+                        this.list_serialized_data_actor = response.data['list_serialized_data_actor']
+                        
+                        this.total_num_registered_item = response.data['total_num_registered_item']
+                        this.total_num_searched_item = response.data['total_num_searched_item']
+                        this.count_page_number_min = response.data['list_count_page_number'][0]
+                        this.count_page_number_max = response.data['list_count_page_number'][1]
+                        this.count_page_number = response.data['list_count_page_number'][2]
+                        
+                        console.log("################ f_refreshData_actor_list executed!")
+                    })
+                },
+
+                f_url_replace_to_local() {
+                    console.log('dir change')
+                    this.BASE_DIR_ACTOR  = 'http://172.16.2.55:8000/media/vault1/actor/'
+                    this.BASE_DIR_PICTURE  = 'http://172.16.2.55:8000/media/vault1/picture/'
+                    this.BASE_DIR_VIDEO  = 'http://172.16.2.55:8000/media/vault1/video/'
+                    this.BASE_DIR_MUSIC  = 'http://172.16.2.55:8000/media/vault1/music/'
+                },
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // 모달창 열기 위한 정보 획득
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                // Actor Profile
+                f_hans_ent_actor_profile_modal_open(event) {
+                    this.selected_actor_id = event
+                    console.log('### Send Data to Actor Profile Modal with Selected Actor ID: ', this.selected_actor_id)
+                    axios.post('/hans_ent_actor_profile_modal/', {
+                        'selected_actor_id': this.selected_actor_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        // console.log('Actor List로부터 Actor Profile Modal로 Data 송신 완료', response.data)
+                        this.data_actor = response.data["selected_serialized_data_actor"]
+                        this.data_picture = response.data["selected_serialized_data_picture_album"]
+                        this.data_video = response.data["selected_serialized_data_video_album"]
+                        this.data_music = response.data["selected_serialized_data_music_album"]
+
+                        this.list_serialized_data_picture_album_by_actor = response.data['list_serialized_data_picture_album_by_actor']
+                        this.list_serialized_data_video_album_by_actor = response.data['list_serialized_data_video_album_by_actor']
+                        this.list_serialized_data_music_album_by_actor = response.data['list_serialized_data_music_album_by_actor']
+
+                        if (Object.keys(this.data_actor).length > 0 ) {
+                            this.selected_actor_id = this.data_actor['id']
+                            if (this.selected_actor_id === null) {this.selected_actor_id = 0}
+                            this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+                            if (this.list_dict_profile_album === null) {this.list_dict_profile_album = []}
+                            this.list_dict_actor_info_url = this.data_actor['list_dict_info_url']
+                            if (this.list_dict_actor_info_url === null) {this.list_dict_actor_info_url = []}
+                        }
+
+                        if (Object.keys(this.data_picture).length > 0 ) {
+                            console.log('hhahahahah')
+                            this.selected_picture_album_id = this.data_picture['id']
+                            if (this.selected_picture_album_id === null) {this.selected_picture_album_id = 0}
+                            this.list_dict_picture_album = this.data_picture['list_dict_picture_album']
+                            if (this.list_dict_picture_album === null) {this.list_dict_picture_album = []}
+                        }
+                        console.log('list_dict_picture_album', this.list_dict_picture_album)
+                        if (Object.keys(this.data_video).length > 0 ) {
+                            this.selected_video_album_id = this.data_video['id']
+                            if (this.selected_video_album_id === null) {this.selected_video_album_id = 0}
+                            this.list_dict_video_album = this.data_video['list_dict_video_album']
+                            if (this.list_dict_video_album == null) {this.list_dict_video_album = []}
+                        } else {
+                            this.data_video = {}
+                            this.selected_video_album_id = 0
+                            this.list_dict_video_album = []
+                        }
+
+                        if (Object.keys(this.data_music).length > 0 ) {
+                            this.selected_music_album_id = this.data_music['id']
+                            if (this.selected_music_album_id === null) {this.selected_music_album_id = 0}
+                            this.list_dict_music_album = this.data_music['list_dict_music_album']
+                            if (this.list_dict_music_album == null) {this.list_dict_music_album = []}
+                        } else {
+                            this.data_music = {}
+                            this.selected_music_album_id = 0
+                            this.list_dict_music_album = []
+                        }
+                        
+                    })
+                    .catch(() => {
+                        console.log('Error! Actor List로부터 Actor Profile로 데이터 송신 오류')
+                    })
+                },
+
+                f_hans_ent_actor_create_modal_oepn() {
+                    console.log('f_hans_ent_actor_create_modal_oepn',)
+                },
+
+                // Actor Update
+                f_hans_ent_actor_update_modal_open(event) {
+                    this.selected_actor_id = event
+                    console.log('f_hans_ent_actor_update_modal_open', event)
+                    axios.post('/hans_ent_actor_update_modal/', {
+                        'selected_actor_id': event,
+                        'modal': 'upload'
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })  
+                    .then((response) => {
+                        console.log('모델리스트에서 모델 업로드로 정보 전송 시작', response.data)
+                        this.data_actor = response.data['selected_serialized_data_actor']
+                        
+                        if (Object.keys(this.data_actor).length > 0 ) {
+                            this.list_dict_info_url = this.data_actor['list_dict_info_url']
+                            this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+                            this.selected_actor_id = this.data_actor['id']
+                        } else {
+                            this.status_create = true
+                        }
+
+                        console.log('Actor List로부터 upload로 데이터 수신 완료', this.selected_actor_id)
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_actor_update_modal_open')
+                    })
+                },
+
+                    
+                f_hans_ent_actor_gallery_modal_open(event) {
+                    this.selected_actor_id = event
+                    console.log(this.selected_actor_id)
+                    axios.post('/hans_ent_actor_gallery_modal/', {
+                        'selected_actor_id': event,
+                        'modal': 'gallery'
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })  
+                    .then((response) => {
+                        console.log('모델리스트에서 모델 갤러리로 정보 전송 시작', response.data)
+                        post_hans_ent_actor_gallery_modal.f_sync_data_actor_list_to_gallery(response.data)
+                    })
+                    .catch(() => {
+                        console.log('Error! ')
+                    })
+                },
+
+                // 사진 앨범 업로드 모달창으로 (Actor Id 가지고)
+                f_hans_ent_picture_album_update_modal_open_by_actor_id(event) {
+                    console.log('event', event)
+                    axios.post('/api/hans_ent_picture_album_update_modal/', {
+                        'selected_actor_id': event,
+                        'selected_picture_album_id': 'none',
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        app_hans_ent_picture_album_list.f_reset_data_picture_create_form()
+                        $('#app_hans_ent_actor_profile_modal').modal('hide')
+                        $('#app_hans_ent_picture_album_create_modal').modal('show')
+                        // post_hans_ent_picture_album_update_modal.f_sync_data_to_picture_album_update_modal(response.data);
+                        console.log('### Actor Profile 창에서 사진 앨범 업로드 모달창으로 송신 완료', this.selected_actor_id)
+                    })
+                    .catch(() => {
+                        console.log('Error! ### Actor Profile 창에서 사진 앨범 업로드 모달창으로 송신 오류')
+                    })
+                },
+                
+
+                // 사진 앨범 갤리러 모달창으로 
+                f_hans_ent_picture_album_gallery_modal_open(event) {
+                    console.log('event', event.id)
+                    this.selected_picture_album_id = event.id
+                    axios.post('/hans_ent_picture_album_gallery_modal/', {
+                        'selected_picture_album_id': this.selected_picture_album_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        console.log('######################## 사진 앨범 갤러리 모달창으로 전송', this.selected_actor_id)
+                        this.data_actor = response.data['selected_serialized_data_actor']
+                        if (Object.keys(this.data_actor).length > 0 ) {
+                            this.selected_actor_id = this.data_actor['id']
+                            if (this.selected_actor_id === null) {this.selected_actor_id = 0}
+                            this.list_dict_info_url = this.data_actor['list_dict_info_url']
+                            if (this.list_dict_info_url == null) {this.list_dict_info_url = []}
+                            this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+                            if (this.list_dict_profile_album == null) {this.list_dict_profile_album = []}
+                        } else {
+                            this.data_actor = {}
+                            this.selected_actor_id = 0
+                            this.list_dict_info_url = []
+                            this.list_dict_profile_album = []
+                        }
+                        
+                        this.data_picture = response.data['selected_serialized_data_picture_album']
+                        if (Object.keys(this.data_picture).length > 0 ) {
+                            this.selected_picture_album_id = this.data_picture['id']
+                            if (this.selected_picture_album_id === null) {this.selected_picture_album_id = 0}
+                            this.list_dict_picture_album = this.data_picture['list_dict_picture_album']
+                            if (this.list_dict_picture_album == null) {this.list_dict_picture_album = []}
+                        } else {
+                            this.data_picture = {}
+                            this.selected_picture_album_id = 0
+                            this.list_dict_picture_album = []
+                        }
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_picture_album_gallery_modal')
+                    })
+                },
+
+                f_hans_ent_picture_album_gallery_fullscreen_modal_open(event) {
+                    this.selected_picture_album_id = event
+                    axios.post('/hans_ent_picture_album_gallery_modal/', {
+                        'selected_picture_album_id': this.selected_picture_album_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        console.log('######################## 사진 앨범 갤러리 모달창으로 전송', this.selected_actor_id)
+                        post_hans_ent_picture_album_gallery_modal.f_sync_data_to_picture_album_gallery_modal(response.data);
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_picture_album_gallery_modal')
+                    })
+                },
+
+                
+                // icon pannel Actor Picture Album Upload Modal로 정보전송
+                f_hans_ent_picture_album_update_modal_open(event) {
+                    this.selected_picture_album_id = event
+                    console.log('선택된 사진 앨범 아이디', this.selected_picture_album_id)
+                    axios.post('/hans_ent_picture_album_update_modal/', {
+                        'selected_picture_album_id': this.selected_picture_album_id,
+                        'selected_actor_id': this.selected_actor_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        post_hans_ent_picture_album_update_modal.f_sync_data_to_picture_album_update_modal(response.data);
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_picture_album_update_modal')
+                    })
+                },
+                
+                
+                // icon pannel 비디오 앨범 업로드 모달창으로 (Actor ID 가지고)
+                f_hans_ent_video_album_update_modal_open_by_actor_id(event) {
+                    this.selected_actor_id = event
+                    console.log('Actor 정보로 Vido Album 업로드하기', this.selected_actor_id)
+                    axios.post('/hans_ent_video_album_update_modal/', {
+                        'selected_actor_id': this.selected_actor_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        console.log('비디오앨범업로드모달창으로 전송시작', response.data)
+                        post_hans_ent_video_album_update_modal.f_sync_data_to_video_album_update_modal(response.data);
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_video_album_update_modal_by_actor_id')
+                    })
+                },
+                
+
+
+                   
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Actor Create Modal 함수
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                f_reset_data_actor_create_form() {
+                    console.log('execute reset function for actor create modal')
+                    this.input_text_name = ''
+                    this.input_text_synonyms = ''
+                    this.input_date_birthday = ''
+                    this.input_number_height = ''
+                    
+                    this.progress_value = 0
+                    this.progress_max = 100
+                    this.progress_min = 0
+                    this.show_progress = false
+
+                    $("#id_actor_create_input_text_name").val("");
+                    $("#id_actor_create_input_date_birthday").val("");
+                    $("#id_actor_create_input_text_synonyms").val("");
+                    $("#id_actor_create_input_number_height").val("");
+                },
+                               
+                
+                f_input_text_name(event) {
+                    this.input_text_name = event.target.value
+                },
+
+                f_input_text_synonyms(event) {
+                    this.input_text_synonyms = event.target.value
+                },
+
+                f_input_date_birthday(event) {
+                    this.input_date_birthday = event.target.value
+                },
+            
+                f_input_number_height(event) {
+                    this.input_number_height = event.target.value
+                },
+
+                
+                async f_actor_create_form() {
+                    let formData = new FormData();
+                    formData.append('button', 'create_or_update');
+                    formData.append('selected_actor_id', 'none')
+                    formData.append('input_text_name', this.input_text_name)
+                    formData.append('input_text_synonyms', this.input_text_synonyms)
+                    formData.append('input_date_birthday', this.input_date_birthday)
+                    formData.append('input_number_height', this.input_number_height)
+                    this.show_progress = true;
+
+                    if (this.input_text_name != '') {
+                        console.log('Actor Create Form Submitted')
+                        try {
+                            await axios.post('/hans_ent_actor_update_modal/', formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                                'X-CSRFToken': "{{ csrf_token }}"
+                            },
+                            onUploadProgress: progressEvent => {
+                            this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
+                            })
+                            .then((response) => {
+                                console.log('Actor Created ')
+                                this.data_actor = response.data['selected_serialized_data_actor']
+                                
+                                if (Object.keys(this.data_actor).length > 0 ) {
+                                    this.list_dict_info_url = this.data_actor['list_dict_info_url']
+                                    this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+                                    this.selected_actor_id = this.data_actor['id']
+                                    this.status_create = false
+                                } else {
+                                    this.status_create = true
+                                }
+
+                                this.f_reset_data_actor_create_form()
+                                $('#app_hans_ent_actor_create_modal').modal('hide')
+                                $('#app_hans_ent_actor_update_modal').modal('show')
+                            })
+                            alert('Actor Created Successfully');
+                        } catch (error) {
+                            console.error('Error uploading images:', error);
+                        }
+                    } else {
+                        alert("이름을 입력하지 않았습니다.");
+                        this.show_progress = false;
+                    }
+                },
+
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Actor Create Modal 관련 종료
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+                    
+                
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Actor Update Modal 시작
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+                    
+                f_fold_searched_actor_list() {
+                    this.list_serialized_data_searched_actor = null
+                },
+                
+                
+                f_sync_data_to_actor_update_modal(data) {
+                    this.f_reset_data_actor_update()
+                    this.BASE_DIR_ACTOR = data['BASE_DIR_ACTOR']
+                    this.data_actor = data['selected_serialized_data_actor']
+                    
+                    if (Object.keys(this.data_actor).length > 0 ) {
+                        this.list_dict_info_url = this.data_actor['list_dict_info_url']
+                        this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+                        this.selected_actor_id = this.data_actor['id']
+                    } else {
+                        this.status_create = true
+                    }
+
+                    console.log('Actor List로부터 upload로 데이터 수신 완료', this.selected_actor_id)
+                },
+                
+                
+                
+                
+                // Cover image 선택/변경/
+                f_replace_registered_actor_profile_cover_image() {
+                    if (this.status_cover_image_change === true) {
+                        this.status_cover_image_change = false
+                    } else {
+                        this.status_cover_image_change = true
+                    }
+                },
+
+                // Cover image 선택/변경/
+                f_select_picture_as_cover(event) {
+                    console.log(event)
+                    this.selected_profile_album_picture_id = event
+                    axios.post('/hans_ent_actor_update_modal/', {
+                        'button': 'change_profile_album_cover_image',
+                        'selected_actor_id': this.selected_actor_id,
+                        'selected_profile_album_picture_id': this.selected_profile_album_picture_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.status_cover_image_change = false
+                        this.selected_profile_album_picture_id = ''
+                        
+                        this.data_actor = response.data['selected_serialized_data_actor']
+                        if (Object.keys(this.data_actor).length > 0 ) {
+                            this.list_dict_info_url = this.data_actor['list_dict_info_url']
+                            this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+                            this.selected_actor_id = this.data_actor['id']
+                        }
+                    })
+                    .catch(() => {
+                        console.log('Error! f_select_picture_as_cover')
+                    })
+                },
+
+                // Cover image 선택/변경/
+                f_remove_registered_profile_album_picture() {
+                    if (this.status_profile_album_picture_remove === true) {
+                        this.status_profile_album_picture_remove = false
+                    } else {
+                        this.status_profile_album_picture_remove = true
+                    }
+                },
+
+                // Cover image 제거/
+                f_select_picture_to_remove(event) {
+                    console.log(event)
+                    this.selected_profile_album_picture_id = event
+                    axios.post('/hans_ent_actor_update_modal/', {
+                        'button': 'remove_profile_album_picture',
+                        'selected_actor_id': this.selected_actor_id,
+                        'selected_profile_album_picture_id': this.selected_profile_album_picture_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.status_profile_album_picture_remove = false
+                        this.selected_profile_album_picture_id = ''
+                        
+                        this.data_actor = response.data['selected_serialized_data_actor']
+                        if (Object.keys(this.data_actor).length > 0 ) {
+                            this.list_dict_info_url = this.data_actor['list_dict_info_url']
+                            this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+                            this.selected_actor_id = this.data_actor['id']
+                        }
+                    })
+                    .catch(() => {
+                        console.log('Error! f_select_picture_to_remove')
+                    })
+                },
+
+
+                // Actor 합치기
+                f_select_actor_to_merge(event) {
+                    console.log(event)
+                    const isConfirmed = window.confirm("모델 정보 합치기를 승인하시겠습니까?");
+                    if (isConfirmed) {
+                        alert("모델 합치기를 승인하였습니다.");
+                            axios.post('/hans_ent_actor_update_modal/', {
+                            'alternative_actor_id': event,
+                            'selected_actor_id': this.selected_actor_id,
+                            'button': 'select_to_merge'
+                        }, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                            'X-CSRFToken': "{{ csrf_token }}"
+                        }
+                        })
+                        .then((response) => {
+                            this.data_actor = response.data['selected_serialized_data_actor']
+                            if (Object.keys(this.data_actor).length > 0 ) {
+                                this.list_dict_info_url = this.data_actor['list_dict_info_url']
+                                this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+                                this.selected_actor_id = this.data_actor['id']
+                            }
+                        })
+                        .catch(() => {
+                            console.log('Error! ')
+                        })
+                    } else {
+                        alert("모델 합치기를 취소하였습니다.");
+                        // Code to execute if user clicked "Cancel" (No)
+                    }
+                },
+
+                
+                // Actor 삭제
+                f_select_actor_to_delete(event) {
+                    console.log('delete actor id', event)
+                    console.log(event)
+                    const isConfirmed = window.confirm("정말 모델 정보를 삭제하시겠습니까?");
+                    if (isConfirmed) {
+                        alert("모델 삭제를 승인하였습니다.");
+                        axios.post('/hans_ent_actor_update_modal/', {
+                            'selected_actor_id': event,
+                            'button': 'actor_delete',
+                            'list_serialized_data_actor': this.list_serialized_data_actor
+                        }, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                            'X-CSRFToken': "{{ csrf_token }}"
+                        }
+                        })
+                        .then((response) => {
+                            this.data_actor = response.data['list_serialized_data_actor']
+                        })
+                        .catch(() => {
+                            console.log('Error! f_select_actor_to_delete')
+                            
+                        }) 
+                    } else {
+                        alert("삭제가 취소되었습니다.");
+                    }
+                },
+
+
+                f_reset_data_actor_update_form() {
+                    console.log('execute reset function for actor update modal')
+                    this.input_text_name = ''
+                    this.input_text_synonyms = ''
+                    this.input_date_birthday = ''
+                    this.input_number_height = ''
+                    this.input_info_site_name = ''
+                    this.input_info_site_url = ''
+                    this.input_text_tag = ''
+                    
+                    this.images =''
+                    
+                    this.progress_value = 0
+                    this.progress_max = 100
+                    this.progress_min = 0
+                    this.show_progress = false
+
+                    this.status_cover_image_change = false
+                    this.status_profile_album_picture_remove = false 
+                    this.status_create = false
+
+                    $("#id_actor_update_input_text_name").val("");
+                    $("#id_actor_update_input_date_birthday").val("");
+                    $("#id_actor_update_input_text_synonyms").val("");
+                    $("#id_actor_update_input_number_height").val("");
+
+                    $("#id_actor_update_input_info_site_name").val("");
+                    $("#id_actor_update_input_info_site_url").val("");
+                    $("#id_actor_update_input_text_tag").val("");
+                    $("#id_actor_update_input_file_images").val("");
+                },
+                
+                f_fold_searched_actor_list() {
+                    this.list_serialized_data_actor = null
+                },
+                
+                // f_input_text_name(event) {
+                //     this.input_text_name = event.target.value
+                // },
+
+                // f_input_text_synonyms(event) {
+                //     this.input_text_synonyms = event.target.value
+                // },
+
+                // f_input_date_birthday(event) {
+                //     this.input_date_birthday = event.target.value
+                // },
+            
+                // f_input_number_height(event) {
+                //     this.input_number_height = event.target.value
+                // },
+
+                f_input_info_site_name(event) {
+                    this.input_info_site_name = event.target.value
+                },
+
+                f_input_info_site_url(event) {
+                    this.input_info_site_url = event.target.value
+                },
+
+                f_input_text_tag(event) {
+                    this.input_text_tag = event.target.value
+                },
+                
+                f_file_actor_images_select(event) {
+                this.images = event.target.files;
+                },
+                
+                // Actor Update
+                async f_actor_update_form() {
+                    let formData = new FormData();
+                    if (this.images != null) {
+                        for (let i = 0; i < this.images.length; i++) {
+                            formData.append('images', this.images[i]);
+                    }}
+                    formData.append('button', 'create_or_update');
+                    formData.append('selected_actor_id', this.selected_actor_id);
+                    formData.append('input_text_name', this.input_text_name)
+                    formData.append('input_text_synonyms', this.input_text_synonyms)
+                    formData.append('input_date_birthday', this.input_date_birthday)
+                    formData.append('input_number_height', this.input_number_height)
+                    formData.append('input_info_site_name', this.input_info_site_name)
+                    formData.append('input_info_site_url', this.input_info_site_url)
+                    formData.append('input_text_tag', this.input_text_tag)
+                    this.show_progress = true;
+
+                    try {
+                        await axios.post('/hans_ent_actor_update_modal/', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                            'X-CSRFToken': "{{ csrf_token }}"
+                        },
+                        onUploadProgress: progressEvent => {
+                        this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
+                        })
+                        .then((response) => {
+                            console.log('Actor Updated ')
+                                this.data_actor = response.data['selected_serialized_data_actor']
+                                
+                                if (Object.keys(this.data_actor).length > 0 ) {
+                                    this.list_dict_info_url = this.data_actor['list_dict_info_url']
+                                    this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+                                    this.selected_actor_id = this.data_actor['id']
+                                    this.status_create = false
+                                } else {
+                                    this.status_create = false
+                                }
+                                this.f_reset_data_actor_update_form()
+                        })
+                        alert('Actor Updated Successfully');
+                    } catch (error) {
+                        console.error('Error uploading images:', error);
+                    }
+                },
+
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Actor Update Modal 관련 종료
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Actor Profile Modal
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                f_sync_data_to_actor_profile_modal(data) {
+                    this.BASE_DIR_ACTOR = data['BASE_DIR_ACTOR']
+                    this.BASE_DIR_PICTURE = data['BASE_DIR_PICTURE']
+                    this.BASE_DIR_VIDEO = data['BASE_DIR_VIDEO']
+                    this.BASE_DIR_MUSIC = data['BASE_DIR_MUSIC']
+                    
+                    this.data_actor = data['selected_serialized_data_actor']
+                    this.data_picture = data['selected_serialized_data_picture']
+                    this.data_video = data['selected_serialized_data_video']
+                    this.data_music = data['selected_serialized_data_music']
+
+                    this.list_serialized_data_picture_album = data['list_serialized_data_picture_album']
+                    this.list_serialized_data_video_album = data['list_serialized_data_video_album']
+                    this.list_serialized_data_music_album = data['list_serialized_data_music_album']
+                    
+                    if (Object.keys(this.data_actor).length > 0 ) {
+                        this.selected_actor_id = this.data_actor['id']
+                        this.list_dict_profile_album = this.data_actor['list_dict_profile_album']
+                    }
+                    console.log('Actor Profile Modal로 Data 수신완료', data)
+                },
+                
+                f_reset_data_actor_profile() {
+                    data_actor = {}
+                    list_dict_profile_album = []
+
+                    data_picture = {}
+                    data_video = {}
+                    data_music = {}
+
+                    list_serialized_data_picture_album = []
+                    list_serialized_data_video_album = []
+                    list_serialized_data_music_album = []
+
+                    selected_actor_id = ''
+                    selected_video_album_id = ''
+                    selected_picture_album_id = ''
+                    selected_music_album_id = ''
+                    
+                    status_profile_gallery_close = false
+                    status_picture_gallery_close = false
+                    status_video_gallery_close = false
+                    status_music_gallery_close = false
+                },
+
+            
+
+                f_button_fold_unfold_album_profile() {
+                    if (this.status_profile_gallery_close == false) {
+                        this.status_profile_gallery_close = true
+                    } else {
+                        this.status_profile_gallery_close = false
+                    }
+                },
+
+                f_button_fold_unfold_album_picture() {
+                    if (this.status_picture_gallery_close == false) {
+                        this.status_picture_gallery_close = true
+                    } else {
+                        this.status_picture_gallery_close = false
+                    }
+                },
+
+                f_button_fold_unfold_album_video() {
+                    if (this.status_video_gallery_close == false) {
+                        this.status_video_gallery_close = true
+                    } else {
+                        this.status_video_gallery_close = false
+                    }
+                },
+
+                f_button_fold_unfold_album_music() {
+                    if (this.status_music_gallery_close == false) {
+                        this.status_music_gallery_close = true
+                    } else {
+                        this.status_music_gallery_close = false
+                    }
+                },
+
+                // icon pannel 배우 프로필 갤러리 풀스크린 모달창
+                f_hans_ent_actor_profile_gallery_fullscreen_modal(event) {
+                    this.selected_actor_id = event
+                    console.log('Actor 프로필 모달 페이지로 가기, 선택한 배우 id', this.selected_actor_id)
+                    axios.post('/hans_ent_actor_profile_modal/', {
+                        'selected_actor_id': this.selected_actor_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        console.log('########################', this.selected_actor_id)
+                        post_streaming_actor_profile_gallery_fullscreen_modal.f_sync_data_to_actor_profile_gallery_fullscreen_modal_w_path(response.data);
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_actor_profile_gallery_fullscreen_modal')
+                    })
+                },
+
+                                    
+                
+                // icon pannel 비디오 앨범 갤러리 모달창으로 (비디오 앨범을 지정해서)
+                f_hans_ent_video_album_gallery_modal(event) {
+                    this.selected_video_album_id = event
+                    console.log(this.selected_video_album_id)
+                    axios.post('/hans_ent_video_album_gallery_modal/', {
+                        'selected_video_album_id': this.selected_video_album_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        console.log('Adult Video Album 정보 전송 시작', response.data)
+                        post_hans_ent_video_album_gallery_modal.f_sync_data_to_video_album_gallery_modal(response.data);
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_video_album_gallery_modal')
+                    })
+                },
+                
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Actor Profile Modal 관련 종료
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+
+
+
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // 리스트 검색 및 정렬
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+
+                    
+                f_sorting_items(event) {
+                    this.selected_sorting_field = event
+                    console.log('initiated f_sorting_items', event)
+                    axios.post('/hans_ent_actor_list/', {
+                        'button': 'sorting_items',
+                        'sort_by': this.selected_sorting_field
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.f_refreshData_actor_list()
+                        console.log(response)
+                    })
+                    .catch(() => {
+                        console.log('Error! 1-1')
+                    })
+                },
+                
+                f_search_keyword_update(event) {
+                    this.inputTextKeyword = event.target.value
+                    searchData = this.inputTextKeyword
+                    axios.get('/hans_ent_actor_list_search/?keyword='+searchData)
+                    .then((response) => {
+                        this.f_refreshData_actor_list()
+                        console.log(response)
+                    })
+                    .catch(() => {
+                        console.log('Error! 3')
+                    })
+                },
+
+                f_reset_return() {
+                    this.selected_sorting_field = ''
+                    this.inputTextKeyword = ''
+                    this.message =''
+                },
+
+                f_search_keyword_button() {
+                    searchData = this.inputTextKeyword
+                    axios.get('/hans_ent_actor_list_search/?keyword='+searchData)
+                    .then((response) => {
+                        this.f_refreshData_actor_list()
+                        console.log(response)
+                    })
+                    .catch(() => {
+                        console.log('Error! 3')
+                    })
+                },
+
+                f_reset_search_result_button() {
+                    this.f_reset_return()
+                    axios.post('/hans_ent_actor_list_search/', {
+                        'button': 'reset'
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        console.log("response::", response);
+                        this.inputTextKeyword = ''
+                        this.f_refreshData_actor_list()
+                    })
+                    .catch(() => {
+                        console.log('Error! 1-6')
+                    })
+                },
+
+                f_page_number_min() {
+                    axios.post('/hans_ent_actor_list/', {
+                        'button': 'page_number_min',
+                        'count_page_number': this.count_page_number,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        console.log("response::", response);
+                        this.f_refreshData_actor_list()
+                    })
+                    .catch(() => {
+                        console.log('Error!')
+                    })
+                },
+
+                f_page_number_max() {
+                    axios.post('/hans_ent_actor_list/', {
+                        'button': 'page_number_max',
+                        'count_page_number': this.count_page_number,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        console.log("response::", response);
+                        this.f_refreshData_actor_list()
+                    })
+                    .catch(() => {
+                        console.log('Error!')
+                    })
+                },
+                
+      
+            },
+            computed: {
+                
+                active_list_dict_profile_album() {
+                    return this.list_dict_profile_album.filter(item => item.active === "true" && item.discard === "false")
+                },
+                total_list_dict_profile_album() {
+                    return this.list_dict_profile_album.filter(item => item.discard === "false")
+                },
+                active_list_dict_picture_album() {
+                return this.list_dict_picture_album.filter(item => item.active === "true" && item.discard === "false")
+                },
+                total_list_dict_picture_album() {
+                    return this.list_dict_picture_album.filter(item => item.discard === "false")
+                },
+            },
+
+            mounted: function() {
+                console.log('actor_list_data_loaded')
+                this.f_refreshData_actor_list()
+                
+            }
+        }).mount('#app_hans_ent_actor_list')
+
+        $('#app_hans_ent_actor_update_modal').on('hidden.bs.modal', function () {
+            console.log('hahahahahahaha')
+            app_hans_ent_actor_list.f_refreshData_actor_list()
+	    });
+
+    </script> 
+
+
+
+    <style>
+        
+        .image-center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 90%;
+        }
+        
+        .grid-container-picture-album-actor{
+                display: grid;
+                gap: 10px; /* Space between boxes */
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Default: fit as many 150px boxes as possible */
+        }
+        
+        .box-picture-album-actor{
+            height: 220px; /* Fixed height for all boxes */
+            background-color: #f0f0f0; /* Example styling */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .grid-container-picture-album-picture{
+                display: grid;
+                gap: 10px; /* Space between boxes */
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Default: fit as many 150px boxes as possible */
+        }
+        
+        .box-picture-album-picture{
+            height: 220px; /* Fixed height for all boxes */
+            background-color: #f0f0f0; /* Example styling */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+                
+        /* 
+        / Picture Album Gallery /////////////////////////////////////////////////////////////////////////////////////
+        */
+        /* Style the image grid */
+        .image-grid-picture-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px; /* Optional: space between grid boxes */
+        }
+
+        /* Each grid box with fixed size */
+        .grid-box-picture-gallery {
+            width: 350px;
+            height: 500px;
+            border: 1px solid #ccc;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        /* Images inside grid boxes */
+        .grid-box-picture-gallery img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Make sure the image fits without distortion */
+        }
+
+        </style>
+
+        
+{% endblock content %}

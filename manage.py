@@ -3,6 +3,8 @@
 import os
 import sys
 
+sys.path.append('/django-project/src')
+
 
 def main():
     """Run administrative tasks."""

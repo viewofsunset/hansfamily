@@ -1,24 +1,935 @@
 
 {% extends 'base.html' %}
 
-{% load bootstrap4  %}
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
 {% load static %}
     
 {% block content %}
 
-    <div class="row">
-        
-        <div class="col-md-12">
-            <legend class="border-bottom mb-4">
-                    <h1>
-                        Study page.
-                    </h1>
-            </legend>
+
+
+    <!--
+        Template //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+
+    
+
+    <div id="app_study">
+
+        <!-- Study Paper Modal-->
+        {% include 'study/study_paper_data_collect_pubmed_modal.html' %}
+
+
+
+
+        <div class="row" id="app_study_menu">
+            
+            <div class="col-md-12">
+                <legend class="border-bottom mb-4">
+                    <br>
+                    <form method="POST" action="{% url 'study' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% for item in LIST_MENU_STUDY %}
+                            <button type="submit" 
+                                {% if q_mysettings_study.menu_selected == item.0 %}
+                                    class="btn btn-warning btn-sm" 
+                                {% else %}
+                                    class="btn btn-dark btn-sm" 
+                                {% endif %}
+                                name="button-switch-study-home-menu" 
+                                value="{{ item.0 }}"
+                            >
+                                {{ item.1 }}
+                            </button>
+                            &nbsp;
+                        {% endfor %}
+
+                    </form>
+                </legend>
+            </div>
         </div>
-        <div>
-            {{ key1 }}
+
+
+        <!-- 
+        Item 리스트 표시
+        -->
+        <div class="row" >
+            <div class="col-md-12" id="app_study_body" >
+              
+            <!--
+                좌측 화면
+            -->
+                <div v-if="menu_selected === '01'" >
+                    {% include 'study/study_mystudy.html' %}
+                </div>
+                <div v-if="menu_selected === '02'" >
+                    {% include 'study/study_conference.html' %}
+                </div>
+                <div v-if="menu_selected === '03'" >
+                    {% include 'study/study_paper.html' %}
+                </div>
+                <div v-if="menu_selected === '04'" >
+                    {% include 'study/study_patent.html' %}
+                </div>
+                <div v-if="menu_selected === '05'" >
+                    {% include 'study/study_protocol.html' %}
+                </div>
+                <div v-if="menu_selected === '06'" >
+                    {% include 'study/study_fda.html' %}
+                </div>
+                <div v-if="menu_selected === '07'" >
+                    {% include 'study/study_lecture.html' %}
+                </div>
+                
+            </div>
         </div>
-        
+            
+
     </div>
+
+
+
+    <!--
+        자바스크립트 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <script>
+        var app_study = createApp({
+            delimiters: ["[[", "]]"],
+            data() {
+                return {
+                    LIST_TABS_SEARCHED_PAPER: [],
+                    LIST_TABS_COLLECTED_PAPER: [],
+                    BASE_URL_PUBMED_FREE: '',
+                    BASE_URL_PUBMED: '',
+                    BASE_URL_GOOGLE_SCHOLAR: '',
+                    BASE_URL_DOI: '',
+                    BASE_URL_SCI_HUB: '',
+                    BASE_URL_PLOS: '',
+                    BASE_DIR_STUDY: '', 
+                    BASE_DIR_STUDY_PAPER: '',
+                    BASE_DIR_STUDY_PAPER_SCREENSHOT: '',
+
+                    data_mysettings_study: {},
+                    menu_selected: '01',
+
+                    // selected Paper 
+                    data_paper: {},
+                    dict_paper_info: {},
+                    selected_data_paper_id: '',
+                    list_dict_reference_paper: [],
+                    list_dict_author_paper: [],
+                    list_dict_relevant_paper: [],
+                    list_dict_paper_image: [],
+
+                    list_serialized_data_paper_reference: [],
+                    list_serialized_data_paper_author: [],
+                    list_serialized_data_paper_relevant: [],
+
+                    list_serialized_data_paper_searched_mine: [],
+                    list_serializsed_data_paper_voronoi: [],
+                    list_serializsed_data_paper_bookmarked: [],
+
+                    // Paper Search
+                    data_paper_searched: {},
+                    selected_data_paper_searched_id: '',
+                    list_dict_paper_info_from_google: [],
+                    list_dict_paper_info_from_pubmed: [],
+                    list_dict_paper_info_from_voronoi_db: [],
+                    list_dict_paper_info_from_my_favorite: [],
+                    list_dict_paper_info: [],
+
+                    // Paper Searched Selected 
+                    data_paper_searched_selected: {},
+                    selected_data_paper_searched_selected_id: '',
+
+
+                    input_text_search_keyword: '',
+                    searchData: '',
+
+                    // modal paper_data_collection
+                    active_tab_searched_paper: '', // Default active tab
+                    list_selected_options_paper_search: [], // Reactive array for storing selected options
+                    allSelected: false,
+                    active_tab_collected_paper: '', // Default active tab
+
+                    
+                    // id_checkbox_paper_search_option: ['id_checkbox_paper_search_option_1', 'id_checkbox_paper_search_option_2', 'id_checkbox_paper_search_option_3', 'id_checkbox_paper_search_option_4'],
+
+                    check_selected_paper_bookmarked: false,
+
+                    // search history
+                    list_history_search_paper: [],
+
+                    status_study_paper_screenshot_fold: false,
+                    screenshot_maxItems: 6,
+
+                    selected_paper_abstract_text: '',
+                    selected_paper_abstract_html: '',
+                    
+                }
+            },
+
+            methods: {
+
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Refresh Start
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                f_refreshData_router() {
+                axios.get('/study_refresh_router/')
+                .then((response) => {
+                    this.menu_selected = response.data['menu_selected']
+                    console.log(this.menu_selected)
+                    if (this.menu_selected === '01' ) {
+                        this.f_refreshData_mystudy()
+                        console.log('f_refreshData_router 01')
+                    }
+                    if (this.menu_selected === '02' ) {
+                        this.f_refreshData_conference()
+                        console.log('f_refreshData_router 02')
+                    }
+                    if (this.menu_selected === '03' ) {
+                        this.f_refreshData_paper()
+                        console.log('f_refreshData_router 03')
+                    }
+                    if (this.menu_selected === '04' ) {
+                        this.f_refreshData_patent()
+                        console.log('f_refreshData_router 04')
+                    }
+                    if (this.menu_selected === '05' ) {
+                        this.f_refreshData_protocol()
+                        console.log('f_refreshData_router 05')
+                    }
+                    if (this.menu_selected === '06' ) {
+                        this.f_refreshData_fda()
+                        console.log('f_refreshData_router 06')
+                    }
+                    if (this.menu_selected === '07' ) {
+                        this.f_refreshData_lecture()
+                        console.log('f_refreshData_router 07')
+                    }
+                })
+                },
+
+                f_refreshData_mystudy() {
+                    console.log('f_refreshData_mystudy START')
+                    axios.get('/study_mystudy/')
+                    .then((response) => {
+                        console.log("################ f_refreshData_mystudy refreshed!!")
+                    })
+                },
+
+                f_refreshData_conference() {
+                    console.log('f_refreshData_conference START')
+                    axios.get('/study_conference/')
+                    .then((response) => {
+                        console.log("################ f_refreshData_conference refreshed!!")
+                    })
+                },
+
+                f_refreshData_paper() {
+                    console.log('f_refreshData_paper START')
+                    axios.get('/study_paper/')
+                    .then((response) => {
+                        console.log("################ f_refreshData_paper refreshed!!")
+                        this.LIST_TABS_SEARCHED_PAPER = response.data['LIST_TABS_SEARCHED_PAPER']
+                        this.LIST_TABS_COLLECTED_PAPER = response.data['LIST_TABS_COLLECTED_PAPER']
+                        this.BASE_URL_PUBMED_FREE = response.data['BASE_URL_PUBMED_FREE']
+                        this.BASE_URL_PUBMED = response.data['BASE_URL_PUBMED']
+                        this.BASE_URL_GOOGLE_SCHOLAR = response.data['BASE_URL_GOOGLE_SCHOLAR']
+                        this.BASE_URL_DOI = response.data['BASE_URL_DOI']
+                        this.BASE_URL_SCI_HUB = response.data['BASE_URL_SCI_HUB']
+                        this.BASE_URL_PLOS = response.data['BASE_URL_PLOS']
+                        this.BASE_DIR_STUDY = response.data['BASE_DIR_STUDY']
+                        this.BASE_DIR_STUDY_PAPER = response.data['BASE_DIR_STUDY_PAPER']
+                        this.BASE_DIR_STUDY_PAPER_SCREENSHOT = response.data['BASE_DIR_STUDY_PAPER_SCREENSHOT']
+
+                        this.data_paper_searched = response.data['serialized_data_paper_searched']
+                        this.f_selected_serialized_data_paper_searched_parsing(this.data_paper_searched)
+                        
+                        this.data_mysettings_study = response.data['serialized_data_mysettings_study']
+                        this.f_selected_serialized_json_data_parsing_mysettings_study(this.data_mysettings_study)
+
+                        this.list_serialized_data_paper_searched_mine = response.data['list_serialized_data_paper_searched_mine']
+                        this.list_serializsed_data_paper_voronoi = response.data['list_serializsed_data_paper_voronoi']
+                        console.log('list_serializsed_data_paper_voronoi', this.list_serializsed_data_paper_voronoi)
+                        this.list_serializsed_data_paper_bookmarked = response.data['list_serializsed_data_paper_bookmarked']
+
+                        this.status_study_paper_screenshot_fold = false
+                       
+                    })
+                },
+
+                f_refreshData_patent() {
+                    console.log('f_refreshData_patent START')
+                    axios.get('/study_patent/')
+                    .then((response) => {
+                        console.log("################ f_refreshData_patent refreshed!!")
+                    })
+                },
+
+                f_refreshData_protocol() {
+                    console.log('f_refreshData_protocol START')
+                    axios.get('/study_protocol/')
+                    .then((response) => {
+                        console.log("################ f_refreshData_protocol refreshed!!")
+                    })
+                },
+
+                f_refreshData_fda() {
+                    console.log('f_refreshData_fda START')
+                    axios.get('/study_fda/')
+                    .then((response) => {
+                        console.log("################ f_refreshData_fda refreshed!!")
+                    })
+                },
+
+                f_refreshData_lecture() {
+                    console.log('f_refreshData_lecture START')
+                    axios.get('/study_lecture/')
+                    .then((response) => {
+                        console.log("################ f_refreshData_lecture refreshed!!")
+                    })
+                },
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Reset Data
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                
+                f_study_reset_search_paper_form_and_list() {
+                    this.input_text_search_keyword = ''
+                    this.data_paper_searched = {}
+                    this.selected_data_paper_searched_id = null
+                    this.selected_data_paper_searched_selected_id = null
+                    this.list_dict_paper_info_from_google = []
+                    this.list_dict_paper_info_from_pubmed = []
+                    this.list_dict_paper_info = []
+                    $("#id_study_paper_input_text_search_paper_google").val("");
+                },
+
+                f_reset_data_paper_selected() {
+                    this.data_paper = {} 
+                    this.dict_paper_info = {}
+                    this.selected_data_paper_id = null
+                    this.list_dict_reference_paper = []
+                    this.list_dict_author_paper = []
+                    this.list_dict_relevant_paper = []
+                    this.list_serialized_data_paper_reference = []
+                    this.list_serialized_data_paper_author = []
+                    this.list_serialized_data_paper_relevant = []
+                    this.status_study_paper_screenshot_fold = false
+                    this.selected_paper_abstract_text = ''
+                    this.selected_paper_abstract_html = ''
+                },
+                
+
+
+
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Serialized Data Parsing 
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                f_selected_serialized_data_paper_parsing(data_paper) {
+                    console.log('data_paper', data_paper)
+                    if (Object.keys(data_paper).length > 0 ) {
+                        this.dict_paper_info = this.data_paper['dict_paper_info']
+                        
+                        this.selected_data_paper_id = data_paper['id']
+                        if (this.selected_data_paper_id === undefined) {this.selected_data_paper_id = null}
+
+                        this.list_dict_reference_paper = data_paper['list_dict_reference_paper']
+                        if (this.list_dict_reference_paper === undefined || this.list_dict_reference_paper === null) {this.list_dict_reference_paper = []}
+                        
+                        this.list_dict_relevant_paper = data_paper['list_dict_relevant_paper']
+                        if (this.list_dict_relevant_paper === undefined || this.list_dict_relevant_paper === null) {this.list_dict_relevant_paper = []}
+
+                        this.list_dict_author_paper = data_paper['list_dict_author_paper']
+                        if (this.list_dict_author_paper === undefined || this.list_dict_author_paper === null) {
+                            this.list_dict_author_paper = []}
+                        
+                        this.list_dict_paper_image = data_paper['list_dict_paper_image']
+                        if (this.list_dict_paper_image === undefined || this.list_dict_paper_image === null) {
+                            this.list_dict_paper_image = []}
+
+                        this.status_study_paper_screenshot_fold = false
+
+                        this.selected_paper_abstract_text = this.dict_paper_info.abstract_text
+                        this.selected_paper_abstract_html = this.dict_paper_info.abstract_html
+
+                    } else {
+                        this.data_paper = {}
+                        this.dict_paper_info = {}
+                        this.selected_data_paper_id = null
+                        this.list_dict_reference_paper = []
+                        this.list_dict_relevant_paper = []
+                        this.list_dict_author_paper = []
+                        this.list_dict_paper_image = []
+                    }
+                },
+
+                f_selected_serialized_data_paper_searched_parsing(data_paper_searched) {
+                    console.log('data_google_searched', data_paper_searched)
+                    if (Object.keys(data_paper_searched).length > 0 ) {
+                        console.log("data_google_searched parsing start!!!")
+                        this.selected_data_paper_searched_id = data_paper_searched['id']
+                        if (this.selected_data_paper_searched_id === null) {this.selected_data_paper_searched_id = null}
+                        console.log('############ selected_data_paper_searched_id', this.selected_data_paper_searched_id)
+                        
+                        this.list_dict_paper_info_from_pubmed = data_paper_searched['list_dict_paper_info_from_pubmed']
+                        if (this.list_dict_paper_info_from_pubmed === null) {this.list_dict_paper_info_from_pubmed = null}
+                        console.log('############ list_dict_paper_info_from_pubmed', this.list_dict_paper_info_from_pubmed)
+
+                        this.list_dict_paper_info_from_google = data_paper_searched['list_dict_paper_info_from_google']
+                        if (this.list_dict_paper_info_from_google === null) {this.list_dict_paper_info_from_google = []}
+                        console.log('############ list_dict_paper_info_from_google', this.list_dict_paper_info_from_google)
+
+                        this.list_dict_paper_info_from_voronoi_db = data_paper_searched['list_dict_paper_info_from_voronoi_db']
+                        if (this.list_dict_paper_info_from_voronoi_db === null) {this.list_dict_paper_info_from_voronoi_db = null}
+                        console.log('############ list_dict_paper_info_from_voronoi_db', this.list_dict_paper_info_from_voronoi_db)
+
+                        this.list_dict_paper_info_from_my_favorite = data_paper_searched['list_dict_paper_info_from_my_favorite']
+                        if (this.list_dict_paper_info_from_my_favorite === null) {this.list_dict_paper_info_from_my_favorite = null}
+                        console.log('############ list_dict_paper_info_from_my_favorite', this.list_dict_paper_info_from_my_favorite)
+
+                        this.list_selected_search_options = data_paper_searched['list_selected_search_options']
+                        if (this.list_selected_search_options === null) {this.list_selected_search_options = null}
+                        console.log('############ list_selected_search_options', this.list_selected_search_options)
+                    } else {
+                        this.data_paper_searched = {}
+                        this.selected_data_paper_searched_id = null
+                        this.list_dict_paper_info_from_pubmed = null
+                        this.list_dict_paper_info_from_google = null
+                        this.list_dict_paper_info_from_voronoi_db = null
+                        this.list_dict_paper_info_from_my_favorite = null
+                        this.list_selected_search_options = null
+                    }
+                },
+
+                f_selected_serialized_data_paper_searched_selected_parsing(data_paper_searched_selected) {
+                    console.log('data_paper_searched_selected', data_paper_searched_selected)
+                    if (Object.keys(data_paper_searched_selected).length > 0 ) {
+                        this.selected_data_paper_searched_selected_id = data_paper_searched_selected['id']
+                        if (this.selected_data_paper_searched_selected_id === null) {this.selected_data_paper_searched_selected_id = null}
+                    } else {
+                        this.data_paper_searched_selected = {}
+                        this.selected_data_paper_searched_selected_id = null
+                    }
+                },
+
+                f_selected_serialized_json_data_parsing_mysettings_study(data_mysettings_study) {
+                    this.active_tab_searched_paper = data_mysettings_study['active_tab_searched_paper']
+                    this.active_tab_collected_paper = data_mysettings_study['active_tab_collected_paper']
+                    this.list_selected_options_paper_search = data_mysettings_study['list_selected_options_paper_search']
+                    if (this.list_selected_options_paper_search == null || this.list_selected_options_paper_search == undefined) {
+                        this.list_selected_options_paper_search = ['all']
+                    }
+                    this.list_history_search_paper = data_mysettings_study['list_history_search_paper']
+                    if (this.list_history_search_paper === null) {this.list_history_search_paper = []}
+                    console.log("done parsing mysettings study")
+                },
+
+
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Display Option functions
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                f_truncateText(text, wordLimit) {
+                    if (!text) return '';
+                    const words = text.split(' ');
+                    if (words.length > wordLimit) {
+                        return words.slice(0, wordLimit).join(' ') + '...';
+                    } else {
+                        return text;
+                    }
+                },
+
+
+                f_study_paper_data_collection_paper_screenshot_fold_unfold_toggle_button() {
+                    this.status_study_paper_screenshot_fold = !this.status_study_paper_screenshot_fold
+                },
+
+
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // to Backend (study_paper_search_form)
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+                f_study_paper_search_history_test() {
+                    axios.post('/study_paper_search_form/', {
+                        'button': 'test',
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        console.log('test excuted!')
+                    })
+                    .catch(() => {
+                        console.log('Error! f_study_paper_search_history_test')
+                    })
+                },
+
+                f_study_paper_reload_searched_paper_list(event) {
+                    console.log('data_paper_searched_id', event)
+                    this.f_refreshData_paper()
+                },
+
+
+                f_study_search_paper_checkbox_update(event) {
+                    console.log('event', event)
+                    console.log(this.list_selected_options_paper_search)
+                    axios.post('/study_paper_search_form/', {
+                        'button': 'search_paper_checkbox_update',
+                        'list_selected_options_paper_search': this.list_selected_options_paper_search,
+                        'selected_option_paper_search': event,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.data_mysettings_study = response.data['serialized_data_mysettings_study']
+                        console.log('data_mysettings_study: ', this.data_mysettings_study)
+                        this.f_selected_serialized_json_data_parsing_mysettings_study(this.data_mysettings_study)
+                        console.log('Success!, f_study_search_paper_checkbox_update')
+                    })
+                    .catch(() => {
+                        console.log('Error! f_study_search_paper_checkbox_update')
+                    })
+                },
+
+                // enter 키 눌러서 서치한 경우
+                f_study_search_paper_form(event) {
+                    this.input_text_search_keyword = event.target.value
+                    this.f_study_search_paper_form_by_button()
+                },
+
+                // Search 버튼 눌러서 서치한 경우우
+                f_study_search_paper_form_by_button() {
+                    searchData = this.input_text_search_keyword
+                    console.log('input_text_search_keyword', this.input_text_search_keyword)
+                    if (this.input_text_search_keyword === '') {
+                        alert('입력한 키워드가 없습니다.')
+                        } else {
+                        axios.get('/study_paper_search_form/?keyword='+searchData)
+                        .then((response) => {
+                            this.input_text_search_keyword = null
+                            this.f_refreshData_paper()
+                            console.log('f_study_search_paper_form', response.data['message'])
+                        })
+                        .catch(() => {
+                            console.log('Error! f_study_search_paper_form 01')
+                        })
+                    }
+                },
+
+                set_active_tab_searched_paper(tab) {
+                    console.log(tab)
+                    axios.post('/study_paper_search_form/', {
+                        'button': 'set_active_tab_searched_paper',
+                        'active_tab_searched_paper': tab,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.data_mysettings_study = response.data['serialized_data_mysettings_study']
+                        console.log('data_mysettings_study: ', this.data_mysettings_study)
+                        this.f_selected_serialized_json_data_parsing_mysettings_study(this.data_mysettings_study)
+                        console.log('Success!, set_active_tab_searched_paper')
+                    })
+                    .catch(() => {
+                        console.log('Error! set_active_tab_searched_paper')
+                    })
+                },
+
+                f_study_reset_search_paper_form() {
+                    console.log('reset search result')
+                    axios.post('/study_paper_search_form/', {
+                        'button': 'reset_search_result',
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.f_study_reset_search_paper_form_and_list()
+                        this.f_refreshData_paper()
+                        console.log('f_study_reset_search_paper_form')
+                    })
+                    .catch(() => {
+                        console.log('Error! f_study_reset_search_paper_form')
+                    })
+                },
+
+                f_study_paper_search_history_select(event) {
+                    console.log('paper_search_google_id', event)
+                    axios.post('/study_paper_search_form/', {
+                        'button': 'search_history_select',
+                        'paper_search_google_id': event
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.f_refreshData_paper()
+                        console.log('f_study_paper_search_history_select')
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_video_album_gallery_modal_open')
+                    })
+                },
+
+
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // to Backend (study_paper_selected_paper_data_collection)
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+                // My Favorite에서 Data Parsing 없이 모달창 열기
+                f_study_paper_open_paper_detail_using_paper_id_modal(event) {
+                    this.selected_data_paper_id = event
+                    axios.post('/study_paper_selected_paper_data_collection/', {
+                        'button': 'update_paper_id',
+                        'selected_data_paper_id': this.selected_data_paper_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.data_paper = response.data['serialized_data_paper']
+                        this.f_selected_serialized_data_paper_parsing(this.data_paper)
+                        
+                        this.data_paper_searched = response.data['serialized_data_paper_searched']
+                        this.f_selected_serialized_data_paper_searched_parsing(this.data_paper_searched)
+                        
+                        this.data_paper_searched_selected = response.data['serialized_data_paper_searched_selected']
+                        this.f_selected_serialized_data_paper_searched_selected_parsing(this.data_paper_searched_selected)
+                        
+                        this.list_serialized_data_paper_reference = response.data['list_serialized_data_paper_reference']
+                        this.list_serialized_data_paper_author = response.data['list_serialized_data_paper_author']
+                        this.list_serialized_data_paper_relevant = response.data['list_serialized_data_paper_relevant']
+
+                        this.check_selected_paper_bookmarked = response.data['check_selected_paper_bookmarked']
+
+                        console.log('f_study_paper_update_data_and_open_paper_detail_modal')
+                    })
+                    .catch(() => {
+                        console.log('Error! f_study_paper_update_data_and_open_paper_detail_modal')
+                    })
+                    console.log('f_study_paper_update_data_and_open_paper_detail_modal', event)
+                },
+                
+                // My Favorite에서 Data Parsing 하면서 모달창 열기
+                f_study_paper_parsing_data_from_pubmed_and_open_paper_detail_using_paper_id_modal(event) {
+                    this.selected_data_paper_id = event
+                    axios.post('/study_paper_selected_paper_data_collection/', {
+                        'button': 'pubmed',
+                        'selected_data_paper_id': this.selected_data_paper_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.data_paper = response.data['serialized_data_paper']
+                        this.f_selected_serialized_data_paper_parsing(this.data_paper)
+
+                        this.data_paper_searched = response.data['serialized_data_paper_searched']
+                        this.f_selected_serialized_data_paper_searched_parsing(this.data_paper_searched)
+
+                        this.data_paper_searched_selected = response.data['serialized_data_paper_searched_selected']
+                        this.f_selected_serialized_data_paper_searched_selected_parsing(this.data_paper_searched_selected)
+                        
+                        this.check_selected_paper_bookmarked = response.data['check_selected_paper_bookmarked']
+                        
+                        console.log('f_study_paper_parsing_data_from_pubmed_and_open_paper_detail_modal')
+                    })
+                    .catch(() => {
+                        console.log('Error! f_study_paper_parsing_data_from_pubmed_and_open_paper_detail_modal')
+                    })
+                    console.log('f_study_paper_parsing_data_from_pubmed_and_open_paper_detail_modal.id', event)
+                },
+
+                
+                // Pubmed에서 Data Parsing 없이 모달창 열기
+                f_study_paper_update_data_and_open_paper_detail_modal(event) {
+                    console.log('selected_data_paper_searched_selected_id', event)
+                    this.selected_data_paper_searched_selected_id = event
+                    axios.post('/study_paper_selected_paper_data_collection/', {
+                        'button': 'update_paper_id',
+                        'selected_data_paper_id': this.selected_data_paper_id,
+                        'selected_data_paper_searched_id': this.selected_data_paper_searched_id,
+                        'selected_data_paper_searched_selected_id': this.selected_data_paper_searched_selected_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.data_paper = response.data['serialized_data_paper']
+                        this.f_selected_serialized_data_paper_parsing(this.data_paper)
+                        
+                        this.data_paper_searched = response.data['serialized_data_paper_searched']
+                        this.f_selected_serialized_data_paper_searched_parsing(this.data_paper_searched)
+                        
+                        this.data_paper_searched_selected = response.data['serialized_data_paper_searched_selected']
+                        this.f_selected_serialized_data_paper_searched_selected_parsing(this.data_paper_searched_selected)
+                        
+                        this.list_serialized_data_paper_reference = response.data['list_serialized_data_paper_reference']
+                        this.list_serialized_data_paper_author = response.data['list_serialized_data_paper_author']
+                        this.list_serialized_data_paper_relevant = response.data['list_serialized_data_paper_relevant']
+
+                        this.check_selected_paper_bookmarked = response.data['check_selected_paper_bookmarked']
+
+                        console.log('f_study_paper_update_data_and_open_paper_detail_modal')
+                    })
+                    .catch(() => {
+                        console.log('Error! f_study_paper_update_data_and_open_paper_detail_modal')
+                    })
+                    console.log('f_study_paper_update_data_and_open_paper_detail_modal', event)
+                }, 
+
+                // Pubmed에서 Data Parsing 하면서 모달창 열기
+                f_study_paper_parsing_data_from_pubmed_and_open_paper_detail_modal(event) {
+                    console.log('selected_data_paper_searched_selected_id', event)
+                    this.selected_data_paper_searched_selected_id = event
+                    axios.post('/study_paper_selected_paper_data_collection/', {
+                        'button': 'pubmed',
+                        'selected_data_paper_id': this.selected_data_paper_id,
+                        'selected_data_paper_searched_id': this.selected_data_paper_searched_id,
+                        'selected_data_paper_searched_selected_id': this.selected_data_paper_searched_selected_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.data_paper = response.data['serialized_data_paper']
+                        this.f_selected_serialized_data_paper_parsing(this.data_paper)
+
+                        this.data_paper_searched = response.data['serialized_data_paper_searched']
+                        this.f_selected_serialized_data_paper_searched_parsing(this.data_paper_searched)
+
+                        this.data_paper_searched_selected = response.data['serialized_data_paper_searched_selected']
+                        this.f_selected_serialized_data_paper_searched_selected_parsing(this.data_paper_searched_selected)
+                        
+                        this.check_selected_paper_bookmarked = response.data['check_selected_paper_bookmarked']
+                        
+                        console.log('f_study_paper_parsing_data_from_pubmed_and_open_paper_detail_modal')
+                    })
+                    .catch(() => {
+                        console.log('Error! f_study_paper_parsing_data_from_pubmed_and_open_paper_detail_modal')
+                    })
+                    console.log('f_study_paper_parsing_data_from_pubmed_and_open_paper_detail_modal.id', event)
+                },
+
+                
+
+
+                f_study_paper_select_from_google_search_result_by_user(event) {
+                    console.log('dict_paper_info_from_google.id', event)
+                },
+
+
+                f_study_paper_reload_selected_paper_detail_modal(event) {
+                    console.log('!!!!!!!!!!!!!!!!!')
+                    this.f_study_paper_update_data_and_open_paper_detail_modal(event)
+                },
+
+                // Google Scholar에서 Data Parsing 하면서 모달창 열기(다양한 곳에서 Parsing 해야 함)
+                f_study_paper_parsing_data_from_google_and_open_paper_detail_modal(event) {
+                    console.log('selected_data_paper_searched_selected_id', event)
+                    this.selected_data_paper_searched_selected_id = event
+                    axios.post('/study_paper_selected_paper_data_collection/', {
+                        'button': 'google',
+                        'selected_data_paper_id': this.selected_data_paper_id,
+                        'selected_data_paper_searched_id': this.selected_data_paper_searched_id,
+                        'selected_data_paper_searched_selected_id': this.selected_data_paper_searched_selected_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.data_paper = response.data['serialized_data_paper']
+                        this.f_selected_serialized_data_paper_parsing(this.data_paper)
+
+                        this.data_paper_searched = response.data['serialized_data_paper_searched']
+                        this.f_selected_serialized_data_paper_searched_parsing(this.data_paper_searched)
+
+                        this.data_paper_searched_selected = response.data['serialized_data_paper_searched_selected']
+                        this.f_selected_serialized_data_paper_searched_selected_parsing(this.data_paper_searched_selected)
+                        
+                        this.check_selected_paper_bookmarked = response.data['check_selected_paper_bookmarked']
+                        
+                        console.log('f_study_paper_parsing_data_from_xxx_and_open_paper_detail_modal')
+                    })
+                    .catch(() => {
+                        console.log('Error! f_study_paper_parsing_data_from_xxx_and_open_paper_detail_modal')
+                    })
+                    console.log('f_study_paper_parsing_data_from_xxx_and_open_paper_detail_modal.id', event)
+                },
+
+
+                
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //   To Backend (study_paper_selected_paper_modal_action)
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                set_active_tab_collected_paper(tab) {
+                    console.log('tab', tab)
+                    this.active_tab_collected_paper = tab;
+                },
+
+                f_study_paper_bookmark_selected_paper(event) {
+                    console.log('selected paper id', event)
+                    axios.post('/study_paper_selected_paper_modal_action/', {
+                        'button': 'check_bookmark',
+                        'selected_data_paper_id': event
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        this.data_paper = response.data['serialized_data_paper']
+                        this.f_selected_serialized_data_paper_parsing(this.data_paper)
+                        this.check_selected_paper_bookmarked = response.data['check_selected_paper_bookmarked']
+
+                        console.log('f_study_paper_search_history_select')
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_video_album_gallery_modal_open')
+                    })
+                },
+
+                
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // To Backend ()
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // To Backend ()
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // To Backend ()
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // 
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+            },
+
+            computed: {
+
+                list_paper_screenshot_limited_items() {
+                    return this.list_dict_paper_image.slice(0, this.screenshot_maxItems);
+                },
+                    
+                reversed_search_history_item() {
+                    return this.list_serialized_data_paper_searched_mine.reverse().slice(0, 6);
+                },
+            },
+
+            mounted: function() {
+                this.f_refreshData_router()
+            },
+
+        }).mount('#app_study')
+        
+        // Paper Album
+        $('#app_study_paper_data_collect_pubmed_modal').on('hidden.bs.modal', function () {
+            console.log("RESET Paper !!!!!!!!!!!")
+            app_study.f_reset_data_paper_selected()
+	    });
+
+    </script>
+
+
+
+    <!--
+        CSS Style  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <style>
+
+        .tab_5px{
+            Padding-left:20px;
+        }
+        .tab_10px{
+            Padding-left:20px;
+        }
+        .tab_20px{
+            Padding-left:20px;
+        }
+
+        /* 
+        / Picture Album Update /////////////////////////////////////////////////////////////////////////////////////
+        */
+        
+        .grid-container-paper-modal-screenshot{
+            display: grid;
+            gap: 10px; /* Space between boxes */
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Default: fit as many 150px boxes as possible */
+        }
+        
+        .box-paper-modal-screenshot{
+            height: 220px; /* Fixed height for all boxes */
+            background-color: #f0f0f0; /* Example styling */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        
+        .btn-floating-bottom-button {
+            position: absolute;
+            bottom: 30px;
+            transform: translateX(-50%);
+            opacity: 0.7;
+            left: 50%;
+        }
+        .btn-floating-bottom-button:hover {
+            opacity: 1;
+        }
+
+
+            
+        /* 
+        Table Align
+        */
+        .alnright { text-align: right; }
+        .alnleft { text-align: left; }
+        .alncenter { text-align: center; }
+
+
+    </style>
+
 
 {% endblock content %}

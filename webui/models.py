@@ -7,6 +7,7 @@ from PIL import Image
 LIST_STR_NONE_SERIES = ['null', 'Null', 'none', 'None', 'undefined', '']
 
 
+
 class Profile_User(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE) 
     image = models.ImageField(default='profile_pics/default.jpg', upload_to='profile_pics')

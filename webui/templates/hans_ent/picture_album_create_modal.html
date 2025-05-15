@@ -1,0 +1,287 @@
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+{% load static %}
+
+
+<!-- Modal -->
+<div class="modal fade modal-xl" id="app_hans_ent_picture_album_create_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h1 class="modal-title fs-4" id="modal_header_h1"> 
+                    Create New Picture Album  
+                </h1>
+                &nbsp; 
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div>
+                    <table  class="table">
+                        <!-- 문서 Title -->
+						<tr>
+							<!--
+								Picture 커버 이미지 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							<td rowspan="4" width="30%">
+							</td>
+						
+							<!--
+								Picture Name 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							<th width="15%" style="background-color:rgb(240,240,240,0.5)">
+								제목 [[ input_text_title ]]
+							</th>
+							<td width="20%">
+								<strong>
+								</strong>
+								<br>
+								<input type="text" @input="f_input_text_title" v-model="input_text_title" class="form-control" enabled id="id_picture_create_input_text_title" ref="ref_picture_create_input_text_title">
+							</td>
+							<th  width="15%" style="background-color:rgb(240,240,240,0.5)">
+								Release Date [[ input_date_released ]]
+							</th>
+							<td  width="20%">
+								<strong>
+								</strong>
+								<br>
+								<input type="date" @input="f_input_date_released" class="form-control" enabled id="id_picture_create_input_date_released" ref="ref_picture_create_input_number_score">
+							</td>
+						</tr>
+
+                        <!-- 추가정보 -->
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								Name [[ input_text_search_actor ]]
+							
+								<!-- Actor 커버 이미지 변경하기 -->
+								
+								<div v-if="Object.keys(this.data_actor).length > 0">
+									<button @click="f_deselect_selected_actor()" class="btn" >
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-slash" viewBox="0 0 16 16">
+											<path d="M13.879 10.414a2.501 2.501 0 0 0-3.465 3.465zm.707.707-3.465 3.465a2.501 2.501 0 0 0 3.465-3.465m-4.56-1.096a3.5 3.5 0 1 1 4.949 4.95 3.5 3.5 0 0 1-4.95-4.95ZM11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m.256 7a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z"/>
+										</svg>
+									</button>
+								</div>
+							</th>
+							<td>
+								<div>
+									Selected Model:
+									<strong> <h5>[[ data_actor.name ]] </h5> </strong>
+								</div>
+								<input type="text" @keyup.enter="f_actor_search_by_name" v-model="input_text_search_actor" class="form-control" placeholder="Hit Enter Key for Search" id="id_input_text_search_actor_select" ref="ref_input_text_search_actor_select">
+							</td>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								스튜디오 [[ input_text_studio ]]
+							</th> 
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<input type="text" @input="f_input_text_studio" class="form-control" enabled id="id_picture_create_input_text_studio" ref="ref_picture_create_input_text_studio">
+							</td>
+						</tr>
+
+                        <!-- Actor 지정한 뒤 생성할 경우 Actor 정보-->
+                        <tr v-if="status_create_picture_album_by_actor_id === true">
+							<th style="background-color:rgb(240,240,240,0.5)">
+								Actor
+							</th> 
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<div>
+									Selected Model:
+									<strong> <h5>[[ data_actor.name ]] </h5> </strong>
+								</div>
+							</td>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								등록된 Album 수 
+							</th>
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<strong>사진앨범: 
+								</strong>
+								<br>
+							</td>
+						</tr>
+
+						<tr>
+                            <th style="background-color:rgb(240,240,240,0.5)">
+                                카테고리 [[ selected_filtering_category_name ]]
+                            </th>
+                            <td style="background-color:rgb(255,255,255,0.05)">
+                                <div class="dropdown"></div>
+                                    <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                      Category
+                                    </button>
+                                    <ul class="dropdown-menu">
+                        
+                                        <li v-for="(item, index) in list_xxx_category" :key="index">
+                                            <a class="dropdown-item" href="#"
+                                            @click="f_select_category_album(item)"
+                                            >[[ item[1] ]]</a>
+                                        </li>
+                                      
+                                    </ul>
+                                </div>
+                            </td>
+                            <th style="background-color:rgb(240,240,240,0.5)">
+								Tag [[ input_text_tag ]]
+							</th>
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<strong>
+								</strong>
+								<br>
+								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id_picture_create_input_text_tag" ref="ref_picture_create_input_text_tag">
+							</td>
+                        </tr>
+                    </table>
+                </div>
+
+				<!--
+					Actor 등록을 위한 검색 결과 표시 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<!-- 검색결과 매칭되는 모델 리스트 표시 -->
+				
+				<div class="text-end">
+					<button @click="f_actor_search_by_name_reset()" class="btn" >
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-collapse" viewBox="0 0 16 16">
+							<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 8m7-8a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7.5 4.293V.5A.5.5 0 0 1 8 0m-.5 11.707-1.146 1.147a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 11.707V15.5a.5.5 0 0 1-1 0z"/>
+						  </svg>
+					</button>
+				</div>
+				<div class="grid-container-picture-album-actor">
+					<div v-for="(item, index) in list_serialized_data_actor_searched" :key="index" >
+						<div class="box-picture-album-actor">
+							<div class="card-body">
+								<div v-for="(dict_profile_album, index) in item.list_dict_profile_album" :key="index">
+									<div v-if="dict_profile_album.active == 'true'">
+										<button @click="f_actor_select_for_album_upload(item.id)" class="btn" >
+											<img :src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
+										</button>
+									</div>
+								</div>
+								<div class="text-center">
+									<strong>
+										[[ item.name ]]
+									</strong>
+								</div>  
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<!--
+					앨범에 이미지 파일 업로드  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div>
+					<table  class="table">
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)" width="15%">
+								File 업로드
+							</th>
+							<td width="30%">
+								<div>
+									Image File들을 업로드 하세요.
+								</div>
+							</td>
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<div v-if="status_create == false">
+									<input type="file" @change="f_file_album_files_select" multiple class="form-control" id="id_picture_create_input_files_upload" ref="ref_picture_create_input_files_upload">
+								</div>
+								<div v-else>
+									Picture 앨범을 먼저 생성하세요.
+								</div>
+								
+							</td>
+						</tr>
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)" width="15%">
+								Folder 통으로 업로드
+							</th>
+							<td width="30%">
+								<div>
+									Image File을 선택하세요
+								</div>
+							</td>
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<input type="file" webkitdirectory @change="f_file_album_files_select" multiple class="form-control" id="id_picture_create_input_folder_upload" ref="ref_picture_create_input_folder_upload">
+							</td>
+						</tr>
+
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								업로드 방식 선택
+							</th>
+							<th>
+								선택한 옵션: <p> [[ file_upload_option ]]</p>
+							</th>
+							<td >
+								<div>
+									<div class="form-check">
+										<input class="form-check-input" type="radio"  value="folder_name_for_nothing" v-model="file_upload_option" name="radio_button_picture_file_upload" id="id_picture_file_update_from_type0"checked>										
+										<label class="form-check-label" for="id_picture_file_update_from_type0">
+										  폴더명이 아무런 역할 안함
+										</label>
+									</div>
+									<div class="form-check">
+										<input class="form-check-input" type="radio"  value="folder_name_as_album_title" v-model="file_upload_option" name="radio_button_picture_file_upload" id="id_picture_file_update_from_type1">										
+										<label class="form-check-label" for="id_picture_file_update_from_type1">
+										  폴더명이 앨범 Title인 경우
+										</label>
+									</div>
+									<div class="form-check">
+										<input class="form-check-input" type="radio"  value="folder_name_as_actor_name" v-model="file_upload_option" name="radio_button_picture_file_upload" id="id_picture_file_update_from_type2" >
+										<label class="form-check-label" for="id_picture_file_update_from_type2">
+										  폴더명이 앨범 Actor인 경우
+										</label>
+									</div>
+									<div class="form-check">
+										<input class="form-check-input" type="radio" value="folder_name_as_album_title_and_actor_name" v-model="file_upload_option"  name="radio_button_picture_file_upload" id="id_picture_file_update_from_type3" >
+										<label class="form-check-label" for="id_picture_file_update_from_type3">
+										  폴더명이 앨범 Actor 이면서 Title인 경우
+										</label>
+									</div>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+
+
+
+                
+				<!-- 
+					Progress Bar ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div v-if="show_progress==true" >
+					<div class="progress">
+						<div
+							class="progress-bar"
+							role="progressbar"
+							:style="'width: ' + progress_value+'%;'"
+							:aria-valuenow="progress_value"
+							aria-valuemin="0"
+							aria-valuemax="100">
+							[[ progress_value ]] %
+						</div>
+					</div>
+				</div>
+
+			
+				
+
+                <!--
+					모달창 제어 버튼 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" @click="f_picture_album_create_form" >Create</button>
+                	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+                
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+

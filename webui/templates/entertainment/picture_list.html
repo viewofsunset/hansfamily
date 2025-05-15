@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+{% load bootstrap4  %}
+{% load static %}
+    
+{% block content %}
+
+    <div class="row"
+    id="app_entertainment_picture_list">
+        
+        <div class="col-md-12">
+            <legend class="border-bottom mb-4">
+                    <h1>
+                        Entertainment Picture List
+                    </h1>
+            </legend>
+            
+            
+        </div>
+        <div>
+            {{ key1 }}
+        </div>
+        
+    </div>
+
+
+    <script>
+        var post_app_entertainment_picture_list = createApp({
+            delimiters: ["[[", "]]"],
+            data() {
+            return {
+            }
+            },
+            methods: {},
+        }).mount('#app_entertainment_picture_list')
+
+    </script> 
+{% endblock content %}

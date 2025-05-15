@@ -34,7 +34,7 @@ SECRET_KEY = config['SECRET_KEY']
 DEBUG = True
 # DEBUG = False
 
-ALLOWED_HOSTS = ['www.hansfamily.xyz', 'hansfamily.xyz', '172.16.2.55', '61.101.55.157' ]
+ALLOWED_HOSTS = ['www.hansfamily.xyz', 'hansfamily.xyz', '172.16.2.55', '61.101.55.157']
 
 
 # Application definition
@@ -54,13 +54,19 @@ INSTALLED_APPS = [
     'entertainment',
     'secret',
     'hans_ent',
-
+    
     # 3rd party app
     'bootstrap4', # pip install django-bootstrap4
     'crispy_forms', # pip install django-crispy-forms
-    'crispy_bootstrap4', # pip install crispy-bootstrap4
+    'crispy_bootstrap4', # pip install django-crispy-forms
     'rest_framework',  # pip install djangorestframework
-
+    'rest_framework.authtoken', 
+    'rest_framework_simplejwt',
+    'corsheaders',  # pip install django-cors-headers
+    'djoser',  # $ pip install -U djoser
+    'django_celery_results',  # pip install django-celery-results
+    'django_celery_beat',  # pip install django-celery-beat
+    'django_cleanup.apps.CleanupConfig', # pip install django-cleanup
 ]
 
 # 리스트 등록하지 않지만 추가로 설치해야 하는것들
@@ -68,9 +74,6 @@ INSTALLED_APPS = [
 # pip install pillow
 # pip install markdown 
 # pip install django-filter  # Filtering support
-
-
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -142,12 +145,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
-
 USE_I18N = True
+USE_L10N = True
 
-USE_TZ = True
 
+# Timezone / Celery Beat Timezone
+TIME_ZONE = 'Asia/Seoul'  # Set Django's timezone
+# USE_TZ = False  # False 로 설정해야 DB에 변경 된 TIME_ZONE 이 반영 됨 
+USE_TZ = True  # Keep time zone support enabled to ensure consistency
+CELERY_TIMEZONE = 'Asia/Seoul'  # Set Celery timezone to match
+CELERY_ENABLE_UTC = False  # Disable UTC
 
 
 
@@ -198,7 +205,20 @@ LOGIN_URL = 'login'
 
 
 # Large File Handling setting
-DATA_UPLOAD_MAX_MEMORY_SIZE = None  # Unlimited upload size
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600000    # 100G upload size
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880000  # 50G upload size
+DATA_UPLOAD_MAX_NUMBER_FILES = 10000
+
+# DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760      # 10M upload size
+# FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760    # 10M upload size
+# DATA_UPLOAD_MAX_NUMBER_FILES = 100
+
+
+# # Large File Handling setting
+# DATA_UPLOAD_MAX_MEMORY_SIZE = None  # Unlimited upload size
+
+
+
 
 FILE_UPLOAD_HANDLERS = [
     'django.core.files.uploadhandler.MemoryFileUploadHandler',
@@ -206,3 +226,38 @@ FILE_UPLOAD_HANDLERS = [
 ]
 
 TIMEOUT = None  # Set your own timeout handling
+
+
+# for Vue - Gunicorn - NGINX
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     ),
+# }
+
+
+# for Celery
+
+# CELERY_BROKER_URL = 'redis://localhost:6379/0'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+# CELERY_BROKER_CONNECTION_RETRY = True
+# CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+# CELERY_TASK_SOFT_TIME_LIMIT = 300  # Set a time limit for each task (e.g., 5 minutes)
+
+CELERY_WORKER_CONCURRENCY  = 150
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 60 * 60 * 24 * 7
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+
+# for Celery Results
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+
+# Session Expire
+SESSION_COOKIE_AGE = 36000  # 10 hour in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # the session to expire when the user closes their browser
+SESSION_SAVE_EVERY_REQUEST = True  # session expiration time to reset every time the user makes a request

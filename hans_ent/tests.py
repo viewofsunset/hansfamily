@@ -1,3 +1,19 @@
-from django.test import TestCase
-
-# Create your tests here.
+[{"id": 0, "cover": "default-c.png", "active": "false", "volume": 0, "discard": "true", "original": "default-o.png", "thumbnail": "default-t.png"}, 
+ {"id": 1, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-1.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-1.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-1.jpg"}, 
+ {"id": 2, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-2.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-2.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-2.jpg"}, 
+ {"id": 3, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-3.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-3.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-3.jpg"}, 
+ {"id": 4, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-4.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-4.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-4.jpg"}, 
+ {"id": 5, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-5.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-5.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-5.jpg"}, 
+ {"id": 6, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-6.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-6.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-6.jpg"}, 
+ {"id": 7, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-7.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-7.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-7.jpg"}, 
+ {"id": 8, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-8.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-8.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-8.jpg"}, 
+ {"id": 9, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-9.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-9.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-9.jpg"}, 
+ {"id": 10, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-10.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-10.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-10.jpg"}, 
+ {"id": 11, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-11.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-11.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-11.jpg"}, 
+ {"id": 12, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-12.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-12.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-12.jpg"}, 
+ {"id": 13, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-13.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-13.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-13.jpg"}, 
+ {"id": 14, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-14.jpg", "active": "false", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-14.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-14.jpg"}, 
+ {"id": 15, "cover": "42035173-a7f6-40d6-8384-61903ae076d7-c-15.jpg", "active": "true", "volume": 0, "discard": "false", "original": "42035173-a7f6-40d6-8384-61903ae076d7-o-15.jpg", "thumbnail": "42035173-a7f6-40d6-8384-61903ae076d7-t-15.jpg"}, 
+ {"last": "true", "title": "None", "volume": 1, "discard": "false", "list_id": [0], "date_released": "unknown"}, 
+ {"last": "true", "title": "None", "volume": 0, "discard": "false", "list_id": [0], "date_released": "unknown"}, 
+ {"last": "true", "title": "None", "volume": 1, "discard": "false", "list_id": [0], "date_released": "unknown"}]

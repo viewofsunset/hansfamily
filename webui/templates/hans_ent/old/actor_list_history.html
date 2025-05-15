@@ -1,0 +1,81 @@
+
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+{% load static %}
+    
+{% block content %}
+
+    <div class="row" id="app-hans-ent-actor-list-history">
+        <div class="col-md-2">
+            
+           hi [[ list_dict_history_actor_select ]]
+
+           <div v-for="(item, index) in list_dict_history_actor_select" :key="index">
+                
+                <button @click="f_hans_ent_actor_profile_modal_from_history(item.actor_id)" class="btn" data-bs-toggle="modal" data-bs-target="#app-hans-ent-actor-profile-modal">
+                    [[ item.actor_name ]] (clicked:  [[ item.count_page_number ]])
+                </button>
+
+           </div>
+           
+           
+        </div>
+    </div> 
+
+
+     
+    <script>
+        var post_hans_ent_actor_list_history = createApp({
+            delimiters: ["[[", "]]"],
+            data() {
+            return {
+                list_dict_history_actor_select: [],
+            }
+            },
+            methods: {
+                f_refreshData() {
+                    axios.get('/hans_ent_actor_list_history/')
+                    .then((response) => {
+                        this.list_dict_history_actor_select = response.data['list_dict_history_actor_select']
+                        console.log("################ hans_ent_actor_list_history view refreshed!!")
+                    })
+                },
+
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // 정보 전송
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                // icon pannel
+                f_hans_ent_actor_profile_modal_from_history(event) {
+                    this.selected_actor_id = event
+                    console.log('### Send Data to Actor Profile Modal with Selected Actor ID: ', this.selected_actor_id)
+                    axios.post('/hans_ent_actor_profile_modal/', {
+                        'selected_actor_id': this.selected_actor_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        post_hans_ent_actor_profile_modal.f_sync_data_to_actor_profile_modal(response.data);
+                        console.log('Actor List로부터 Actor Profile Modal로 Data 송신 완료', data)
+                    })
+                    .catch(() => {
+                        console.log('Error! Actor List History 로부터 Actor Profile로 데이터 송신 오류')
+                    })
+                },
+
+            },
+            computed: {
+            },
+            mounted: function() {
+                console.log(' refresh 실행!! ')
+                this.f_refreshData()
+            }
+        }).mount('#app-hans-ent-actor-list-history')
+
+    </script> 
+
+{% endblock content %}

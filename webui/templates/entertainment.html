@@ -1,12 +1,13 @@
-
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %}
 {% load bootstrap4  %}
 {% load static %}
     
 {% block content %}
 
-    <div class="row">
+    <div class="row"
+    id="app_entertainment">
         
         <div class="col-md-12">
             <legend class="border-bottom mb-4">
@@ -14,11 +15,94 @@
                         Entertainment page.
                     </h1>
             </legend>
+
+            <div>
+                <button class="btn btn-link btn-md" @click="f_button_main_menu_change('actor')">Actor</button> |
+                <button class="btn btn-link btn-md"  @click="f_button_main_menu_change('picture')">Picture</button> |
+                <button class="btn btn-link btn-md"  @click="f_button_main_menu_change('video')">Video</button> |
+                <button class="btn btn-link btn-md"  @click="f_button_main_menu_change('music')">Music</button>
+            </div>
+            <hr>
+            <div>
+                <div v-if="status_selected_actor === true">1
+                    {% include 'entertainment/actor_list.html' %}
+                </div>
+                <div v-else-if="status_selected_picture === true">2
+                    {% include 'entertainment/picture_list.html' %}
+                </div>
+                <div v-else-if="status_selected_video === true">3
+                    {% include 'entertainment/video_list.html' %}
+                </div>
+                <div v-else-if="status_selected_music === true">4
+                    {% include 'entertainment/music_list.html' %}
+                </div>
+                <div v-else>
+                    5
+                </div>
+            </div>
+            
+            
         </div>
         <div>
-            {{ key1 }}
+           
         </div>
         
     </div>
+
+
+     <!--
+        자바스크립트 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <script>
+        
+        var post_app_entertainment = createApp({
+            delimiters: ["[[", "]]"],
+            data() {
+            return {
+                check_error: false,
+                message:'',
+                    
+                status_selected_actor: true,
+                status_selected_picture: false,
+                status_selected_video: false,
+                status_selected_music: false,
+            }
+            },
+
+            methods: {
+                f_refreshData() {
+                    axios.get('entertainment/')
+                    .then((response) => {
+                        console.log("entertainment")
+                    })
+                },
+
+                    
+                f_button_main_menu_change(event) {
+                    console.log('event', event)
+                    if (event == 'actor') {
+                        console.log('actor')
+                        if (this.status_selected_actor == false) {this.status_selected_actor = true, this.status_selected_picture=false, this.status_selected_video=false, this.status_selected_music=false} else {this.status_selected_actor = true}
+                    } else if (event == 'picture') {
+                        console.log('picture')
+                        if (this.status_selected_picture == false) {this.status_selected_picture = true, this.status_selected_actor=false, this.status_selected_video=false, this.status_selected_music=false} else {this.status_selected_picture = true}
+                    } else if (event == 'video') {
+                        console.log('video')
+                        if (this.status_selected_video == false) {this.status_selected_video = true, this.status_selected_actor=false, this.status_selected_picture=false, this.status_selected_music=false} else {this.status_selected_video = true}
+                    } else if (event == 'music') {
+                        console.log('music')
+                        if (this.status_selected_music == false) {this.status_selected_music = true, this.status_selected_actor=false, this.status_selected_picture=false, this.status_selected_video=false} else {this.status_selected_music = true}
+                    }
+                    console.log(this.status_selected_actor, this.status_selected_picture, this.status_selected_video, this.status_selected_music)
+                },
+            },
+            mounted: function() {
+                this.f_refreshData()
+                console.log('load data actor_list.html')
+            }
+        }).mount('#app_entertainment')
+    
+    </script>
+    
 
 {% endblock content %}

@@ -8,4 +8,4 @@ from django.db.models import Q
 
 
 def index(request):
-    return HttpResponse("Hello world. this is hans endtertainment root page")
+    return HttpResponse("Hello !!  Welcom!!")

@@ -1,0 +1,424 @@
+
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+{% load static %}
+
+
+<!-- Modal -->
+<div class="modal fade modal-xl" id="app_hans_ent_actor_update_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-4" id="exampleModalLabel">
+					Update Actor: [[ data_actor.name ]]
+				</h1>
+				&nbsp; 
+				<!-- 
+					Icons  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				--> 
+				
+				<button @click="f_hans_ent_actor_profile_modal_open(data_actor.id)" type="button" class="btn" data-bs-toggle="modal" data-bs-target="#app_hans_ent_actor_profile_modal">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
+						<path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
+						<path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+					</svg> 
+				</button>
+				&nbsp;
+				
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+
+			<div class="modal-body">
+				<div>
+					<table  class="table">
+						<!-- 문서 Title -->
+						<tr>
+							<!--
+								Actor 커버 이미지 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							<td rowspan="5" width="30%">
+								<div class="text-end">
+									<button @click="f_collect_images_from_registered_picture_album_for_actor_profile_cover_image()" class="btn" >
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-collection" viewBox="0 0 16 16">
+											<path d="M2.5 3.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1zm2-2a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM0 13a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 16 13V6a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 0 6zm1.5.5A.5.5 0 0 1 1 13V6a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5z"/>
+										</svg>
+									</button>
+									<button @click="f_replace_registered_actor_profile_cover_image()" class="btn" >
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-recycle" viewBox="0 0 16 16">
+											<path d="M9.302 1.256a1.5 1.5 0 0 0-2.604 0l-1.704 2.98a.5.5 0 0 0 .869.497l1.703-2.981a.5.5 0 0 1 .868 0l2.54 4.444-1.256-.337a.5.5 0 1 0-.26.966l2.415.647a.5.5 0 0 0 .613-.353l.647-2.415a.5.5 0 1 0-.966-.259l-.333 1.242zM2.973 7.773l-1.255.337a.5.5 0 1 1-.26-.966l2.416-.647a.5.5 0 0 1 .612.353l.647 2.415a.5.5 0 0 1-.966.259l-.333-1.242-2.545 4.454a.5.5 0 0 0 .434.748H5a.5.5 0 0 1 0 1H1.723A1.5 1.5 0 0 1 .421 12.24zm10.89 1.463a.5.5 0 1 0-.868.496l1.716 3.004a.5.5 0 0 1-.434.748h-5.57l.647-.646a.5.5 0 1 0-.708-.707l-1.5 1.5a.5.5 0 0 0 0 .707l1.5 1.5a.5.5 0 1 0 .708-.707l-.647-.647h5.57a1.5 1.5 0 0 0 1.302-2.244z"/>
+										</svg>
+									</button>
+								</div>
+
+								<div v-for="item in active_list_dict_profile_album" :key="item.id">
+									<a :href="BASE_DIR_ACTOR+item.original" target="_blank">
+										<img :src="BASE_DIR_ACTOR+item.cover" width="300">
+									</a>
+                                </div>
+							</td>
+
+						
+							<!--
+								Actor Name 등록 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							<th width="15%" style="background-color:rgb(240,240,240,0.5)">
+								이름 [[ input_text_name ]]
+							</th>
+							<td  width="20%">
+								<strong>
+									[[ data_actor.name ]]
+								</strong>
+								<br>
+								<input type="text" @input="f_input_text_name" class="form-control" enabled id="id_actor_update_input_text_name" ref="ref_input_text_name">
+							</td>
+                            <th  width="15%" style="background-color:rgb(240,240,240,0.5)">
+								나이 (생일) [[ input_date_birthday ]]
+							</th>
+							<td  width="20%">
+								<strong>
+									[[ data_actor.age ]] ([[ data_actor.date_birth ]])
+								</strong>
+								<br>
+								<input type="date" @input="f_input_date_birthday" class="form-control" enabled id="id_actor_update_input_date_birthday" ref="ref_input_date_birthday">
+							</td>
+						</tr>
+
+                        <!-- 추가정보 -->
+						<tr>
+							<th style="background-color:rgb(240,240,240,0.5)">
+								다른이름 
+								<br>
+								split by ','
+							</th>
+							<td style="background-color:rgb(255,255,255,0.05)">
+                                <strong v-for="item in data_actor.synonyms" >
+                                    [[ item ]]
+									<br>
+								</strong>
+								<br>
+								<input type="text" @input="f_input_text_synonyms" class="form-control" enabled id="id_actor_update_input_text_synonyms" ref="ref_input_text_synonyms">
+							</td>
+                            <th style="background-color:rgb(240,240,240,0.5)">
+								키 
+							</th>
+                            <td style="background-color:rgb(255,255,255,0.05)">
+                                <strong>
+									[[ data_actor.height ]]
+								</strong>
+								<br>
+								<input type="number" @input="f_input_number_height" class="form-control" enabled id="id_actor_update_input_number_height" ref="ref_input_number_height">
+                            </td>
+						</tr>
+
+						
+						<!-- 사이트 -->
+						<tr>
+
+							<!--
+							관련사이트 /////////////////////////////////////////////////////////////////////////
+							-->
+							<th style="background-color:rgb(240,240,240,0.5)">
+								관련 사이트 등록
+								<br>
+								<div class="dropdown">
+                                    <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                      Category 
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li v-for="(item, index) in LIST_DICT_SITE_ACTOR_INFO" :key="index">
+											<a 
+                                            v-if="selected_site_name_actor_info === item.key"
+                                            class="dropdown-item" 
+                                            @click="f_select_site_to_collect_actor_info(item.key)"
+                                            aria-selected="true"
+											id="id_actor_update_dropdown_info_site_name" 
+											ref="ref_actor_update_dropdown_info_site_name"
+                                            >
+											<strong>
+												[[ item.name ]]
+											</strong>
+											</a>
+                                        </li>
+
+										<li v-for="(item, index) in LIST_DICT_SITE_ACTOR_INFO" :key="index">
+											<a 
+                                            v-if="selected_site_name_actor_info != item.key"
+                                            class="dropdown-item" 
+                                            @click="f_select_site_to_collect_actor_info(item.key)"
+                                            aria-selected="false"
+											id="id_actor_update_dropdown_info_site_name" 
+											ref="ref_actor_update_dropdown_info_site_name"
+                                            >[[ item.name ]]</a>
+                                        </li>
+                                    </ul>
+									<br>
+									<span v-for="(item, index) in LIST_DICT_SITE_ACTOR_INFO" :key="index">
+										<strong 
+										v-if="selected_site_name_actor_info === item.key"
+										>
+										<a v-if="selected_site_name_actor_info !='blank'" :href="item.url" target="_blank">
+											[[ item.name ]]
+										</a>
+										</strong>
+									</span>
+                                </div>
+							</th>
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<input type="text" @input="f_input_info_site_name" class="form-control" enabled id="id_actor_update_input_info_site_name" ref="ref_input_info_site_name" 
+								v-if="selected_site_name_actor_info != 'blank'" :value="selected_site_name_actor_info"
+								>
+								<input type="text" @input="f_input_info_site_name" class="form-control" enabled id="id_actor_update_input_info_site_name" ref="ref_input_info_site_name" 
+								v-else  placeholder="사이트 이름 입력">
+								<br>
+								<input type="text" @input="f_input_info_site_url" class="form-control" enabled id="id_actor_update_input_info_site_url" ref="ref_input_info_site_url" placeholder="특정인물 페이지 URL 입력">
+							</td>
+
+
+							<th style="background-color:rgb(240,240,240,0.5)">
+								등록된 사이트
+							</th>
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<div v-for="item in data_actor.list_dict_info_url" class="card" >
+                                    <a :href="[[ item.url ]]" target="_blank">
+                                        [[ item.name ]]
+                                    </a>
+                                </div>
+							</td>
+						</tr>
+
+						<tr>
+							<!--
+							Tag /////////////////////////////////////////////////////////////////////////
+							-->
+                            <th style="background-color:rgb(240,240,240,0.5)">
+								Tag 등록
+								<br>
+								split by ','
+							</th>
+                            <td style="background-color:rgb(255,255,255,0.05)">
+                                
+								<input type="text" @input="f_input_text_tag" class="form-control" enabled id="id_actor_update_input_text_tag" ref="ref_input_text_tag">
+                            </td>
+							<th style="background-color:rgb(240,240,240,0.5)">
+                                등록된 Tag
+                            </th>
+							<td style="background-color:rgb(255,255,255,0.05)">
+								<div v-for="(item, index) in data_actor.tags":key="index" class="card" >
+									<span  v-if="index < 10" >
+										[[ item ]]
+ 									</span>
+                                </div>
+							</td>
+						</tr>
+
+						<!-- 카테고리 -->
+						<tr>
+                            <th style="background-color:rgb(240,240,240,0.5)">
+                                카테고리 
+                            </th>
+                            <td style="background-color:rgb(255,255,255,0.05)">
+                                <div class="dropdown">
+									<span v-for="(item, index) in list_xxx_category" :key="index">
+										<strong 
+										v-if="data_actor.category === item[0]"
+										>[[ item[1] ]]</strong>
+									</span>
+									<br>
+                                    <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                      Category 
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li v-for="(item, index) in list_xxx_category" :key="index">
+											<a 
+                                            v-if="data_actor.category === item[0]"
+                                            class="dropdown-item" 
+                                            @click="f_select_category_album(item)"
+                                            aria-selected="true"
+											
+                                            >[[ item[1] ]]</a>
+                                        </li>
+
+										<li v-for="(item, index) in list_xxx_category" :key="index">
+											<a 
+                                            v-if="data_actor.category != item[0]"
+                                            class="dropdown-item" 
+                                            @click="f_select_category_album(item)"
+                                            aria-selected="false"
+                                            >[[ item[1] ]]</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <th style="background-color:rgb(240,240,240,0.5)">
+                                ???
+                            </th>
+                            <td style="background-color:rgb(255,255,255,0.05)">
+                                ???
+                            </td>
+                        </tr>
+
+					</table>
+				</div>
+
+
+
+
+                    <!--
+                        배우 검색 결과 표시 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    -->
+                    <div v-if="list_serialized_data_actor_searched != null">
+                        <div class="text-end">
+                            <button @click="f_actor_search_by_name_reset()" class="btn" >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="gallery-container">
+                            <div v-for="(item, index) in list_serialized_data_actor_searched" :key="index" class="card" >
+                                <div class="box">
+                                    <div class="card-body">
+
+                                        <div v-for="(dict_profile_album, index) in item.list_dict_profile_album" :key="index">
+                                            <div v-if="dict_profile_album.active == 'true'">
+                                                <button @click="f_select_actor_to_merge(item.id)" class="btn" >
+                                                    <img :src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
+                                                </button>
+                                            </div>
+                                            
+                                            <div class="text-center">
+                                                [[ item.name ]] 
+                                                <button @click="f_select_actor_to_update(item.id)" class="btn" >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                                        <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                                                    </svg>
+                                                </button>
+                                            </div>  
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!--
+                        Actor Profile 이미지 등록 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    -->
+                    <!-- 이미지 파일 업로드 폼-->
+                    <div>
+                        <table  class="table">
+                            <!-- File Upload -->
+                            <tr>
+                                <th style="background-color:rgb(240,240,240,0.5)">
+                                    File 업로드
+                                </th>
+                                <td >
+                                    <div>
+                                        Image 및 Video File을 선택하세요
+                                    </div>
+                                </td>
+                                <td style="background-color:rgb(255,255,255,0.05)">
+                                    <input type="file"multiple @change="f_file_album_files_select"  class="form-control" id="id_actor_update_input_files_upload" ref="ref_actor_update_input_files_upload">
+                                </td>
+                            </tr>
+							<tr>
+								<th style="background-color:rgb(240,240,240,0.5)" width="15%">
+									Folder 업로드
+								</th>
+								<td width="30%">
+									<div>
+										업로드할 파일이 들어있는 폴더를 선택하세요
+									</div>
+								</td>
+								<td style="background-color:rgb(255,255,255,0.05)">
+									<input type="file" multiple webkitdirectory @change="f_file_album_files_select" class="form-control" id="id_actor_update_input_folder_upload" ref="ref_actor_update_input_folder_upload">
+								</td>
+							</tr>
+                        </table>
+                    </div>
+                    
+
+
+
+				
+				<!-- Progress Bar -->
+				<div v-if="show_progress==true" >
+					<div class="progress">
+						<div
+							class="progress-bar"
+							role="progressbar"
+							:style="'width: ' + progress_value+'%;'"
+							:aria-valuenow="progress_value"
+							aria-valuemin="0"
+							aria-valuemax="100">
+							[[ progress_value ]] %
+						</div>
+					</div>
+				</div>
+				
+				<!--
+					모달창 제어 버튼 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div class="modal-footer">
+					<button type="button" class="btn btn-warning"  @click="f_select_actor_to_delete(selected_actor_id)" data-bs-dismiss="modal">Delete</button>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary"  @click="f_actor_update_form" >Update</button>
+					
+				</div>
+
+				
+				<!--
+					Actor Profile에 등록한 이미지 표시 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				-->
+				<div class="text-end">
+					<button @click="f_remove_registered_profile_album_picture(data_actor.id)" class="btn" >
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+							<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+							<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+						</svg>
+					</button>
+				</div>
+				<!-- Registered Images -->
+				<div class="grid-container-picture-album-picture">
+					
+					<div v-for="(dict_profile_album, index) in total_list_dict_profile_album" :key="index" class="box-picture-album-picture">
+						<div v-if="status_cover_image_change === true && status_profile_album_picture_remove === false" >
+							<button @click="f_select_picture_as_cover_actor(dict_profile_album.id)">
+								<img v-bind:src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
+								
+							</button>
+						</div>
+						<div v-else-if="status_cover_image_change === false && status_profile_album_picture_remove === true  && dict_profile_album.id !=0" >
+							<button @click="f_select_picture_to_remove_actor(dict_profile_album.id)">
+								<img v-bind:src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
+							</button>
+						</div>
+						<div v-else>
+							<a :href="BASE_DIR_ACTOR+dict_profile_album.original" target="_blank">
+								<img v-bind:src="BASE_DIR_ACTOR+dict_profile_album.thumbnail" width="140">
+							</a>
+						</div>
+					</div>
+					
+				</div>
+				
+			
+			</div>
+
+		
+		</div>
+	</div>
+
+</div>
+
+
+
+
+			

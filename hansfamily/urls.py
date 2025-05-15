@@ -25,10 +25,14 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('webui.urls')),
-    path('hans_ent/', include('hans_ent.urls')),
-] 
+    
+    # path('hans_ent/', include('hans_ent.urls')),
 
-# + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # path('api/', include('djoser.urls')), 
+    # path('api/', include('djoser.urls.authtoken')), 
+    # path('api/', include('webui.urls')), 
+
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 #] + static(document_root=settings.STATIC_ROOT) + static(document_root=settings.MEDIA_ROOT)
 # ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

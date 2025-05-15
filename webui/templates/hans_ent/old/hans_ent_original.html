@@ -1,0 +1,264 @@
+
+
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+{% load static %}
+    
+{% block content %}
+
+
+    <!--
+        메뉴바 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+
+
+
+    <div class="row" id="app-hans-ent">
+        <div class="col-md-12">
+            <legend class="border-bottom mb-4">
+                    <br>
+                    <form method="POST" action="{% url 'hans-ent' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% for item in LIST_MENU_HANS_ENT %}
+                            <button type="submit" 
+                                {% if q_mysettings_hansent.menu_selected == item.0 %}
+                                    class="btn btn-warning btn-sm" 
+                                {% else %}
+                                    class="btn btn-dark btn-sm" 
+                                {% endif %}
+                                name="button-switch-hans-ent-home-menu" 
+                                value="{{ item.0 }}"
+                            >
+                                {{ item.1 }}
+                            </button>
+                        {% endfor %}
+
+                    </form>
+            </legend>
+
+
+        </div>
+        <hr>
+    </div>
+
+    <!-- 
+        Item 리스트 표시
+    -->
+    <div class="row" >
+        <div class="col-md-12" id="app-hans_ent_left_window" >
+        <!--
+            좌측 화면
+        -->
+            {% if q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.0.0 %}
+                111
+                {% include 'hans_ent/actor_list.html' %}
+               
+            {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.1.0 %}
+                222
+                {% include 'hans_ent/picture_album_list.html' %}
+                
+            {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.2.0 %}
+               333
+                {% include 'hans_ent/video_album_list.html' %}
+            
+            {% elif q_mysettings_hansent.menu_selected == LIST_MENU_HANS_ENT.3.0 %}
+               444
+                {% include 'hans_ent/music_album_list.html' %}
+               
+            {% else %}
+              555
+            {% endif %}
+            
+
+        </div>
+
+    </div>
+
+
+   
+
+
+
+    <!--
+        자바스크립트 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <script>
+        
+        var post_hans_ent = createApp({
+            delimiters: ["[[", "]]"],
+            data() {
+            return {
+                check_error: false,
+                message:'',
+            }
+            },
+            methods: {
+                f_refreshData() {
+                    axios.get('hans_ent/')
+                    .then((response) => {
+                        console.log("hans_ent_get_refresh",response.data[0])
+                    })
+                },
+               
+            },
+            mounted: function() {
+                
+            }
+        }).mount('#app-hans-ent')
+    
+    </script>
+    
+
+    <style scoped>
+        .image-container {
+            position: relative;
+            display: inline-block; /* Or use another display type that suits your layout */
+        }
+        
+        img {
+            display: block; /* Removes bottom space/line */
+            /* width: 100%; /* Adjust this as per your requirement */
+            height: auto; /* Adjust this as per your requirement */
+        }
+        
+        .text-overlay {
+            position: absolute;
+            top: 0; /* Adjust this to place your text */
+            left: 0; /* Adjust this to place your text */
+            width: 100%; /* Adjust this to match your image's width */
+            color: magenta; /* Text color */
+            font-size: 20px; /* Adjust this as per your requirement */
+            text-align: center; /* Aligns the text horizontally */
+            padding: 5px; /* Adjust this as per your requirement */
+        }
+
+        .grid-container {
+        display: grid;
+        gap: 10px; /* Space between boxes */
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Default: fit as many 150px boxes as possible */
+        }
+
+        .box {
+        height: 375px; /* Fixed height for all boxes */
+        background-color: #f0f0f0; /* Example styling */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        }
+
+        @media (max-width: 800px) {
+        .grid-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        }
+
+        @media (min-width: 1200px) and (max-width: 1500px) {
+        .grid-container {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        }
+
+        @media (min-width: 1500px) and (max-width: 1900px) {
+        .grid-container {
+            grid-template-columns: repeat(5, 1fr);
+        }
+        }
+
+        @media (min-width: 1900px) and (max-width: 2100px) {
+        .grid-container {
+            grid-template-columns: repeat(6, 1fr);
+        }
+        }
+
+        @media (min-width: 2100px) and (max-width: 2400px) {
+        .grid-container {
+            grid-template-columns: repeat(7, 1fr);
+        }
+        }
+
+        @media (min-width: 2400px) and (max-width: 2800px) {
+        .grid-container {
+            grid-template-columns: repeat(8, 1fr);
+        }
+        }
+
+        @media (min-width: 2800px) and (max-width: 3200px) {
+        .grid-container {
+            grid-template-columns: repeat(9, 1fr);
+        }
+        }
+
+        @media (min-width: 3200px) {
+        .grid-container {
+            grid-template-columns: repeat(10, 1fr);
+        }
+        }
+
+
+        
+            
+        .gallery-container {
+        display: grid;
+        gap: 10px; /* Space between boxes */
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Default: fit as many 150px boxes as possible */
+        }
+
+        .box {
+        height: 375px; /* Fixed height for all boxes */
+        background-color: #f0f0f0; /* Example styling */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        }
+
+
+        
+        @media (max-width: 800px) {
+        .gallery-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        }
+
+        @media (min-width: 1200px) and (max-width: 1500px) {
+        .gallery-container {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        }
+
+        @media (min-width: 1500px)  {
+        .gallery-container {
+            grid-template-columns: repeat(5, 1fr);
+        }
+        }
+
+            
+        .stillimage-container {
+        display: grid;
+        gap: 10px; /* Space between boxes */
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Default: fit as many 150px boxes as possible */
+        }
+
+        .stillimage-box {
+        height: 75px; /* Fixed height for all boxes */
+        background-color: #f0f0f0; /* Example styling */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        }
+
+        @media (max-width: 1200px) {
+        .stillimage-container {
+            grid-template-columns: repeat(10, 1fr);
+        }
+        }
+
+    </style>
+
+{% endblock content %}
+
+
+
+
