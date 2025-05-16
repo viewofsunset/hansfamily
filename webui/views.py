@@ -2376,6 +2376,7 @@ def hans_ent_actor_update_modal(request):
             list_selected_picture_album_for_actor_create = list(map(int, list_selected_picture_album_for_actor_create))
             qs_picture_album_actor = Picture_Album.objects.filter(id__in=list_selected_picture_album_for_actor_create) 
             if qs_picture_album_actor is not None and len(qs_picture_album_actor) > 0:
+                print(f'len(qs_picture_album_actor): {len(qs_picture_album_actor)}')
                 for q_picture_album_actor in qs_picture_album_actor:
                     try:
                         picture_album_second_path = q_picture_album_actor.list_dict_picture_album[1]['original']
@@ -2386,7 +2387,10 @@ def hans_ent_actor_update_modal(request):
                 for q_picture_album_actor in qs_picture_album_actor:
                     q_actor = q_picture_album_actor.main_actor
                     if q_actor is not None:
+                        # 앨범에 등록된 Actor 찾았음
                         break
+                print(f'앨범에 등록된 actor는: {q_actor}')
+
         # 선택된 Video 앨범에서 Actor 찾기
         if list_selected_video_album_for_actor_create_str is not None:
             list_selected_video_album_for_actor_create = list_selected_video_album_for_actor_create_str.split(',')
@@ -2414,12 +2418,15 @@ def hans_ent_actor_update_modal(request):
         # 선택된 배우 쿼리 찾기
         print('selected_actor_id_str', selected_actor_id_str)
         print('input_text_name_str', input_text_name_str)
+
         if q_actor is None:
+            print('선택된 Actor 쿼리리가 없는 경우')
             if selected_actor_id_str is not None and selected_actor_id_str != '':
+                print('선택된 Actor ID가 있는 경우')
                 selected_actor_id = int(selected_actor_id_str)
                 q_actor = Actor.objects.get(id=selected_actor_id)
             else:
-                # Actor 쿼리 생성하기
+                print('# 선택된 Actor 쿼리도 ID도 모두 없음. Actor 쿼리 생성하기')
                 if request.POST.get('button') == 'create_or_update':
                     if input_text_name_str is not None:
                         print('***************** input_text_name_str', input_text_name_str)
@@ -2449,13 +2456,14 @@ def hans_ent_actor_update_modal(request):
             collect_images_from_registered_all_album_for_actor_profile_cover_image(q_actor)
             pass
 
-        # 각 Picture 앨범으로 부터 지정된 프로필 사진 등록하기
+        # 각 Picture 앨범으로 부터 수집된 프로필 사진을 Actor의 profile 리스트에 등록하기
         if q_actor is not None and len(list_images_for_actor_profile) > 0:
             print('Actor Profile Image 수집하기')
             # collect_images_from_registered_picture_album_for_actor_profile_cover_image(q_actor)
             # collect_images_from_registered_video_album_for_actor_profile_cover_image(q_actor)
             collect_images_from_registered_all_album_for_actor_profile_cover_image(q_actor)
             pass
+
 
         # 앨범 커버 이미지 변경하기
         if request.POST.get('button') == 'change_profile_album_cover_image':
@@ -2733,6 +2741,8 @@ def hans_ent_actor_update_modal(request):
                                 'picture_url': picture_url,
                             }
                         )
+                print(f'len(list_serialized_data_picture_album_collected): {len(list_serialized_data_picture_album_collected)}')
+
             # if len(list_collected_manga_album_id) > 0:
             #     qs_manga_album_collected = Manga_Album.objects.filter(id__in=list_collected_manga_album_id)
             #     print('qs_manga_album_collected length', len(qs_manga_album_collected))
@@ -2815,83 +2825,82 @@ def hans_ent_actor_update_modal(request):
                 q_actor.refresh_from_db()
         
 
-        # # Actor를 연결된 Album에 등록하기
-        # if q_actor is not None:
-        #     print('# Actor를 연결된 Album에 등록하기')
-        #     print('main_actor', q_actor)
-        #     hashcode = q_actor.hashcode
-        #     list_dict_profile_album = q_actor.list_dict_profile_album
-        #     num_item = len(list_dict_profile_album)
-        #     if list_selected_picture_album_for_actor_create is not None and len(list_selected_picture_album_for_actor_create) > 0:
-        #         print('list_selected_picture_album_for_actor_create', list_selected_picture_album_for_actor_create)
-        #         qs_picture_album_actor = Picture_Album.objects.filter(id__in=list_selected_picture_album_for_actor_create) 
-        #         if qs_picture_album_actor is not None and len(qs_picture_album_actor) > 0:
-        #             for q_picture_album_actor in qs_picture_album_actor:
-        #                 data = {
-        #                     'main_actor': q_actor,
-        #                 }
-        #                 Picture_Album.objects.filter(id=q_picture_album_actor.id).update(**data)
-        #     if list_selected_video_album_for_actor_create is not None and len(list_selected_video_album_for_actor_create) > 0:
-        #         print('video album')
-        #         qs_video_album_actor = Video_Album.objects.filter(id__in=list_selected_video_album_for_actor_create) 
-        #         if qs_video_album_actor is not None and len(qs_video_album_actor) > 0:
-        #             for q_video_album_actor in qs_video_album_actor:
-        #                 print(q_video_album_actor.id)
-        #                 data = {
-        #                     'main_actor': q_actor,
-        #                 }
-        #                 Video_Album.objects.filter(id=q_video_album_actor.id).update(**data)
-        #                 # video album 커버 이미지를 Actor의 profile 이미지 리스트에 하나씩 등록(Actor 커버이미지 선택시 활용 위해)
-        #                 list_dict_picture_album = q_video_album_actor.list_dict_picture_album
+        # Actor를 연결된 Album에 등록하기
+        if q_actor is not None:
+            print('# Actor를 연결된 Album에 등록하기')
+            print('main_actor', q_actor)
+            hashcode = q_actor.hashcode
+            list_dict_profile_album = q_actor.list_dict_profile_album
+            num_item = len(list_dict_profile_album)
+            if list_selected_picture_album_for_actor_create is not None and len(list_selected_picture_album_for_actor_create) > 0:
+                print('list_selected_picture_album_for_actor_create', list_selected_picture_album_for_actor_create)
+                qs_picture_album_actor = Picture_Album.objects.filter(id__in=list_selected_picture_album_for_actor_create) 
+                if qs_picture_album_actor is not None and len(qs_picture_album_actor) > 0:
+                    for q_picture_album_actor in qs_picture_album_actor:
+                        data = {
+                            'main_actor': q_actor,
+                        }
+                        Picture_Album.objects.filter(id=q_picture_album_actor.id).update(**data)
+            if list_selected_video_album_for_actor_create is not None and len(list_selected_video_album_for_actor_create) > 0:
+                print('video album')
+                qs_video_album_actor = Video_Album.objects.filter(id__in=list_selected_video_album_for_actor_create) 
+                if qs_video_album_actor is not None and len(qs_video_album_actor) > 0:
+                    for q_video_album_actor in qs_video_album_actor:
+                        print(q_video_album_actor.id)
+                        data = {
+                            'main_actor': q_actor,
+                        }
+                        Video_Album.objects.filter(id=q_video_album_actor.id).update(**data)
+                        # video album 커버 이미지를 Actor의 profile 이미지 리스트에 하나씩 등록(Actor 커버이미지 선택시 활용 위해)
+                        list_dict_picture_album = q_video_album_actor.list_dict_picture_album
                         
-        #                 if list_dict_picture_album is not None and len(list_dict_picture_album) > 0:
-        #                     for dict_picture_album in list_dict_picture_album:
-        #                         if dict_picture_album['active'] == 'true':
-        #                             video_cover_image_name_original = dict_picture_album['original']
-        #                             video_cover_image_name_cover = dict_picture_album['cover']
-        #                             video_cover_image_thumbnail = dict_picture_album['thumbnail']
-        #                             input_path_original = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_cover_image_name_original)
-        #                             input_path_cover = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_cover_image_name_cover)
-        #                             input_path_thumbnail = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_cover_image_thumbnail)
+                        if list_dict_picture_album is not None and len(list_dict_picture_album) > 0:
+                            for dict_picture_album in list_dict_picture_album:
+                                if dict_picture_album['active'] == 'true':
+                                    video_cover_image_name_original = dict_picture_album['original']
+                                    video_cover_image_name_cover = dict_picture_album['cover']
+                                    video_cover_image_thumbnail = dict_picture_album['thumbnail']
+                                    input_path_original = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_cover_image_name_original)
+                                    input_path_cover = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_cover_image_name_cover)
+                                    input_path_thumbnail = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, video_cover_image_thumbnail)
                                     
-        #                             file_extension = video_cover_image_name_original.split('.')[-1]
-        #                             # print('file_extension', file_extension)
-        #                             new_image_name_original = f'{hashcode}-o-{num_item}.{file_extension}'
-        #                             new_image_name_cover = f'{hashcode}-c-{num_item}.{file_extension}'
-        #                             new_image_name_thumbnail = f'{hashcode}-t-{num_item}.{file_extension}'
-        #                             output_path_original = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, new_image_name_original)
-        #                             output_path_cover = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, new_image_name_cover)
-        #                             output_path_thumbnail = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, new_image_name_thumbnail)
-        #                             # print('output_path_original', output_path_original)
-        #                             # print('output_path_cover', output_path_cover)
-        #                             # print('output_path_thumbnail', output_path_thumbnail)
+                                    file_extension = video_cover_image_name_original.split('.')[-1]
+                                    # print('file_extension', file_extension)
+                                    new_image_name_original = f'{hashcode}-o-{num_item}.{file_extension}'
+                                    new_image_name_cover = f'{hashcode}-c-{num_item}.{file_extension}'
+                                    new_image_name_thumbnail = f'{hashcode}-t-{num_item}.{file_extension}'
+                                    output_path_original = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, new_image_name_original)
+                                    output_path_cover = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, new_image_name_cover)
+                                    output_path_thumbnail = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR, new_image_name_thumbnail)
+                                    # print('output_path_original', output_path_original)
+                                    # print('output_path_cover', output_path_cover)
+                                    # print('output_path_thumbnail', output_path_thumbnail)
 
-        #                             # Actor폴더에 이동저장하기
-        #                             try:
-        #                                 with Image.open(input_path_original) as img:
-        #                                     img.save(output_path_original)
-        #                             except:
-        #                                 pass
-        #                             try:
-        #                                 with Image.open(input_path_cover) as img:
-        #                                     img.save(output_path_cover)
-        #                             except:
-        #                                 pass
-        #                             try:
-        #                                 with Image.open(input_path_thumbnail) as img:
-        #                                     img.save(output_path_thumbnail)
-        #                             except:
-        #                                 pass
-        #                             # 저장한 이미지 path Actor에 등록하기
-        #                             list_dict_profile_album.append({'id': num_item, 'original': new_image_name_original, 'cover': new_image_name_cover, 'thumbnail': new_image_name_thumbnail, 'active': 'false', 'discard': 'false'})
-        #                             num_item = num_item + 1
+                                    # Actor폴더에 이동저장하기
+                                    try:
+                                        with Image.open(input_path_original) as img:
+                                            img.save(output_path_original)
+                                    except:
+                                        pass
+                                    try:
+                                        with Image.open(input_path_cover) as img:
+                                            img.save(output_path_cover)
+                                    except:
+                                        pass
+                                    try:
+                                        with Image.open(input_path_thumbnail) as img:
+                                            img.save(output_path_thumbnail)
+                                    except:
+                                        pass
+                                    # 저장한 이미지 path Actor에 등록하기
+                                    list_dict_profile_album.append({'id': num_item, 'original': new_image_name_original, 'cover': new_image_name_cover, 'thumbnail': new_image_name_thumbnail, 'active': 'false', 'discard': 'false'})
+                                    num_item = num_item + 1
 
-        #                     data = {
-        #                         'list_dict_profile_album': list_dict_profile_album,
-        #                     }
-        #                     Actor.objects.filter(id=q_actor.id).update(**data)
-        #                     q_actor.refresh_from_db()
-
+                            data = {
+                                'list_dict_profile_album': list_dict_profile_album,
+                            }
+                            Actor.objects.filter(id=q_actor.id).update(**data)
+                            q_actor.refresh_from_db()
                                     
             if list_selected_music_album_for_actor_create is not None and len(list_selected_music_album_for_actor_create) > 0:
                 qs_music_album_actor = Music_Album.objects.filter(id__in=list_selected_music_album_for_actor_create) 
@@ -2901,6 +2910,9 @@ def hans_ent_actor_update_modal(request):
                             'main_actor': q_actor,
                         }
                         Music_Album.objects.filter(id=q_music_album_actor.id).update(**data)
+            
+            # Actor Profile용 이미지 수집하기
+            collect_images_from_registered_all_album_for_actor_profile_cover_image(q_actor)
         
 
         # 파일 업로드 했으면 저장하기
