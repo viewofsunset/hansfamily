@@ -788,6 +788,8 @@
                     this.list_serialized_data_picture_album_collected = []
                     this.list_serialized_data_video_album_collected = []
                     this.list_serialized_data_music_album_collected = []
+
+                    this.list_serialized_data_actor_searched = []
                     this.files = ''
                     this.file_upload_option = 'files_single_album'
                     this.folder_upload_option = 'folder_name_for_nothing'
@@ -798,6 +800,7 @@
                     this.show_progress = false
                     this.data_actor = {}
                     this.selected_actor_id = ''
+                    this.input_text_search_actor = ''
 
 
                     $("#id_actor_create_input_text_name").val("");
@@ -806,8 +809,10 @@
                     $("#id_actor_create_input_number_height").val("");
                     $("#id_actor_create_input_files_upload").val("");
                     $("#id_actor_create_input_folder_upload").val("");
+                    $("#id_input_text_create_actor_name").val("");
+                    
 
-                    console.log('executed reset function for actor create modal')
+                    console.log('############ executed f_reset_data_actor_create_form', this.data_actor, this.data_actor.name)
                 },
 
 
@@ -844,7 +849,7 @@
                     $("#id_actor_update_input_text_tag").val("");
                     $("#id_actor_update_input_files_upload").val("");
 
-                    console.log('executed reset function for actor update modal')
+                    console.log('executed f_reset_data_actor_update_form @@@@@@@@@@@@@@@@@@@@@@@@@')
                 },
 
 
@@ -1179,8 +1184,9 @@
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 f_selected_serialized_json_data_parsing_actor(data_actor) {
-                    console.log('actor', data_actor)
+                    console.log('f_selected_serialized_json_data_parsing_actor', data_actor)
                     if (Object.keys(data_actor).length > 0 ) {
+                        console.log('data_actor > 0')
                         this.selected_actor_id = data_actor['id']
                         if (this.selected_actor_id === null) {this.selected_actor_id = null}
                         this.list_dict_profile_album = data_actor['list_dict_profile_album']
@@ -1188,6 +1194,7 @@
                         this.list_dict_actor_info_url = data_actor['list_dict_info_url']
                         if (this.list_dict_actor_info_url === null) {this.list_dict_actor_info_url = []}
                     } else {
+                        console.log('data_actor == 0')
                         this.data_actor = {}
                         this.selected_actor_id = null
                         this.list_dict_profile_album = []
@@ -1196,8 +1203,9 @@
                 },    
 
                 f_selected_serialized_json_data_parsing_picture(data_picture) {
-                    console.log('picture')
+                    console.log('f_selected_serialized_json_data_parsing_picture')
                     if (Object.keys(data_picture).length > 0 ) {
+                        console.log('data_picture > 0')
                         console.log('title', data_picture['title'])
                         this.selected_picture_album_id = data_picture['id']
                         if (this.selected_picture_album_id === null) {this.selected_picture_album_id = null}
@@ -1208,6 +1216,7 @@
                         this.list_picture_url_album = data_picture['list_picture_url_album']
                         if (this.list_picture_url_album === null) {this.list_picture_url_album = []}
                     } else {
+                        console.log('data_picture == 0')
                         this.data_picture = {}
                         this.selected_picture_album_id = null
                         this.list_dict_picture_album = []
@@ -1217,8 +1226,9 @@
                 },
 
                 f_selected_serialized_json_data_parsing_manga(data_manga) {
-                    console.log('manga', data_manga)
+                    console.log('f_selected_serialized_json_data_parsing_manga', data_manga)
                     if (Object.keys(data_manga).length > 0 ) {
+                        console.log('data_manga > 0')
                         this.selected_manga_album_id = data_manga['id']
                         if (this.selected_manga_album_id === null) {this.selected_manga_album_id = null}
                         this.list_dict_manga_album = data_manga['list_dict_manga_album']
@@ -1228,6 +1238,7 @@
                         this.list_dict_volume_manga = data_manga['list_dict_volume_manga']
                         if (this.list_dict_volume_manga === null) {this.list_dict_volume_manga = []}
                     } else {
+                        console.log('data_manga == 0')
                         this.data_manga = {}
                         this.selected_manga_album_id = null
                         this.list_dict_manga_album = []
@@ -1239,7 +1250,7 @@
                 f_selected_serialized_json_data_parsing_video(data_video) {
                     console.log('f_selected_serialized_json_data_parsing_video', data_video)
                     if (Object.keys(data_video).length > 0 ) {
-                        console.log('11111')
+                        console.log('data_video > 0')
                         this.selected_video_album_id = data_video['id']
                         if (this.selected_video_album_id === null) {this.selected_video_album_id = null}
                         console.log('2')
@@ -1253,7 +1264,7 @@
                         if (this.list_dict_video_info_url === null) {this.list_dict_video_info_url = []}
                         console.log('5')
                     } else {
-                        console.log('9999')
+                        console.log('data_video == 0')
                         this.data_video = {}
                         this.selected_video_album_id = null
                         this.list_dict_video_album = []
@@ -1264,8 +1275,9 @@
                 },
 
                 f_selected_serialized_json_data_parsing_music(data_music) {
-                    console.log('music')
+                    console.log('f_selected_serialized_json_data_parsing_music')
                     if (Object.keys(data_music).length > 0 ) {
+                        console.log('data_music > 0')
                         this.selected_music_album_id = data_music['id']
                         if (this.selected_music_album_id === null) {this.selected_music_album_id = null}
                         this.list_dict_music_picture_album = data_music['list_dict_picture_album']
@@ -1275,6 +1287,7 @@
                         this.list_dict_music_info_url = data_music['list_dict_info_url']
                         if (this.list_dict_music_info_url === null) {this.list_dict_music_info_url = []}
                     } else {
+                        console.log('data_music == 0')
                         this.data_music = {}
                         this.selected_music_album_id = null
                         this.list_dict_music_album = []
@@ -1443,6 +1456,7 @@
 
                 // Actor Create
                 async f_actor_create_form() {
+                    console.log('11111111111111111111111111111111111111111111111111111111111111111')
                     console.log('!!!!!!!!!! ##############  this.selected_actor_id', this.selected_actor_id)
                     console.log('!!!!!!!!!! ##############  this.input_text_name', this.input_text_name)
                     console.log('!!!!!!!!!! ##############  this.file_upload_option', this.file_upload_option)
@@ -1481,6 +1495,7 @@
                         this.status_create = false
                     } else {
                         console.log('Actor Create Form Submitted')
+                        // $('#app_hans_ent_actor_create_modal').modal('hide')
                         try {
                             await axios.post('/hans_ent_actor_update_modal/', formData, {
                             headers: {
@@ -1491,19 +1506,21 @@
                             this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
                             })
                             .then((response) => {
-                                console.log('Actor Created ')
-                                this.data_actor = response.data['selected_serialized_data_actor']
+                                // this.f_hide_all_modals_hans_ent()
+                                this.show_progress = false;
 
+                                console.log('Actor Created!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ')
+                                this.data_actor = response.data['selected_serialized_data_actor']
+                                console.log("@@@@@@@@@@@@@@@@@@@@@@@@@ this.data_actor", this.data_actor)
                                 this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
-                                                        
+                                                       
                                 if (Object.keys(this.data_actor).length > 0 ) {
                                     this.status_create = false
                                 } else {
                                     this.status_create = true
                                 }
-
-                                this.f_reset_data_actor_create_form()
-                                this.f_hide_all_modals_hans_ent()
+                               
+                                this.f_refreshData_actor_list()
                                 $('#app_hans_ent_actor_update_modal').modal('show')
                                 console.log('f_actor_create_form')
                             })
@@ -1798,6 +1815,7 @@
                 // Actor Create Open
                 f_hans_ent_actor_create_modal_oepn() {
                     this.status_create = true
+                    this.f_reset_data_actor_create_form()
                     this.f_hide_all_modals_hans_ent()
                     this.f_refreshData_actor_list()
                     this.list_xxx_category = response.data['LIST_ACTOR_CATEGORY']
@@ -1855,6 +1873,10 @@
                             }
                         } else {
                             console.log("222222222222222222")
+                            this.f_hide_all_modals_hans_ent()
+                            this.f_reset_data_actor_update_form()
+                            $('#app_hans_ent_actor_profile_modal').modal('show')
+
                             this.message = response.data['message']
                             if (this.message != null) {
                                 alert(this.message)
@@ -1874,9 +1896,7 @@
                             this.f_selected_serialized_json_data_parsing_picture(this.data_picture)
                             this.f_selected_serialized_json_data_parsing_video(this.data_video)
                             this.f_selected_serialized_json_data_parsing_music(this.data_music)
-
-                            // this.f_hide_all_modals_hans_ent()
-                            // $('#app_hans_ent_actor_profile_modal').modal('show')
+                            
                             console.log('f_hans_ent_actor_profile_modal_open')
                         }
                     })
@@ -4049,7 +4069,7 @@
                 // Actor 
                 // Actor cover image 선택
                 f_select_picture_as_cover_actor(event) {
-                    console.log(event)
+                    console.log('f_select_picture_as_cover_actor, selected_profile_album_picture_id:', event)
                     this.selected_profile_album_picture_id = event
                     axios.post('/hans_ent_actor_update_modal/', {
                         'button': 'change_profile_album_cover_image',
@@ -6959,10 +6979,10 @@
 
             
         $('#app_hans_ent_actor_create_modal').on('hidden.bs.modal', function () {
-            app_hans_ent.f_reset_data_actor_create_form()
+            app_hans_ent.f_refreshData_actor_list()
 	    });
         $('#app_hans_ent_actor_update_modal').on('hidden.bs.modal', function () {
-            app_hans_ent.f_reset_data_actor_update_form()
+            // app_hans_ent.f_reset_data_actor_update_form()
             app_hans_ent.f_refreshData_actor_list()
 	    });
         $('#app_hans_ent_actor_profile_modal').on('hidden.bs.modal', function () {

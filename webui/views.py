@@ -2469,16 +2469,23 @@ def hans_ent_actor_update_modal(request):
         if request.POST.get('button') == 'change_profile_album_cover_image':
             if selected_profile_album_picture_id_str is not None and selected_profile_album_picture_id_str != '':
                 selected_profile_album_picture_id = int(selected_profile_album_picture_id_str)
+                print('selected_profile_album_picture_id', selected_profile_album_picture_id)
                 if q_actor is not None:
+                    print('1')
                     list_dict_profile_album = q_actor.list_dict_profile_album
                     # acitve 모두 false 변경
                     for dict_profile_album in list_dict_profile_album:
-                        dict_profile_album['active'] = 'false'
                         if dict_profile_album['id'] == selected_profile_album_picture_id:
                             dict_profile_album['active'] = 'true'
+                            print('bingo')
+                        else:
+                            dict_profile_album['active'] = 'false'
                     data = {'list_dict_profile_album': list_dict_profile_album}
                     Actor.objects.filter(id=q_actor.id).update(**data)
                     q_actor.refresh_from_db()
+                else:
+                    print('2')
+                    pass
         
         # 모델 선택 이미지 삭제하기
         if request.POST.get('button') == 'remove_profile_album_picture':
@@ -2672,16 +2679,7 @@ def hans_ent_actor_update_modal(request):
             Actor.objects.filter(id=q_actor.id).update(**data)
             q_actor.refresh_from_db()
 
-        # Actor Profile 이미지 저장하기
-        if request.FILES:
-            if q_actor is not None:
-                # 앨범 갤러이 이미지 저장하기
-                files = request.FILES.getlist('files')
-                if files is not None and len(files) > 0:
-                    # save_actor_profile_images(q_actor, images)
-                    save_files_in_list_dict_xxx_album(q_actor, files, type_album='actor')
-
-        # Actor Title Keyword 선택하기 (관련 키워드에 해당하는 앨범 표시용 데이터 모집)
+       # Actor Title Keyword 선택하기 (관련 키워드에 해당하는 앨범 표시용 데이터 모집)
         if request.POST.get('button') == 'select_keyword':
             # data = json.loads(request.body)  # parse JSON body
             # list_x = data.get('list_collected_keywords_from_title_selected', [])
@@ -2701,11 +2699,6 @@ def hans_ent_actor_update_modal(request):
                         for q_picture_album_searched in qs_picture_album_searched:
                             if q_picture_album_searched.id not in list_collected_picture_album_id:
                                 list_collected_picture_album_id.append(q_picture_album_searched.id)
-                    # qs_manga_album_searched = Manga_Album.objects.filter(Q(check_discard=False) & (Q(title__icontains=keyword) | Q(tags__contains=keyword)) & Q(main_actor__isnull=True))
-                    # if qs_manga_album_searched is not None and len(qs_manga_album_searched) > 0:
-                    #     for q_manga_album_searched in qs_manga_album_searched:
-                    #         if q_manga_album_searched.id not in list_collected_manga_album_id:
-                    #             list_collected_manga_album_id.append(q_manga_album_searched.id)
                     qs_video_album_searched = Video_Album.objects.filter(Q(check_discard=False) & (Q(title__icontains=keyword) | Q(tags__contains=keyword)) & Q(main_actor__isnull=True))
                     if qs_video_album_searched is not None and len(qs_video_album_searched) > 0:
                         for q_video_album_searched in qs_video_album_searched:
@@ -2742,25 +2735,6 @@ def hans_ent_actor_update_modal(request):
                             }
                         )
                 print(f'len(list_serialized_data_picture_album_collected): {len(list_serialized_data_picture_album_collected)}')
-
-            # if len(list_collected_manga_album_id) > 0:
-            #     qs_manga_album_collected = Manga_Album.objects.filter(id__in=list_collected_manga_album_id)
-            #     print('qs_manga_album_collected length', len(qs_manga_album_collected))
-            #     if qs_manga_album_collected is not None and len(qs_manga_album_collected) > 0:
-            #         for q_manga_album_collected in qs_manga_album_collected:
-            #             dict_manga_album = {}
-            #             list_dict_manga_album = q_manga_album_collected.list_dict_manga_album
-            #             if list_dict_manga_album is not None and len(list_dict_manga_album) > 0:
-            #                 for dict_item in list_dict_manga_album:
-            #                     if dict_item['active'] == 'true' and dict_item['discard'] == 'false':
-            #                         dict_manga_album = dict_item
-            #             list_serialized_data_manga_album_collected.append(
-            #                 {
-            #                     'id': q_manga_album_collected.id,
-            #                     'title': q_manga_album_collected.title,
-            #                     'dict_manga_album': dict_manga_album,
-            #                 }
-            #             )
 
             if len(list_collected_video_album_id) > 0:
                 qs_video_album_collected = Video_Album.objects.filter(id__in=list_collected_video_album_id)
@@ -2825,6 +2799,7 @@ def hans_ent_actor_update_modal(request):
                 q_actor.refresh_from_db()
         
 
+    
         # Actor를 연결된 Album에 등록하기
         if q_actor is not None:
             print('# Actor를 연결된 Album에 등록하기')
@@ -2911,12 +2886,12 @@ def hans_ent_actor_update_modal(request):
                         }
                         Music_Album.objects.filter(id=q_music_album_actor.id).update(**data)
             
-            # Actor Profile용 이미지 수집하기
-            collect_images_from_registered_all_album_for_actor_profile_cover_image(q_actor)
-        
-
+           
+           
         # 파일 업로드 했으면 저장하기
         if request.FILES:
+            print(f'****************************************** 0')
+            print('q_actor 0', q_actor)
             print('# 파일 업로드 했으면 저장하기')
             files = request.FILES.getlist('files')
             paths = request.POST.getlist('paths')
@@ -2926,28 +2901,39 @@ def hans_ent_actor_update_modal(request):
             folder_name_str = None if folder_name_str in LIST_STR_NONE_SERIES else folder_name_str
             file_upload_option_str = None if file_upload_option_str in LIST_STR_NONE_SERIES else file_upload_option_str
 
-            tree = {}
+            print('folder_name_str', folder_name_str)
 
-            for file_obj, relative_path in zip(files, paths):
-                parts = relative_path.strip('/').split('/')
-                current_level = tree
+            if folder_name_str is not None:
+                print(f'****************************************** 1')
+                print('q_actor 1', q_actor)
+                tree = {}
 
-                for idx, part in enumerate(parts):
-                    if idx == len(parts) - 1:
-                        # 마지막은 파일
-                        current_level.setdefault('files', []).append(part)
-                    else:
-                        # 폴더
-                        current_level = current_level.setdefault('folders', {}).setdefault(part, {})
-            print(f'tree: {tree}' )
+                for file_obj, relative_path in zip(files, paths):
+                    parts = relative_path.strip('/').split('/')
+                    current_level = tree
 
-            if files is not None and len(files) > 0:
-                # save_actor_profile_images(q_actor, images)
-                save_folder_in_list_dict_xxx_album(q_actor, files, tree, folder_name_str, file_upload_option_str)
+                    for idx, part in enumerate(parts):
+                        if idx == len(parts) - 1:
+                            # 마지막은 파일
+                            current_level.setdefault('files', []).append(part)
+                        else:
+                            # 폴더
+                            current_level = current_level.setdefault('folders', {}).setdefault(part, {})
+                print(f'tree: {tree}' )
+
+                if files is not None and len(files) > 0:
+                    # save_actor_profile_images(q_actor, images)
+                    save_folder_in_list_dict_xxx_album(q_actor, files, tree, folder_name_str, file_upload_option_str)
                 
-            
+            else:
+                print(f'****************************************** 2')
+                type_album = 'actor'
+                if files is not None and len(files) > 0:
+                    print('q_actor 2', q_actor)
+                    save_files_in_list_dict_xxx_album(q_actor, files, type_album)
 
-
+            # Actor Profile용 이미지 수집하기
+            collect_images_from_registered_all_album_for_actor_profile_cover_image(q_actor)
 
         # Data Serialize 하기
         if q_actor is not None:

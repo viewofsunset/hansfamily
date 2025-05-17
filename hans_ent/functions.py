@@ -344,9 +344,10 @@ def register_title_to_album(q_xxx_album_selected, type_album, title_item):
     try:
         # title 저장
         if type_album == 'actor':
-            data = {
-                'name': title_item
-            }        
+            # data = {
+            #     'name': title_item
+            # }        
+            pass
         else:
             data = {
                 'title': title_item
@@ -2597,7 +2598,6 @@ def save_folder_in_list_dict_xxx_album(q_actor, files, tree, folder_name_str, fi
     tot_num_video = 0
     tot_num_audio = 0
     
-    return True 
     for dict_item in list_folder_file_for_album:
         # 루프 한 번 돌 때마다 하나의 앨범을 생성함. 
         # 하나의 앨범에는 하나의 타입과 여러개의 파일들(폴더 내)이 포함됨. 
