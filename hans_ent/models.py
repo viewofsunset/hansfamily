@@ -245,7 +245,8 @@ class Picture_Album(models.Model):
     picture_download_url = models.CharField(max_length=250, null=True, blank=True)  # TeraBox 등의 고해상도 이미지 다운받는 사이트 url 
     list_dict_info_url =  models.JSONField(null=True, blank=True)                   # 앨범 관련 정보 URL [{"name":'imdb', "site":'https://www.imbd.com/xxx'}, {}]
     
-    check_url_downloaded = models.BooleanField(default=False)                       # 갤러리 이미지(4KHD)를 다운받았는지 체크
+    check_url_downloaded = models.BooleanField(default=False)                       # 갤러리 이미지 주소(4KHD)를 다운받았는지 체크
+    check_4k_downloaded = models.BooleanField(default=False)                        # 갤러리 이미지(4KHD)를 다운받았는지 체크
     check_4k_uploaded = models.BooleanField(default=False)                          # 고해상도 이미지(Terabox)를 업로드 했는지 체크
 
     list_dict_related_album = models.JSONField(null=True, blank=True)

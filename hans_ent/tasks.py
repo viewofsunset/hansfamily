@@ -1095,6 +1095,7 @@ def timeout_handler_hans_ent(signum, frame):
 # ---------------------------------------------------------------------------------------------------------------------------------------------
 # Image URL 정보 획득 함수
 def get_image_url_from_gallery_info(gallery_title, gallery_url):
+    print(f'이미지 url 정보를 다운받습니다. gallery_title: {gallery_title}, gallery_url: {gallery_url}')
     q_systemsettings_hansent = SystemSettings_HansEnt.objects.filter(check_discard=False).last()
     selected_vault = q_systemsettings_hansent.selected_vault
     list_collect_gallery_image_url_all_page_no_dup = []
@@ -1119,6 +1120,7 @@ def get_image_url_from_gallery_info(gallery_title, gallery_url):
     if elements2 is not None:
         # 중복확인
         q_picture_album = Picture_Album.objects.filter(Q(check_discard=False) & Q(title=gallery_title)).last()
+        print(f'q_picture_album id : {q_picture_album.id}')
 
         if q_picture_album is not None:
             print(f'1-1 : {q_picture_album.id}')
@@ -1156,11 +1158,13 @@ def get_image_url_from_gallery_info(gallery_title, gallery_url):
                     check_collect = True
                 else:
                     print(f'수집한 Image URL 개수와 다운받은 Image 개수가 동일합니다. 다운받을 이미지 URL이 없습니다.')
-                    pass
+                    check_collect = False
             else:
-                print(f'수집한 Gallery URL 정보가가 있습니다 Image URL을 다운받습니다.2.')
+                print(f'수집한 Gallery URL 정보가가 없습니다. Image URL을 다운받습니다.2.')
                 check_collect = True
                 pass
+        
+        print(f'check_collect: {check_collect}')
 
         if check_collect == True:
             print('2-1 이미지 URL 크롤링 시작')
@@ -1171,7 +1175,7 @@ def get_image_url_from_gallery_info(gallery_title, gallery_url):
             # list_result = []
 
             start_time = time.time()  # Record the start time
-            
+            print('1')
             # #################################################################################################
             # # 앨범 생성하기
             # #################################################################################################
@@ -1186,21 +1190,46 @@ def get_image_url_from_gallery_info(gallery_title, gallery_url):
                     list_picture_url_album = []
                     num_list_picture_url_album = 0
 
-            # hashcode = q_picture_album.hashcode
-            list_dict_picture_album = q_picture_album.list_dict_picture_album
-            list_dict_picture_album[0]['active'] = 'false'
-            list_dict_picture_album[0]['discard'] = 'true'
+            print('2')
+            try:
+                hashcode = q_picture_album.hashcode
+            except:
+                hashcode = None
+            print(f'hashcode: {hashcode}')
+            
+            try:
+                list_dict_picture_album = q_picture_album.list_dict_picture_album
+                if list_dict_picture_album is None:
+                    list_dict_picture_album = DEFAULT_LIST_DICT_PICTURE_ALBUM
+            except:
+                list_dict_picture_album = DEFAULT_LIST_DICT_PICTURE_ALBUM
+            print(f'list_dict_picture_album: {list_dict_picture_album}')
+
+            if len(list_dict_picture_album) > 0: # 디폴트 disable 시킴킴
+                print('3')
+                try:
+                    list_dict_picture_album[0]['active'] = 'false'
+                    list_dict_picture_album[0]['discard'] = 'true'
+                except:
+                    print('디폴트 disable 실패')
+                    pass
+            else:
+                print('디폴트 없음')
+                pass
+
             # max_processor = 100
             # timeout_sec = 200
+            
             print(f'list_dict_picture_album 길이 1: {len(list_dict_picture_album)}')  # 1 이면 디폴트 값만 들어있는 경우
 
             # #################################################################################################
             # # 이미지주소 다운받기
             # #################################################################################################
             # Gallery First Page Image URL Parsing
+            print('# 이미지주소 다운받기 시작')
             k = 1
             for element2 in elements2:
-                # print('k', k)
+                print(f'element2: {element2}')
                 list_collect_gallery_image_url = []
                 tags = element2.find_all('a')
                 m = 0
@@ -1229,7 +1258,7 @@ def get_image_url_from_gallery_info(gallery_title, gallery_url):
             else:
                 list_collect_gallery_image_url_all_page = []
             list_collect_gallery_image_url_all_page_no_dup = list_collect_gallery_image_url_all_page_no_dup + list_collect_gallery_image_url_all_page
-            # print('list_collect_gallery_image_url_all_page', len(list_collect_gallery_image_url_all_page))
+            print(f'list_collect_gallery_image_url_all_page: {len(list_collect_gallery_image_url_all_page)}')
 
             # 2 page 이상 있으면 추가 이미지 주소 획득
             print(f'갤러리 페이지 개수 : {list_page_num}')
@@ -1345,18 +1374,7 @@ def get_image_url_from_gallery_info_from_views():
         # print(f'gallery_url: {gallery_url}, gallery_title: {gallery_title}')
 
         q_picture_album_id, list_collect_gallery_image_url_all_page_no_dup = get_image_url_from_gallery_info(gallery_title, gallery_url)
-        # print(f'q_picture_album_id: {q_picture_album_id}')
-        # print(f'list_collect_gallery_image_url_all_page_no_dup: {list_collect_gallery_image_url_all_page_no_dup}')
-
-        # data = {
-        #     'list_picture_url_album': list_collect_gallery_image_url_all_page_no_dup,     
-        # }
-        # Picture_Album.objects.filter(id=q_picture_album_id).update(**data)
-        # q_picture_album = Picture_Album.objects.get(id=q_picture_album_id)
-        # q_picture_album.refresh_from_db()
-        # list_picture_url_album = q_picture_album.list_picture_url_album
-
-        
+               
         print('success 크롤링 이미지 URL')
     except:
         print('failed 크롤링 이미지 URL')
@@ -1366,7 +1384,7 @@ def get_image_url_from_gallery_info_from_views():
         download_image_using_image_url(q_picture_album_id)
         print('success 다운로드 이미지')
     except:
-        print('failed 다운로드 이미지지')
+        print('failed 다운로드 이미지')
         pass
 
     # 해당 필드 리셋하기
@@ -1400,7 +1418,7 @@ def download_image_from_image_url_info_from_views():
         download_image_using_image_url(q_picture_album_id)
         print('success 다운로드 이미지')
     except:
-        print('failed 다운로드 이미지지')
+        print('failed 다운로드 이미지')
         pass
 
     # 해당 필드 리셋하기
@@ -1906,6 +1924,7 @@ def f_save_images_from_url_in_task_w_proxy(image_url, hashcode, n):
 
 
 
+# 선택된 앨범의 이미지를 4KHD에서 다운받기
 def download_image_using_image_url(q_picture_album_id):
     print('# 다운받아야 하는 이미지 ULR 정보가 있는 경우')
     q_systemsettings_hansent = SystemSettings_HansEnt.objects.filter(check_discard=False).last()
@@ -1923,76 +1942,112 @@ def download_image_using_image_url(q_picture_album_id):
     q_picture_album.refresh_from_db()
     hashcode = q_picture_album.hashcode
     list_picture_url_album = q_picture_album.list_picture_url_album
-    list_dict_picture_album = q_picture_album.list_dict_picture_album
+    
     
     print(f'q_picture_album_id: {q_picture_album_id}, hashcode: {hashcode}, len(list_picture_url_album): {len(list_picture_url_album)}')
+    
+    # 이미지 다운로드
+    def download_image_using_image_url_inside_function(q_picture_album_id):
+        q_picture_album = Picture_Album.objects.get(id=q_picture_album_id)
+        list_dict_picture_album = q_picture_album.list_dict_picture_album
+        list_picture_url_album = q_picture_album.list_picture_url_album
 
-    if list_picture_url_album is not None and len(list_picture_url_album) > 0:
+        print(f'download_image_using_image_url_inside_function 함수 시작')
         time.sleep(random_sec)
         if list_dict_picture_album is not None and len(list_dict_picture_album) > 0:
-            list_dict_picture_album[0]['active'] = 'false'
-            list_dict_picture_album[0]['discard'] = 'true'
+            try:
+                list_dict_picture_album[0]['active'] = 'false'
+                list_dict_picture_album[0]['discard'] = 'true'
+            except:
+                pass
         else:
             list_dict_picture_album = DEFAULT_LIST_DICT_PICTURE_ALBUM
             list_dict_picture_album[0]['active'] = 'false'
             list_dict_picture_album[0]['discard'] = 'true'
-            
-        n = 1
-        for image_url in list_picture_url_album:
-            list_job.append((image_url, hashcode, n))
-            n = n + 1 
         
-        # 실제 사용할 프로세서 개수 정하기
-        req_processor = len(list_job)
-        if max_processor > req_processor:
-            final_processor = req_processor
-        else:
-            final_processor = max_processor
-        print(f'final_processor: {final_processor}')
+        if len(list_picture_url_album) > 0:
+            n = 1
+            for image_url in list_picture_url_album:
+                list_job.append((image_url, hashcode, n))
+                n = n + 1 
+        
+            # 실제 사용할 프로세서 개수 정하기
+            req_processor = len(list_job)
+            if max_processor > req_processor:
+                final_processor = req_processor
+            else:
+                final_processor = max_processor
+            print(f'final_processor: {final_processor}')
 
-        # Set the timeout handler for the SIGALRM signal
-        signal.signal(signal.SIGALRM, timeout_handler_hans_ent)
-        list_result = []
-        try:
-            signal.alarm(timeout_sec)
-            print('# 1-1. 멀티프로세싱 활용 이미지 저장 w/o Proxy')
-            with b_Pool(processes=final_processor) as pool:
-                list_result = pool.starmap(f_save_images_from_url_in_task, list_job)
-            signal.alarm(0)
-        except Exception as e:
-            print(f"An error occurred 1: {e}")
+            # Set the timeout handler for the SIGALRM signal
+            signal.signal(signal.SIGALRM, timeout_handler_hans_ent)
+            list_result = []
             try:
-                print('# 1-2. 멀티프로세싱 활용 이미지 저장 w/ Proxy')
+                signal.alarm(timeout_sec)
+                print('# 1-1. 멀티프로세싱 활용 이미지 저장 w/o Proxy')
                 with b_Pool(processes=final_processor) as pool:
-                    list_result = pool.starmap(f_save_images_from_url_in_task_w_proxy, list_job)
+                    list_result = pool.starmap(f_save_images_from_url_in_task, list_job)
+                signal.alarm(0)
             except Exception as e:
-                print('# 1-3. 멀티프로세싱 활용 이미지 저장 실패')
-                print(f"An error occurred 2: {e}")
-                
-        if list_result is not None and len(list_result) > 0:
-            dict_picture_album_0 = list_dict_picture_album[0]
-            list_dict_picture_album = []
-            list_dict_picture_album.append(dict_picture_album_0)
-            for result in list_result:
-                if result is not None:
-                    list_dict_picture_album.append(result)
+                print(f"An error occurred 1: {e}")
+                try:
+                    print('# 1-2. 멀티프로세싱 활용 이미지 저장 w/ Proxy')
+                    with b_Pool(processes=final_processor) as pool:
+                        list_result = pool.starmap(f_save_images_from_url_in_task_w_proxy, list_job)
+                except Exception as e:
+                    print('# 1-3. 멀티프로세싱 활용 이미지 저장 실패')
+                    print(f"An error occurred 2: {e}")
+                    
+            if list_result is not None and len(list_result) > 0:
+                dict_picture_album_0 = list_dict_picture_album[0]
+                list_dict_picture_album = []
+                list_dict_picture_album.append(dict_picture_album_0)
+                for result in list_result:
+                    if result is not None:
+                        list_dict_picture_album.append(result)
 
-            if len(list_dict_picture_album) > 1:
-                list_dict_picture_album[-1]['active'] = 'true'
-            data = {
-                'list_dict_picture_album': list_dict_picture_album,
-                'check_url_downloaded': True,
-            }
-            Picture_Album.objects.filter(id=q_picture_album.id).update(**data)
-            q_picture_album.refresh_from_db()
-            print(f'{q_picture_album.id} 업데이트 완료.')
+                if len(list_dict_picture_album) > 1:
+                    list_dict_picture_album[-1]['active'] = 'true'
+                data = {
+                    'list_dict_picture_album': list_dict_picture_album,
+                    'check_url_downloaded': True,
+                }
+                Picture_Album.objects.filter(id=q_picture_album.id).update(**data)
+                q_picture_album.refresh_from_db()
+                print(f'{q_picture_album.id} 업데이트 완료.')
+            else:
+                print(f'{q_picture_album.id} list_result 결과값이 없습니다.')
+                list_picture_id_parsing_error.append(q_picture_album.id)
         else:
-            print(f'{q_picture_album.id} list_result 결과값이 없습니다.')
-            list_picture_id_parsing_error.append(q_picture_album.id)
-    else:
-        print(f'다운받을 이미지 주소 list_picture_url_album 정보가 없습니다.')
-        list_picture_id_parsing_error.append(q_picture_album.id)
+            print(f'수집한 image url이 없습니다.')
+            pass
 
+
+    if list_picture_url_album is not None and len(list_picture_url_album) > 0:
+        print(f'다운받을 이미지 주소 정보가 있습니다. 다운로드를 시작합니다.')
+        download_image_using_image_url_inside_function(q_picture_album_id)
+    else:
+        dict_gallery_info = q_picture_album.dict_gallery_info
+        try:
+            gallery_url = dict_gallery_info['url']
+            gallery_title = dict_gallery_info['title']
+        except:
+            gallery_url = None
+            gallery_title = None
+        if gallery_title is not None and gallery_url is not None:   
+            print(f'다운받을 이미지 주소 정보가 없습니다.갤러리 주소를 이용하여 이미지 주소를 먼저 크롤링 합니다.')
+            get_image_url_from_gallery_info(gallery_title, gallery_url)
+            q_picture_album.refresh_from_db()
+            list_picture_url_album = q_picture_album.list_picture_url_album
+            if list_picture_url_album is not None and len(list_picture_url_album) > 0:
+                print(f'다운받을 이미지 주소 정보를 크롤링 하였습니다. 다운로드를 시작합니다.')
+                download_image_using_image_url_inside_function(q_picture_album_id)
+            else:
+                print(f'다운받을 이미지 주소 정보를 크롤링 실패하였습니다.')
+                list_picture_id_parsing_error.append(q_picture_album.id)
+        else:
+            print(f'다운받을 갤러리 주소 정보가 없습니다.')
+            list_picture_id_parsing_error.append(q_picture_album.id)
     data = {
         'list_picture_id_parsing_error': list_picture_id_parsing_error
     }
@@ -2023,81 +2078,6 @@ def download_image_using_url_w_multiprocessing1():
         print(f'remained mission: {tot_num_mission}')
     
     return True 
-
-
-    # p = 1
-    # for q_picture_album in qs_picture_album:
-    #     print(f'********************* q_picture_album_id: {q_picture_album.id}')
-    #     # 다운받은 이미지 파일이 존재하는지 체크
-    #     hashcode = q_picture_album.hashcode
-    #     DOWNLOAD_PICTURE_DIR = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE)
-    #     test_file_name = f'{hashcode}-o-1.jpg'
-    #     test_file_path = os.path.join(DOWNLOAD_PICTURE_DIR, test_file_name)
-    #     if os.path.exists(test_file_path):
-    #         print(f'동일한 파일이 존재합니다.')
-    #         check_download_picture = True
-    #     else:
-    #         print(f'동일한 파일이 없습니다. 다운로드합니다.')
-    #         check_download_picture = False
-        
-    #     # 다운받은 파일이 없는 경우 다운로드 수행
-    #     if check_download_picture == False:
-    #         random_sec = random.uniform(2, 4)
-    #         list_job=[]
-    #         start_time = time.time()  # Record the start time
-    #         hashcode = q_picture_album.hashcode
-    #         list_dict_picture_album = q_picture_album.list_dict_picture_album
-    #         list_picture_url_album = q_picture_album.list_picture_url_album
-
-    #         try:
-    #             dict_gallery_info = q_picture_album.dict_gallery_info
-    #         except:
-    #             dict_gallery_info = None
-    #         if dict_gallery_info is not None:
-    #             try:
-    #                 gallery_url = dict_gallery_info['url']
-    #             except:
-    #                 gallery_url = None 
-    #             try:
-    #                 gallery_title = dict_gallery_info['title']
-    #             except:
-    #                 gallery_title = None
-    #         else:
-    #             gallery_url = None
-    #             gallery_title = None
-
-            
-    #         # 다운받아야 하는 이미지 ULR 정보가 없는 경우, list_picture_url_album 정보 획득하기
-    #         if list_picture_url_album is None or len(list_picture_url_album) == 0:
-    #             q_picture_album_id, list_collect_gallery_image_url_all_page_no_dup = get_image_url_from_gallery_info(gallery_title, gallery_url)
-
-    #         q_picture_album.refresh_from_db()
-    #         list_picture_url_album = q_picture_album.list_picture_url_album
-
-    #         # 다운받아야 하는 이미지 ULR 정보가 있는 경우
-    #         if list_picture_url_album is not None and len(list_picture_url_album) > 0:
-    #             download_image_using_image_url(q_picture_album.id)
-
-            
-    #         end_time = time.time()  # Record the end time
-    #         processing_time = end_time - start_time  # Calculate the time difference
-    #         print(f"Task processed {p} in {processing_time:.4f} seconds") 
-            
-    #         # Get current local date & time
-    #         now = datetime.datetime.now()
-    #         print(f"Completed time: {now}")
-    #         p = p + 1
-    #     else:
-    #         pass 
-
-    #     tot_num_mission = tot_num_mission - 1
-    #     print(f'remained mission: {tot_num_mission}')
-    # return True
-    
-
-
-
-
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -2339,6 +2319,200 @@ def update_missing_files_in_list_dict_picture_album():
 
 # Picture Album 오류 수정하기
 @shared_task
+def check_picture_album_defect_and_correct_by_album(q_picture_album_id):
+    q_systemsettings_hansent = SystemSettings_HansEnt.objects.filter(check_discard=False).last()
+    list_done_cover_resize_id = q_systemsettings_hansent.list_done_cover_resize_id
+    if list_done_cover_resize_id is None:
+        list_done_cover_resize_id = []
+
+    q_picture_album = Picture_Album.objects.get(id=q_picture_album_id)
+    selected_vault = q_picture_album.selected_vault
+
+    # print('# # 다운받은 이미지 정보와 실제 다운받은 파일이 있는지 체크')
+    # folder_path = os.path.join(settings.MEDIA_ROOT, selected_vault, 'picture')
+    list_dict_picture_album = q_picture_album.list_dict_picture_album
+    list_check_file_original = []
+    if list_dict_picture_album is not None and len(list_dict_picture_album) > 1:
+        for dict_picture_album in list_dict_picture_album:
+            image_name_original = dict_picture_album['original']
+            file_path = os.path.join(settings.MEDIA_ROOT, selected_vault, 'picture', image_name_original)
+            if not os.path.exists(file_path):
+                list_dict_picture_album.remove(dict_picture_album)
+                list_check_file_original.append(False)
+            else:
+                list_check_file_original.append(False)
+        check_4k_downloaded = q_picture_album.check_4k_downloaded
+        if list_check_file_original.count(True)/len(list_check_file_original) < 0.5:
+            check_4k_downloaded = False
+        data = {
+            'list_dict_picture_album': list_dict_picture_album,
+            'check_4k_downloaded': check_4k_downloaded
+        }
+        Picture_Album.objects.filter(id=q_picture_album.id).update(**data)
+        q_picture_album.refresh_from_db()
+
+    # print('# # 이미지 다운받았으나 체크되지 않은 상태 변경하기')
+    if q_picture_album.check_url_downloaded == False:
+        check_url_downloaded = q_picture_album.check_url_downloaded
+        list_picture_url_album = q_picture_album.list_picture_url_album
+        if list_picture_url_album is None or len(list_picture_url_album) == 0:
+            num_list_picture_url_album = 0
+        else:    
+            num_list_picture_url_album = len(list_picture_url_album)
+
+        list_dict_picture_album = q_picture_album.list_dict_picture_album
+        if list_dict_picture_album is not None and len(list_dict_picture_album) > 0:
+            num_list_dict_picture_album = len(list_dict_picture_album)
+        else:
+            num_list_dict_picture_album = 0 
+        if num_list_picture_url_album > 0 and num_list_dict_picture_album > 1 and check_url_downloaded == False:
+            data = {
+                'check_url_downloaded': True
+            }
+            Picture_Album.objects.filter(id=q_picture_album.id).update(**data)
+
+    # print('# # 오리지널만 저장된 상태로 list dict 내용이 모두 들어간 경우. 커버, 썸네일 다시 저장하기 함수')
+    if q_picture_album.id not in list_done_cover_resize_id:
+        list_done_cover_resize_id.append(q_picture_album.id)
+        hashcode = q_picture_album.hashcode
+        file_extension = 'jpg'
+        image_name_original_base = f'{hashcode}-o-'
+        image_name_original_first = f'{hashcode}-o-{1}.{file_extension}'
+        
+        # 오리지널 첫 번째 이미지 저장됐나 확인
+        file_path_original_first = os.path.join(settings.MEDIA_ROOT, selected_vault, 'picture', image_name_original_first)
+        directory_picture_path_ = os.path.join(settings.MEDIA_ROOT, selected_vault, 'picture')
+        if os.path.exists(file_path_original_first):
+            check_original_downloaded = True
+        else:
+            check_original_downloaded = False
+
+        list_check_image_file_downloaded = []
+        num_tot_original_images = 0
+        if check_original_downloaded == True:
+            # DB에 저장된 오리지널 이미지 파악
+            for filename in os.listdir(directory_picture_path_):
+                if image_name_original_base in filename:
+                    filename = filename.split('.')[0]
+                    filename = filename.split('-o-')[-1]
+                    try:
+                        filename = int(filename)
+                    except:
+                        try:
+                            filename = filename.spiit('_')[0]
+                            filename = int(filename)
+                        except:
+                            filename = None
+                    if filename is not None:
+                        list_check_image_file_downloaded.append(filename)
+            num_tot_original_images = len(list_check_image_file_downloaded)
+        
+        # 마지막 커버 / 썸네일 이미지 저장됐나 확인
+        check_cover_downloaded = False
+        check_thumbnail_downloaded = False
+        if num_tot_original_images > 0:
+            image_name_cover_last = f'{hashcode}-c-{num_tot_original_images}.{file_extension}'
+            image_name_thumbnail_last = f'{hashcode}-t-{num_tot_original_images}.{file_extension}'
+            file_path_cover_last = os.path.join(settings.MEDIA_ROOT, selected_vault, 'picture', image_name_cover_last)
+            file_path_thumbnail_last = os.path.join(settings.MEDIA_ROOT, selected_vault, 'picture', image_name_thumbnail_last)
+            if os.path.exists(file_path_cover_last):
+                check_cover_downloaded = True
+            if os.path.exists(file_path_thumbnail_last):
+                check_thumbnail_downloaded = True
+            
+        if check_original_downloaded == True:
+            if check_cover_downloaded != True or check_thumbnail_downloaded != True:
+                if len(list_check_image_file_downloaded) > 0:
+                    print("커버/썸네일 저장중 ")
+                    for image_number in list_check_image_file_downloaded:
+                        image_name_original = f'{hashcode}-o-{image_number}.{file_extension}'
+                        image_name_cover = f'{hashcode}-c-{image_number}.{file_extension}'
+                        image_name_thumbnail = f'{hashcode}-t-{image_number}.{file_extension}'
+                        file_path_original = os.path.join(settings.MEDIA_ROOT, selected_vault, 'picture', image_name_original)
+                        try:
+                            image_pil = Image.open(file_path_original)
+                            img_width, img_height = image_pil.size
+
+                            if check_cover_downloaded == False:
+                                if os.path.exists(image_name_cover):
+                                    pass 
+                                else:
+                                    # 오리지널 이미지로부터 커버 이미지 변환 시작
+                                    cover_pil = resize_with_padding(image_pil, 520, 640)  # Target size: 300x300 with white background
+                                    file_path_cover = os.path.join(settings.MEDIA_ROOT, selected_vault, 'picture', image_name_cover)
+                                    try:
+                                        cover_pil.save(file_path_cover)
+                                    except:
+                                        print('cover_pil is None!')
+                                        pass
+
+                            if check_thumbnail_downloaded == False:
+                                if os.path.exists(file_path_thumbnail_last):
+                                    pass 
+                                else:
+                                    # 오리지널 이미지로부터 썸네일 이미지 변환 시작
+                                    thumbnail_pil = resize_with_padding(image_pil, 260, 320)  # Target size: 300x300 with white background
+                                    file_path_thumbnail = os.path.join(settings.MEDIA_ROOT, selected_vault, 'picture', image_name_thumbnail)
+                                    try:
+                                        thumbnail_pil.save(file_path_thumbnail) 
+                                    except:
+                                        print('thumbnail_pil is None!')
+                                        pass
+                        except:
+                            print('Save Error !!!!  q_pictuer_album_id : ', hashcode)
+        
+                    data = {
+                        'list_done_cover_resize_id': list_done_cover_resize_id,
+                    }
+                    SystemSettings_HansEnt.objects.filter(id=q_systemsettings_hansent.id).update(**data)
+                    q_systemsettings_hansent.refresh_from_db()
+    
+    print(f'끝난 작업 앨범 ID: {q_picture_album_id}')
+    return True
+
+# Picture Album 오류 수정하기 멀티로
+@shared_task
+def check_picture_album_defect_and_correct_by_multiprocessing():
+
+    max_processor = 100
+    timeout_sec = 200
+    random_sec = random.uniform(2, 4)
+    time.sleep(random_sec)
+    list_job=[]
+    list_result = []
+    start_time = time.time()  # Record the start time
+
+    qs_picture_album = Picture_Album.objects.filter(Q(check_discard=False))
+    total_num_tasks = len(qs_picture_album)
+    print(f'total_num_tasks: {total_num_tasks}')
+
+    if qs_picture_album is not None and len(qs_picture_album) > 0:
+        for q_picture_album in qs_picture_album:
+            list_job.append((q_picture_album.id))
+    
+    if len(list_job) > 0:
+        # 실제 사용할 프로세서 개수 정하기
+        req_processor = len(list_job)
+        if max_processor > req_processor:
+            final_processor = req_processor
+        else:
+            final_processor = max_processor
+        print(f'final_processor: {final_processor}')
+        
+        try:
+            signal.alarm(timeout_sec)
+            print('# 1-1. Picture Album 오류 수정하기 멀티로')
+            with b_Pool(processes=final_processor) as pool:
+                list_result = pool.starmap(check_picture_album_defect_and_correct_by_album, list_job)
+            signal.alarm(0)
+        except Exception as e:
+            print(f"An error occurred 1: {e}")
+
+    print(list_result.count)
+
+
+# Picture Album 오류 수정하기
+@shared_task
 def check_picture_album_defect_and_correct():
     q_systemsettings_hansent = SystemSettings_HansEnt.objects.filter(check_discard=False).last()
     list_done_cover_resize_id = q_systemsettings_hansent.list_done_cover_resize_id
@@ -2346,12 +2520,38 @@ def check_picture_album_defect_and_correct():
         list_done_cover_resize_id = []
 
     qs_picture_album = Picture_Album.objects.filter(Q(check_discard=False))
-    print(len(qs_picture_album))
+    total_num_tasks = len(qs_picture_album)
+    print(f'total_num_tasks: {total_num_tasks}')
     
     if qs_picture_album is not None and len(qs_picture_album) > 0:
         start_time = time.time()  # Record the start time
         p = 1    
         for q_picture_album in qs_picture_album:
+
+            # print('# # 다운받은 이미지 정보와 실제 다운받은 파일이 있는지 체크')
+            selected_vault = q_picture_album.selected_vault
+            # folder_path = os.path.join(settings.MEDIA_ROOT, selected_vault, 'picture')
+            list_dict_picture_album = q_picture_album.list_dict_picture_album
+            list_check_file_original = []
+            if list_dict_picture_album is not None and len(list_dict_picture_album) > 1:
+                for dict_picture_album in list_dict_picture_album:
+                    image_name_original = dict_picture_album['original']
+                    file_path = os.path.join(settings.MEDIA_ROOT, selected_vault, 'picture', image_name_original)
+                    if not os.path.exists(file_path):
+                        list_dict_picture_album.remove(dict_picture_album)
+                        list_check_file_original.append(False)
+                    else:
+                        list_check_file_original.append(False)
+                check_4k_downloaded = q_picture_album.check_4k_downloaded
+                if list_check_file_original.count(True)/len(list_check_file_original) < 0.5:
+                    check_4k_downloaded = False
+                data = {
+                    'list_dict_picture_album': list_dict_picture_album,
+                    'check_4k_downloaded': check_4k_downloaded
+                }
+                Picture_Album.objects.filter(id=q_picture_album.id).update(**data)
+                q_picture_album.refresh_from_db()
+                    
 
             # print('# # 이미지 다운받았으나 체크되지 않은 상태 변경하기')
             if q_picture_album.check_url_downloaded == False:
@@ -2374,7 +2574,6 @@ def check_picture_album_defect_and_correct():
                     Picture_Album.objects.filter(id=q_picture_album.id).update(**data)
 
             # print('# # 오리지널만 저장된 상태로 list dict 내용이 모두 들어간 경우. 커버, 썸네일 다시 저장하기 함수')
-
             if q_picture_album.id not in list_done_cover_resize_id:
                 list_done_cover_resize_id.append(q_picture_album.id)
                 hashcode = q_picture_album.hashcode
@@ -2469,6 +2668,7 @@ def check_picture_album_defect_and_correct():
                             }
                             SystemSettings_HansEnt.objects.filter(id=q_systemsettings_hansent.id).update(**data)
                             q_systemsettings_hansent.refresh_from_db()
+            print(f'진행상황: {p}/{total_num_tasks}, progress: {round(p/total_num_tasks, 1)}) %')
             p = p + 1
         
         end_time = time.time()  # Record the end time

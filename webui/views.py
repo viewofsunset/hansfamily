@@ -1545,7 +1545,8 @@ def hans_ent_test_function(request):
 
         if request.POST.get('button') == 'picture_3':
             print('************ Check Downloaded image')
-            check_picture_album_defect_and_correct.delay()
+            # check_picture_album_defect_and_correct.delay()
+            check_picture_album_defect_and_correct_by_multiprocessing.delay()
         
         if request.POST.get('button') == 'picture_4':
             print('************ Update Missing File to List')
@@ -2231,13 +2232,36 @@ def hans_ent_actor_profile_modal(request):
                     }
                     list_serialized_data_picture_album_by_actor.append(data)
                 print("list_serialized_data_picture_album_by_actor", len(list_serialized_data_picture_album_by_actor))
+
+            # 선택된 Actor에 등록된 사진앨범 중 4KHD 이미지 다운 못받은 앨범 모두 다운받기
+            if request.POST.get('button') == 'download_image_from_given_image_url':
+                qs_picture_album_selected = Picture_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor) & Q(check_4k_uploaded=False))
+                if qs_picture_album_selected is not None and len(qs_picture_album_selected) > 0:
+                    for q_picture_album_selected in qs_picture_album_selected:
+                        pass 
+
+                # dict_gallery_info = q_picture_album_selected.dict_gallery_info
+                # if dict_gallery_info is not None and len(dict_gallery_info) > 0:
+                #     print(f'# 선택한 앨범의 Gallery URL 정보를 시스템 세팅 DB에 저장하기: {dict_gallery_info}')
+                #     data = {
+                #         'dict_gallery_info_for_crawling_image_url': {'id': q_picture_album_selected.id, 'dict_gallery_info': dict_gallery_info}
+                #     }
+                #     SystemSettings_HansEnt.objects.filter(id=q_systemsettings_hansent.id).update(**data)
+                #     q_systemsettings_hansent.refresh_from_db()
+                #     print('백그라운드에서 선택한 앨범의 이미지 URL 수집을 실행합니다.')
+                #     download_image_from_image_url_info_from_views.delay()
+                # else:
+                #     print('앨범에 Gallery URL 정보가 없습니다. !!.')
+                #     pass
+            
+                
+            # serialization
             if qs_video_album is not None and len(qs_video_album) > 0:
                 list_serialized_data_video_album_by_actor = Video_Album_Serializer(qs_video_album, many=True).data
                 print("list_serialized_data_video_album_by_actor", len(list_serialized_data_video_album_by_actor))
             if qs_music_album is not None and len(qs_music_album) > 0:
                 list_serialized_data_music_album_by_actor = Music_Album_Serializer(qs_video_album, many=True).data
                 print("list_serialized_data_music_album_by_actor", len(list_serialized_data_music_album_by_actor))
-
             if q_picture_album:
                 selected_serialized_data_picture_album = Picture_Album_Serializer(q_picture_album, many=False).data
             if q_video_album:
@@ -2282,6 +2306,9 @@ def hans_ent_actor_profile_modal(request):
                     'dict_picture_album': dict_picture_album,
                     'picture_url': picture_url,
                 }
+
+        
+
                 
             if q_video_album:
                 print('q_video_album', q_video_album)

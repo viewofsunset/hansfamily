@@ -11,7 +11,7 @@
 
             <div class="modal-header">
                 <h1 class="modal-title fs-4" id="modal_header_h1"> 
-                    Create New Picture Album  
+                    Create New Picture Album   [[ data_picture.id ]] / [[ data_actor.id ]]
                 </h1>
                 &nbsp; 
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -184,13 +184,7 @@
 								</div>
 							</td>
 							<td style="background-color:rgb(255,255,255,0.05)">
-								<div v-if="status_create == false">
-									<input type="file" @change="f_file_album_files_select" multiple class="form-control" id="id_picture_create_input_files_upload" ref="ref_picture_create_input_files_upload">
-								</div>
-								<div v-else>
-									Picture 앨범을 먼저 생성하세요.
-								</div>
-								
+								<input type="file" multiple @change="f_file_album_files_select"  class="form-control" id="id_picture_create_input_files_upload" ref="ref_picture_create_input_files_upload">
 							</td>
 						</tr>
 						<tr>

@@ -11,23 +11,35 @@
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h1 class="modal-title fs-4" id="exampleModalLabel">
-					Update Actor: [[ data_actor.name ]]
-				</h1>
-				&nbsp; 
-				<!-- 
-					Icons  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				--> 
-				
-				<button @click="f_hans_ent_actor_profile_modal_open(data_actor.id)" type="button" class="btn" data-bs-toggle="modal" data-bs-target="#app_hans_ent_actor_profile_modal">
-					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
-						<path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
-						<path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
-					</svg> 
-				</button>
-				&nbsp;
-				
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				<table class="table">
+					<tr>
+						<th class="alnleft" rowspan="2">
+							<h1 class="modal-title fs-4" id="exampleModalLabel">
+								Update Actor: [[ data_actor.name ]]
+							</h1>
+						</th>
+						<td width="35%" class="alnright">
+							<!--
+								아이콘들 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							-->
+							<button @click="f_hans_ent_actor_profile_modal_open(data_actor.id)" type="button" class="btn" data-bs-toggle="modal" data-bs-target="#app_hans_ent_actor_profile_modal">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-bounding-box" viewBox="0 0 16 16">
+									<path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5"/>
+									<path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+								</svg> 
+							</button>
+							&nbsp;
+							<button @click="f_hans_ent_actor_profile_update_modal_refresh(data_actor.id)" class="btn">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+									<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+									<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+								</svg>
+							</button>
+							&nbsp; 
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</td>
+					</tr>
+				</table>
 			</div>
 
 			<div class="modal-body">

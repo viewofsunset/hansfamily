@@ -1322,9 +1322,273 @@
 
 
 
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // 상태 변경 함수
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  
+                
+                // Cover image 선택/변경/
+                f_replace_registered_actor_profile_cover_image() {
+                    if (this.status_cover_image_change === true) {
+                        this.status_cover_image_change = false
+                    } else {
+                        this.status_cover_image_change = true
+                    }
+                },
+
+                f_replace_registered_picture_album_cover_image() {
+                    if (this.status_cover_image_change === true) {
+                        this.status_cover_image_change = false
+                    } else {
+                        this.status_cover_image_change = true
+                    }
+                },
+
+                f_replace_registered_manga_album_cover_image() {
+                    if (this.status_cover_image_change === true) {
+                        this.status_cover_image_change = false
+                    } else {
+                        this.status_cover_image_change = true
+                    }
+                },
+
+                f_replace_registered_video_album_cover_image() {
+                    if (this.status_cover_image_change === true) {
+                        this.status_cover_image_change = false
+                    } else {
+                        this.status_cover_image_change = true
+                    }
+                },
+
+                f_replace_registered_music_album_cover_image() {
+                    if (this.status_cover_image_change === true) {
+                        this.status_cover_image_change = false
+                    } else {
+                        this.status_cover_image_change = true
+                    }
+                },
+                
+                // Cover image 제거를 위한 상태 변경 /
+                f_remove_registered_profile_album_picture(event) {
+                    console.log(event)
+                    if (this.status_profile_album_picture_remove === true) {
+                        this.status_profile_album_picture_remove = false
+                    } else {
+                        this.status_profile_album_picture_remove = true
+                    }
+                },
+
+                f_remove_registered_picture_album_picture() {
+                    if (this.status_picture_album_picture_remove === true) {
+                        this.status_picture_album_picture_remove = false
+                    } else {
+                        this.status_picture_album_picture_remove = true
+                    }
+                },
+
+                // manga
+
+                // f_status_manga_update_checkbox_covoer_image_update() {
+                //     if (this.status_manga_update_checkbox_covoer_image_update === true) {
+                //         this.status_manga_update_checkbox_covoer_image_update = false
+                //     } else {
+                //         this.status_manga_update_checkbox_covoer_image_update = true
+                //     }
+                // },
+
+
+                // Video Album
+                f_status_video_album_picture_remove() {
+                    if (this.status_video_album_picture_remove === true) {
+                        this.status_video_album_picture_remove = false
+                    } else {
+                        this.status_video_album_picture_remove = true
+                    }
+                },
+
+                f_status_video_album_video_remove() {
+                    if (this.status_video_album_video_remove === true) {
+                        this.status_video_album_video_remove = false
+                    } else {
+                        this.status_video_album_video_remove = true
+                    }
+                },
+
+                f_status_video_album_video_still_generate() {
+                    if (this.status_video_album_video_still_generate === true) {
+                        this.status_video_album_video_still_generate = false
+                    } else {
+                        this.status_video_album_video_still_generate = true
+                    }
+                },
+
+                // Music Album
+                f_status_music_album_picture_remove() {
+                    if (this.status_music_album_picture_remove === true) {
+                        this.status_music_album_picture_remove = false
+                    } else {
+                        this.status_music_album_picture_remove = true
+                    }
+                },
+
+                f_status_music_album_music_remove() {
+                    if (this.status_music_album_music_remove === true) {
+                        this.status_music_album_music_remove = false
+                    } else {
+                        this.status_music_album_music_remove = true
+                    }
+                },
+
+
+                f_status_visibility_list_incompleted() {
+                    console.log('f_status_visibility_list_incompleted', this.status_visibility_list_incompleted)
+                    if (this.status_visibility_list_incompleted === true) {
+                        this.status_visibility_list_incompleted = false
+                    } else {
+                        this.status_visibility_list_incompleted = true
+                    }
+                },
+
+                f_status_visibility_list_completed() {
+                    console.log('f_status_visibility_list_completed', this.status_visibility_list_completed)
+                    if (this.status_visibility_list_completed === true) {
+                        this.status_visibility_list_completed = false
+                    } else {
+                        this.status_visibility_list_completed = true
+                    }
+                },
+
+
+                f_hans_ent_video_gallery_item_display_status_change() {
+                    this.status_video_gallery_item_display_screenshot = !this.status_video_gallery_item_display_screenshot
+                },
+
+
+
+
+
+
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Form Input 정보 임시저장
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+
+                f_input_text_name(event) {
+                    this.input_text_name = event.target.value
+                },
+
+                f_input_text_synonyms(event) {
+                    this.input_text_synonyms = event.target.value
+                },
+
+                f_input_date_birthday(event) {
+                    this.input_date_birthday = event.target.value
+                },
+            
+                f_input_number_height(event) {
+                    this.input_number_height = event.target.value
+                },
+
+                f_input_number_volume(event) {
+                    this.input_number_volume = event.target.value
+                    this.f_manga_volume_select_for_album_upload()
+                },
+                
+                f_input_text_title(event) {
+				this.input_text_title = event.target.value
+                },
+
+                f_input_text_studio(event) {
+                    this.input_text_studio = event.target.value
+                },
+
+                f_input_date_released(event) {
+                    this.input_date_released = event.target.value
+                },
+
+                f_input_text_tag(event) {
+                    this.input_text_tag = event.target.value
+                },
+
+                f_input_info_site_name(event) {
+                    this.input_info_site_name = event.target.value
+                },
+
+                f_input_info_site_url(event) {
+                    this.input_info_site_url = event.target.value
+                },
+
+                f_file_actor_images_select(event) {
+                    this.images = event.target.files;
+                },
+
+                f_file_album_files_select(event) {
+                    this.files = event.target.files;
+                    console.log(this.files)
+                },
+
+                f_video_album_steaming_url_upload(event) {
+                    this.input_streaming_video_url = event.target.value
+                    console.log(this.input_streaming_video_url)
+                },
+
+                f_file_album_images_select(event) {
+                    this.images = event.target.files;
+                },
+
+                f_file_album_videos_select(event) {
+                    this.videos = event.target.files;
+                },
+
+                f_file_album_audios_select(event) {
+                    this.audios = event.target.files;
+                },
+
+                f_input_number_parsing_id(event) {
+                    this.input_number_parsing_id = event.target.value;
+                },
+
+                f_input_text_url(event) {
+                    this.input_text_url = event.target.value;
+                },
+
+                f_input_text_img_url(event) {
+                    this.input_text_img_url = event.target.value;
+                },
+
+                f_select_category_album(event) {
+                    console.log('f_select_category_actor', event)
+                    this.selected_filtering_category_id = event[0]
+                    this.selected_filtering_category_name = event[1]
+                },
+
+
+
+
+
 
 
                 
+
+
+
+
+
+
+
+                
+
+
+
+
+
+
+
+
+
+
 
 
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1506,7 +1770,7 @@
                             this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
                             })
                             .then((response) => {
-                                // this.f_hide_all_modals_hans_ent()
+                                $('#app_hans_ent_actor_create_modal').modal('hide')
                                 this.show_progress = false;
 
                                 console.log('Actor Created!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ')
@@ -1570,8 +1834,14 @@
                         this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
                         })
                         .then((response) => {
+                            this.f_reset_data_picture_album_create_form()
+                            $('#app_hans_ent_picture_album_create_modal').modal('hide')
+
                             this.data_actor = response.data['selected_serialized_data_actor']
                             this.data_picture = response.data['selected_serialized_data_picture_album']
+                            
+                            console.log('actor ------------------------- 3', this.data_actor)
+                            console.log('picture ------------------------- 3', this.data_picture)
 
                             this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
                             this.f_selected_serialized_json_data_parsing_picture(this.data_picture)
@@ -1581,9 +1851,7 @@
                             } else {
                                 this.status_create = true
                             }
-
-                            this.f_reset_data_picture_album_create_form()
-                            this.f_hide_all_modals_hans_ent()
+                            
                             $('#app_hans_ent_picture_album_update_modal').modal('show')
                             console.log('f_picture_album_create_form')
                         })
@@ -1622,6 +1890,9 @@
                             this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
                             })
                             .then((response) => {
+                                this.f_reset_data_manga_album_create_form()
+                                this.f_hide_all_modals_hans_ent()
+
                                 this.data_actor = response.data['selected_serialized_data_actor']
                                 this.data_manga = response.data['selected_serialized_data_manga_album']
 
@@ -1634,8 +1905,7 @@
                                     this.status_create = true
                                 }
 
-                                this.f_reset_data_manga_album_create_form()
-                                this.f_hide_all_modals_hans_ent()
+                               
                                 $('#app_hans_ent_manga_album_update_modal').modal('show')
                                 console.log('f_manga_album_create_form')
                             })
@@ -1692,6 +1962,9 @@
                         this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
                         })
                         .then((response) => {
+                            this.f_reset_data_video_album_create_form()
+                            this.f_hide_all_modals_hans_ent()
+
                             this.data_actor = response.data['selected_serialized_data_actor']
                             this.data_video = response.data['selected_serialized_data_video_album']
                             
@@ -1703,9 +1976,6 @@
                             } else {
                                 this.status_create = true
                             }
-
-                            this.f_reset_data_video_album_create_form()
-                            this.f_hide_all_modals_hans_ent()
                             $('#app_hans_ent_video_album_update_modal').modal('show')
                             console.log('f_video_album_create_form')
                         })
@@ -1743,6 +2013,9 @@
                             this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
                             })
                             .then((response) => {
+                                this.f_reset_data_music_album_create_form()
+                                this.f_hide_all_modals_hans_ent()
+
                                 this.data_actor = response.data['selected_serialized_data_actor']
                                 this.data_music = response.data['selected_serialized_data_music_album']
                                 
@@ -1754,9 +2027,6 @@
                                 } else {
                                     this.status_create = true
                                 }
-
-                                this.f_reset_data_music_album_create_form()
-                                this.f_hide_all_modals_hans_ent()
                                 $('#app_hans_ent_music_album_update_modal').modal('show')
                                 console.log('f_music_album_create_form')
                             })
@@ -1788,19 +2058,18 @@
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //
-                //                                                  Update Form
+                //                                                  Modal Open
                 //
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 
 
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Actor
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
                 f_select_site_to_collect_actor_info(event) {
                     console.log('selected key', event)
                     this.selected_site_name_actor_info = event
@@ -1920,6 +2189,7 @@
                     .then((response) => {
                         // console.log('Actor List로부터 Actor Profile Modal로 Data 송신 완료', response.data)
                         if (response.data['check_response'] === 'false') {
+                            this.f_reset_data_actor_create_form()
                             console.log("1111111111111111 picture", response.data)
                             this.message = response.data['message']
                             if (this.message != null) {
@@ -2094,6 +2364,31 @@
                     })
                 },
 
+                // 선택된 Actor에 등록된 사진앨범 중 다운 못받은 앨범 모두 4KHD에서 이미지 다운로드드
+                f_hans_ent_actor_profile_picture_album_download_image_from_given_image_url(event) {
+                    this.selected_actor_id = event
+                    console.log('선택된 Actor 아이디', this.selected_actor_id)
+                    axios.post('/hans_ent_actor_profile_modal/', {
+                        'button': 'download_image_from_given_image_url',
+                        'selected_actor_id': this.selected_actor_id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        // this.data_picture = response.data['selected_serialized_data_picture_album']
+                        // this.f_selected_serialized_json_data_parsing_picture(this.data_picture)
+                        // this.f_refreshData_picture_album_list()           
+                        alert('갤러리 접속하여 이미지 URL 다운로드를 수행합니다.')         
+                        console.log('Success! f_hans_ent_picture_album_download_image_from_given_image_url',)
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_picture_album_download_image_from_given_image_url')
+                    })
+                },
+
                 // Actor Gallery Open
                 f_hans_ent_actor_gallery_modal_open(event) {
                     this.selected_actor_id = event
@@ -2121,11 +2416,11 @@
 
 
 
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Picture Album 
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
                 
                 // Picture Album Create Open
                 f_hans_ent_picture_album_create_modal_oepn() {
@@ -2162,6 +2457,7 @@
                     })
                 },
 
+                // 선택된 사진 앨범 이미지 4KHD에서 다운로드드
                 f_hans_ent_picture_album_download_image_from_given_image_url(event) {
                     this.selected_picture_album_id = event
                     console.log('선택된 사진 앨범 아이디', this.selected_picture_album_id)
@@ -2186,6 +2482,8 @@
                     })
                 },
 
+                
+
 
                 // Picture Album Create Open by Actor Id
                 f_hans_ent_picture_album_create_modal_open_by_actor_id(event) {
@@ -2200,8 +2498,11 @@
                     }
                     })
                     .then((response) => {
+                        this.f_reset_data_picture_album_create_form()
+                        $('#app_hans_ent_actor_profile_modal').modal('hide')
+                        
                         this.data_actor = response.data['selected_serialized_data_actor']
-                        console.log('this.data_actor', this.data_actor)
+                        console.log('actor ------------------------- 1', this.data_actor)
                         this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
                         
                         if (Object.keys(this.data_actor).length > 0 ) {
@@ -2214,10 +2515,6 @@
                         }
 
                         this.list_xxx_category = response.data['LIST_PICTURE_CATEGORY']
-                        
-                        this.f_reset_data_picture_album_create_form()
-                        this.f_hide_all_modals_hans_ent()
-
                         this.input_text_title = this.data_actor.name + ' - Images'
                         
                         if (Object.keys(this.data_actor).length > 0 ) {
@@ -2227,7 +2524,8 @@
                         }
                         
                         $('#app_hans_ent_picture_album_create_modal').modal('show')
-                        console.log('f_hans_ent_picture_album_create_modal_open_by_actor_id')
+                        console.log('actor ------------------------- 2', this.data_actor)
+                        console.log('@@@@@@@@@@@@@@@@    f_hans_ent_picture_album_create_modal_open_by_actor_id')
                     })
                     .catch(() => {
                         console.log('Error! ### Actor Profile 창에서 사진 앨범 업로드 모달창으로 송신 오류')
@@ -2491,22 +2789,6 @@
                         this.list_picture_album_image_id_for_checkbox_selection = this.list_picture_album_image_id_for_checkbox_selection.filter(item => item !== event); // 2nd parameter means remove one item only
                     }
                     console.log('2', this.list_picture_album_image_id_for_checkbox_selection)
-
-                    // const index = list_picture_album_image_id_for_checkbox_selection.indexOf(event);
-                    // if (this.list_picture_album_image_id_for_checkbox_selection.includes(event)) {
-                    //     this.list_picture_album_image_id_for_checkbox_selection.push(event);
-                    // } else {
-                    //     if (index > -1) {
-                    //         this.list_picture_album_image_id_for_checkbox_selection = list_picture_album_image_id_for_checkbox_selection.splice(index, 1);
-                    //     }
-                    // }
-                    
-                    // const index = this.list_picture_album_image_id_for_checkbox_selection.indexOf(event);
-                    // if (index === -1) {
-                    // this.list_picture_album_image_id_for_checkbox_selection.push(event);
-                    // } else {
-                    // this.list_picture_album_image_id_for_checkbox_selection.splice(index, 1);
-                    // }
                 },
 
                 f_picture_album_image_multi_selection_checkbox_empty_list() {
@@ -2648,14 +2930,10 @@
 
                 
 
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Manga Album 
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 
-
-
 
                 // Manga Album Create Open
                 f_hans_ent_manga_album_create_modal_oepn() {
@@ -2978,11 +3256,11 @@
                 },
 
 
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Video Album
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 // Video Album Create Open
                 f_hans_ent_video_album_create_modal_open() {
@@ -3316,243 +3594,7 @@
 
 
 
-                
-                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                // 상태 변경 함수
-                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                  
-                
-                // Cover image 선택/변경/
-                f_replace_registered_actor_profile_cover_image() {
-                    if (this.status_cover_image_change === true) {
-                        this.status_cover_image_change = false
-                    } else {
-                        this.status_cover_image_change = true
-                    }
-                },
 
-                f_replace_registered_picture_album_cover_image() {
-                    if (this.status_cover_image_change === true) {
-                        this.status_cover_image_change = false
-                    } else {
-                        this.status_cover_image_change = true
-                    }
-                },
-
-                f_replace_registered_manga_album_cover_image() {
-                    if (this.status_cover_image_change === true) {
-                        this.status_cover_image_change = false
-                    } else {
-                        this.status_cover_image_change = true
-                    }
-                },
-
-                f_replace_registered_video_album_cover_image() {
-                    if (this.status_cover_image_change === true) {
-                        this.status_cover_image_change = false
-                    } else {
-                        this.status_cover_image_change = true
-                    }
-                },
-
-                f_replace_registered_music_album_cover_image() {
-                    if (this.status_cover_image_change === true) {
-                        this.status_cover_image_change = false
-                    } else {
-                        this.status_cover_image_change = true
-                    }
-                },
-                
-                // Cover image 제거를 위한 상태 변경 /
-                f_remove_registered_profile_album_picture(event) {
-                    console.log(event)
-                    if (this.status_profile_album_picture_remove === true) {
-                        this.status_profile_album_picture_remove = false
-                    } else {
-                        this.status_profile_album_picture_remove = true
-                    }
-                },
-
-                f_remove_registered_picture_album_picture() {
-                    if (this.status_picture_album_picture_remove === true) {
-                        this.status_picture_album_picture_remove = false
-                    } else {
-                        this.status_picture_album_picture_remove = true
-                    }
-                },
-
-                // manga
-
-                // f_status_manga_update_checkbox_covoer_image_update() {
-                //     if (this.status_manga_update_checkbox_covoer_image_update === true) {
-                //         this.status_manga_update_checkbox_covoer_image_update = false
-                //     } else {
-                //         this.status_manga_update_checkbox_covoer_image_update = true
-                //     }
-                // },
-
-
-                // Video Album
-                f_status_video_album_picture_remove() {
-                    if (this.status_video_album_picture_remove === true) {
-                        this.status_video_album_picture_remove = false
-                    } else {
-                        this.status_video_album_picture_remove = true
-                    }
-                },
-
-                f_status_video_album_video_remove() {
-                    if (this.status_video_album_video_remove === true) {
-                        this.status_video_album_video_remove = false
-                    } else {
-                        this.status_video_album_video_remove = true
-                    }
-                },
-
-                f_status_video_album_video_still_generate() {
-                    if (this.status_video_album_video_still_generate === true) {
-                        this.status_video_album_video_still_generate = false
-                    } else {
-                        this.status_video_album_video_still_generate = true
-                    }
-                },
-
-                // Music Album
-                f_status_music_album_picture_remove() {
-                    if (this.status_music_album_picture_remove === true) {
-                        this.status_music_album_picture_remove = false
-                    } else {
-                        this.status_music_album_picture_remove = true
-                    }
-                },
-
-                f_status_music_album_music_remove() {
-                    if (this.status_music_album_music_remove === true) {
-                        this.status_music_album_music_remove = false
-                    } else {
-                        this.status_music_album_music_remove = true
-                    }
-                },
-
-
-                f_status_visibility_list_incompleted() {
-                    console.log('f_status_visibility_list_incompleted', this.status_visibility_list_incompleted)
-                    if (this.status_visibility_list_incompleted === true) {
-                        this.status_visibility_list_incompleted = false
-                    } else {
-                        this.status_visibility_list_incompleted = true
-                    }
-                },
-
-                f_status_visibility_list_completed() {
-                    console.log('f_status_visibility_list_completed', this.status_visibility_list_completed)
-                    if (this.status_visibility_list_completed === true) {
-                        this.status_visibility_list_completed = false
-                    } else {
-                        this.status_visibility_list_completed = true
-                    }
-                },
-
-
-                f_hans_ent_video_gallery_item_display_status_change() {
-                    this.status_video_gallery_item_display_screenshot = !this.status_video_gallery_item_display_screenshot
-                },
-
-
-
-                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                // Form Input 정보 임시저장
-                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                
-
-                f_input_text_name(event) {
-                    this.input_text_name = event.target.value
-                },
-
-                f_input_text_synonyms(event) {
-                    this.input_text_synonyms = event.target.value
-                },
-
-                f_input_date_birthday(event) {
-                    this.input_date_birthday = event.target.value
-                },
-            
-                f_input_number_height(event) {
-                    this.input_number_height = event.target.value
-                },
-
-                f_input_number_volume(event) {
-                    this.input_number_volume = event.target.value
-                    this.f_manga_volume_select_for_album_upload()
-                },
-                
-                f_input_text_title(event) {
-				this.input_text_title = event.target.value
-                },
-
-                f_input_text_studio(event) {
-                    this.input_text_studio = event.target.value
-                },
-
-                f_input_date_released(event) {
-                    this.input_date_released = event.target.value
-                },
-
-                f_input_text_tag(event) {
-                    this.input_text_tag = event.target.value
-                },
-
-                f_input_info_site_name(event) {
-                    this.input_info_site_name = event.target.value
-                },
-
-                f_input_info_site_url(event) {
-                    this.input_info_site_url = event.target.value
-                },
-
-                f_file_actor_images_select(event) {
-                    this.images = event.target.files;
-                },
-
-                f_file_album_files_select(event) {
-                    this.files = event.target.files;
-                    console.log(this.files)
-                },
-
-                f_video_album_steaming_url_upload(event) {
-                    this.input_streaming_video_url = event.target.value
-                    console.log(this.input_streaming_video_url)
-                },
-
-                f_file_album_images_select(event) {
-                    this.images = event.target.files;
-                },
-
-                f_file_album_videos_select(event) {
-                    this.videos = event.target.files;
-                },
-
-                f_file_album_audios_select(event) {
-                    this.audios = event.target.files;
-                },
-
-                f_input_number_parsing_id(event) {
-                    this.input_number_parsing_id = event.target.value;
-                },
-
-                f_input_text_url(event) {
-                    this.input_text_url = event.target.value;
-                },
-
-                f_input_text_img_url(event) {
-                    this.input_text_img_url = event.target.value;
-                },
-
-                f_select_category_album(event) {
-                    console.log('f_select_category_actor', event)
-                    this.selected_filtering_category_id = event[0]
-                    this.selected_filtering_category_name = event[1]
-                },
 
 
 
@@ -3572,14 +3614,70 @@
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //
-                // Update Form (페이지 전체 업로드)
+                //                                              Refresh Form (페이지 전체 업로드)
                 //
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+                f_hans_ent_actor_profile_modal_refresh() {
+                    axios.post('/hans_ent_actor_profile_modal/', {
+                        'button': 'refresh_selected_album',
+                        'selected_actor_id': this.data_actor.id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        console.log('f_hans_ent_actor_profile_modal_refresh 완료', response.data)
+
+                        this.data_actor = response.data["selected_serialized_data_actor"]
+                        this.data_picture = response.data["selected_serialized_data_picture_album"]
+                        this.data_video = response.data["selected_serialized_data_video_album"]
+                        this.data_music = response.data["selected_serialized_data_music_album"]
+
+                        this.list_serialized_data_picture_album_by_actor = response.data['list_serialized_data_picture_album_by_actor']
+                        this.list_serialized_data_video_album_by_actor = response.data['list_serialized_data_video_album_by_actor']
+                        this.list_serialized_data_music_album_by_actor = response.data['list_serialized_data_music_album_by_actor']
+
+                        this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
+                        this.f_selected_serialized_json_data_parsing_picture(this.data_picture)
+                        this.f_selected_serialized_json_data_parsing_video(this.data_video)
+                        this.f_selected_serialized_json_data_parsing_music(this.data_music)
+
+                        console.log('Success! f_hans_ent_actor_profile_modal_refresh')
+                        }
+                    )
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_actor_profile_modal_refresh')
+                    })
+                },
+
                 
-                f_hans_ent_actor_update_modal_refresh() {},
+                f_hans_ent_actor_profile_update_modal_refresh() {
+                    axios.post('/hans_ent_actor_update_modal/', {
+                        'button': 'refresh_selected_album',
+                        'selected_actor_id': this.data_actor.id,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })
+                    .then((response) => {
+                        console.log('f_hans_ent_actor_profile_update_modal_refresh 완료', response.data)
+
+                        this.data_actor = response.data["selected_serialized_data_actor"]
+                        this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
+                        console.log('Success! f_hans_ent_actor_profile_update_modal_refresh')
+                        }
+                    )
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_actor_profile_update_modal_refresh')
+                    })
+                },
 
                 f_hans_ent_picture_album_update_modal_refresh() {
                     axios.post('/hans_ent_picture_album_update_modal/', {
@@ -3601,7 +3699,6 @@
                     .catch(() => {
                         console.log('Error! f_hans_ent_picture_album_update_modal_refresh')
                     })
-
                 },
 
                 f_hans_ent_manga_album_update_modal_refresh() {},
@@ -3652,11 +3749,13 @@
 
 
 
+
+
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //
-                // Update Form (페이지 전체 업로드)
+                //                                              Update Form (페이지 전체 업로드)
                 //
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3777,13 +3876,18 @@
                         this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
                         })
                         .then((response) => {
+                            this.f_reset_data_picture_album_update_form()
+
                             this.data_actor = response.data['selected_serialized_data_actor']
                             this.data_picture = response.data['selected_serialized_data_picture_album']
                             
+                            console.log('actor ------------------------- 4', this.data_actor)
+                            console.log('picture ------------------------- 4', this.data_picture)
+
                             this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
                             this.f_selected_serialized_json_data_parsing_picture(this.data_picture)
                             
-                            this.f_reset_data_picture_album_update_form()
+                            
                             console.log('f_picture_album_update_form')
                         })
                         alert('Picture Album Updated Successfully');
@@ -3824,13 +3928,13 @@
                         this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
                         })
                         .then((response) => {
+                            this.f_reset_data_manga_album_update_form()
+
                             this.data_actor = response.data['selected_serialized_data_actor']
                             this.data_manga = response.data['selected_serialized_data_manga_album']
                             
                             this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
                             this.f_selected_serialized_json_data_parsing_manga(this.data_manga)
-                            
-                            this.f_reset_data_manga_album_update_form()
                             console.log('f_manga_album_update_form')
                         })
                         alert('Manga Album Updated Successfully');
@@ -3871,13 +3975,13 @@
                         this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
                         })
                         .then((response) => {
+                            this.f_reset_data_video_album_update_form()
+
                             this.data_actor = response.data['selected_serialized_data_actor']
                             this.data_video = response.data['selected_serialized_data_video_album']
                             
                             this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
                             this.f_selected_serialized_json_data_parsing_video(this.data_video)
-                            
-                            this.f_reset_data_video_album_update_form()
                             console.log('f_video_album_update_form')
                         })
                         alert('Video Album Updated Successfully');
@@ -3922,13 +4026,13 @@
                         this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
                         })
                         .then((response) => {
+                            this.f_reset_data_music_album_update_form()
+
                             this.data_actor = response.data['selected_serialized_data_actor']
                             this.data_music = response.data['selected_serialized_data_music_album']
                             
                             this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
                             this.f_selected_serialized_json_data_parsing_music(this.data_music)
-                            
-                            this.f_reset_data_music_album_update_form()
                             console.log('f_music_album_update_form')
                         })
                         alert('Music Album Updated Successfully');
@@ -6982,7 +7086,6 @@
             app_hans_ent.f_refreshData_actor_list()
 	    });
         $('#app_hans_ent_actor_update_modal').on('hidden.bs.modal', function () {
-            // app_hans_ent.f_reset_data_actor_update_form()
             app_hans_ent.f_refreshData_actor_list()
 	    });
         $('#app_hans_ent_actor_profile_modal').on('hidden.bs.modal', function () {
@@ -6991,18 +7094,18 @@
 
         // Picture Album
         $('#app_hans_ent_picture_album_create_modal').on('hidden.bs.modal', function () {
-            app_hans_ent.f_reset_data_picture_album_create_form()
+            // app_hans_ent.f_reset_data_picture_album_create_form()
+            app_hans_ent.f_refreshData_picture_album_list()
 	    });
         $('#app_hans_ent_picture_album_update_modal').on('hidden.bs.modal', function () {
-            console.log('app_hans_ent_picture_album_update_modal HIDDEN!!')
-            app_hans_ent.f_reset_data_picture_album_update_form()
+            // app_hans_ent.f_reset_data_picture_album_update_form()
             app_hans_ent.f_refreshData_picture_album_list()
 	    });
         $('#app_hans_ent_picture_album_profile_modal').on('hidden.bs.modal', function () {
             app_hans_ent.f_refreshData_picture_album_list()
 	    });
         $('#app_hans_ent_picture_album_gallery_modal').on('hidden.bs.modal', function () {
-            app_hans_ent.f_reset_data_picture_album_gallery_modal()
+            // app_hans_ent.f_reset_data_picture_album_gallery_modal()
             app_hans_ent.f_refreshData_picture_album_list()
 	    });
         $('#app_hans_ent_picture_album_gallery_fullscreen_modal').on('hidden.bs.modal', function () {
@@ -7034,8 +7137,8 @@
         
         // Video Album
         $('#app_hans_ent_video_album_create_modal').on('hidden.bs.modal', function () {
-            console.log('hahahaha')
             app_hans_ent.f_reset_data_video_album_create_form()
+            app_hans_ent.f_refreshData_video_album_list()
 	    });
         $('#app_hans_ent_video_album_update_modal').on('hidden.bs.modal', function () {
             app_hans_ent.f_reset_data_video_album_update_form()
