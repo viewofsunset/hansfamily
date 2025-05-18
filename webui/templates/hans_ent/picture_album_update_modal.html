@@ -326,6 +326,14 @@
 					모달창 제어 버튼 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				-->
 				<div class="modal-footer">
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheck_actor_delete_with_related_album_as_well"
+						@change="f_check_switch_actor_delete_with_related_album_as_well"
+						v-model="check_switch_actor_delete_with_related_album_as_well"
+						>
+						<label class="form-check-label" for="flexSwitchCheck_actor_delete_with_related_album_as_well">Actor 등록앨범 모두 삭제</label>
+						[[ check_switch_actor_delete_with_related_album_as_well ]]
+					</div>
 					<button type="button" class="btn btn-warning"  @click="f_select_picture_album_to_delete(data_picture.id)" data-bs-dismiss="modal">Delete</button>
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 					<button type="button" class="btn btn-primary"  @click="f_picture_album_update_form" >Update</button>

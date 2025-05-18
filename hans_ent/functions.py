@@ -523,6 +523,7 @@ def collect_images_from_registered_video_album_for_actor_profile_cover_image(q_a
     list_images_for_actor_profile = []
     qs_video_album_actor = Video_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
     if qs_video_album_actor is not None and len(qs_video_album_actor) > 0:
+        print(f'actor로 등록된 비디오 앨범 개수: {len(qs_video_album_actor)}개')
         for q_video_album_actor in qs_video_album_actor:
             # Actor로 옮겨갈 이미지 리스트 비디오 Picture Album에서 확보
             list_dict_picture_album = q_video_album_actor.list_dict_picture_album
@@ -548,9 +549,9 @@ def collect_images_from_registered_video_album_for_actor_profile_cover_image(q_a
         for dict_profile_album in list_dict_profile_album:
             if "source" not in dict_profile_album:
                 dict_profile_album["source"] = "none"
-            dict_profile_album['active'] = 'false' 
-            if dict_profile_album['id'] == 0 :
-                dict_profile_album['discard'] = 'true' 
+            # dict_profile_album['active'] = 'false' 
+            # if dict_profile_album['id'] == 0 :
+            #     dict_profile_album['discard'] = 'true' 
         num_tot_original_images = len(list_dict_profile_album)
 
         # 복사해갈 이미지가 1개 이상 있으면:
@@ -560,7 +561,7 @@ def collect_images_from_registered_video_album_for_actor_profile_cover_image(q_a
                 file_path_images_for_actor_profile = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO, images_for_actor_profile)
                 if os.path.exists(file_path_images_for_actor_profile):
 
-                    # Actor의 Profile에 등록되어 있는지 중복체크
+                    # Actor의 Profile에 기 등록되어 있는지 중복체크
                     check_duplicated = False
                     for dict_profile_album in list_dict_profile_album:
                         if dict_profile_album["source"]== images_for_actor_profile :
@@ -632,7 +633,7 @@ def collect_images_from_registered_video_album_for_actor_profile_cover_image(q_a
     
         # 최종 상태 업데이트
         check_activated = False
-        # 기등록된 item의 Activated된 이미지가 하나 이상 있는지 확인.
+        # 기등록된 item의 Activated된 이미지가 하나 이상 있는지 확인. 없으면 하나 activation 자동으로 시켜준다.')
         for item in list_dict_profile_album:
             print(item['active'])
             if item['active'] == "true":
@@ -640,20 +641,19 @@ def collect_images_from_registered_video_album_for_actor_profile_cover_image(q_a
                 break 
         
         if check_activated == False:
+            print('# 기등록된 이미지가 하나도 Activated되지 않았다면, 하나의 이미지를 Activation 시킨다.')
             if list_dict_profile_album[-1]["discard"] == "false":
-                # print('# 기등록된 이미지가 하나도 Activated되지 않았다면, 마지막 이미지 discard 안되었다면 마지막 이미지를 Activation 시킨다.')
+                print('# 마지막 이미지 discard 안되었다면 마지막 이미지를 Activation 시킨다.')
                 list_dict_profile_album[0]["active"] = "false"
                 list_dict_profile_album[0]["discard"] = "false"
                 list_dict_profile_album[-1]["active"] = "true"
             else:
-                # print('# 기등록된 이미지가 하나도 Activated되지 않았다면 default 이미지를 Activation 시킨다.')
+                print('# 마지막이 discard 되어있다면, default 이미지를 Activation 시킨다.')
                 list_dict_profile_album[0]["active"] = "true"
                 list_dict_profile_album[0]["discard"] = "false"
         else:
-            # print('# 기등록된 이미지가 하나 이상 Activated 되었다면(Default 포함) 마자막 이미지를 Activation 시킨다.')
-            list_dict_profile_album[0]["active"] = "false"
-            list_dict_profile_album[0]["discard"] = "false"
-            list_dict_profile_album[-1]["active"] = "true"
+            print('# 기등록된 이미지가 하나 이상 Activated 되었다면(Default 포함) 마자막 이미지를 Activation 시킨다.')
+            pass
 
         data = {
             'list_dict_profile_album': list_dict_profile_album,
@@ -690,9 +690,9 @@ def collect_images_from_registered_picture_album_for_actor_profile_cover_image(q
     for dict_profile_album in list_dict_profile_album:
         if "source" not in dict_profile_album:
             dict_profile_album["source"] = "none"
-        dict_profile_album["active"] = "false"
-        if dict_profile_album['id'] == 0:
-            dict_profile_album["discard"] = "true"
+        # dict_profile_album["active"] = "false"
+        # if dict_profile_album['id'] == 0:
+        #     dict_profile_album["discard"] = "true"
     num_tot_original_images = len(list_dict_profile_album)
     hashcode = q_actor.hashcode
 
@@ -772,14 +772,28 @@ def collect_images_from_registered_picture_album_for_actor_profile_cover_image(q
         if item['active'] == "true":
             check_activated = True
             break 
-    
+    # 최종 상태 업데이트
+    check_activated = False
+    # 기등록된 item의 Activated된 이미지가 하나 이상 있는지 확인. 없으면 하나 activation 자동으로 시켜준다.')
+    for item in list_dict_profile_album:
+        print(item['active'])
+        if item['active'] == "true":
+            check_activated = True
+            break 
     if check_activated == False:
-        list_dict_profile_album[0]["active"] = "true"
-        list_dict_profile_album[0]["discard"] = "false"
+        print('# 기등록된 이미지가 하나도 Activated되지 않았다면, 하나의 이미지를 Activation 시킨다.')
+        if list_dict_profile_album[-1]["discard"] == "false":
+            print('# 마지막 이미지 discard 안되었다면 마지막 이미지를 Activation 시킨다.')
+            list_dict_profile_album[0]["active"] = "false"
+            list_dict_profile_album[0]["discard"] = "false"
+            list_dict_profile_album[-1]["active"] = "true"
+        else:
+            print('# 마지막이 discard 되어있다면, default 이미지를 Activation 시킨다.')
+            list_dict_profile_album[0]["active"] = "true"
+            list_dict_profile_album[0]["discard"] = "false"
     else:
-        list_dict_profile_album[0]["active"] = "false"
-        list_dict_profile_album[0]["discard"] = "true"
-        list_dict_profile_album[-1]["active"] = "true"
+        print('# 기등록된 이미지가 하나 이상 Activated 되었다면(Default 포함) 마자막 이미지를 Activation 시킨다.')
+        pass
 
     data = {
         'list_dict_profile_album': list_dict_profile_album,
@@ -885,9 +899,9 @@ def collect_images_from_registered_all_album_for_actor_profile_cover_image(q_act
         for dict_profile_album in list_dict_profile_album:
             if "source" not in dict_profile_album:
                 dict_profile_album["source"] = "none"
-            dict_profile_album['active'] = 'false' 
-            if dict_profile_album['id'] == 0 :
-                dict_profile_album['discard'] = 'true' 
+            # dict_profile_album['active'] = 'false' 
+            # if dict_profile_album['id'] == 0 :
+            #     dict_profile_album['discard'] = 'true' 
         num_tot_original_images = len(list_dict_profile_album)
 
         
@@ -941,30 +955,59 @@ def collect_images_from_registered_all_album_for_actor_profile_cover_image(q_act
         print('완료') 
         
     
+        # # 최종 상태 업데이트
+        # check_activated = False
+        # # 기등록된 item의 Activated된 이미지가 하나 이상 있는지 확인.
+        # for item in list_dict_profile_album:
+        #     print(item['active'])
+        #     if item['active'] == "true":
+        #         check_activated = True
+        #         break 
+        
+        # if check_activated == False:
+        #     if list_dict_profile_album[-1]["discard"] == "false":
+        #         # print('# 기등록된 이미지가 하나도 Activated되지 않았다면, 마지막 이미지 discard 안되었다면 마지막 이미지를 Activation 시킨다.')
+        #         list_dict_profile_album[0]["active"] = "false"
+        #         list_dict_profile_album[0]["discard"] = "false"
+        #         list_dict_profile_album[-1]["active"] = "true"
+        #     else:
+        #         # print('# 기등록된 이미지가 하나도 Activated되지 않았다면 default 이미지를 Activation 시킨다.')
+        #         list_dict_profile_album[0]["active"] = "true"
+        #         list_dict_profile_album[0]["discard"] = "false"
+        # else:
+        #     # print('# 기등록된 이미지가 하나 이상 Activated 되었다면(Default 포함) 마자막 이미지를 Activation 시킨다.')
+        #     list_dict_profile_album[0]["active"] = "false"
+        #     list_dict_profile_album[0]["discard"] = "false"
+        #     list_dict_profile_album[-1]["active"] = "true"
+        # 최종 상태 업데이트
+
+        check_activated = False
+        for item in list_dict_profile_album:
+            if item['active'] == "true":
+                check_activated = True
+                break 
         # 최종 상태 업데이트
         check_activated = False
-        # 기등록된 item의 Activated된 이미지가 하나 이상 있는지 확인.
+        # 기등록된 item의 Activated된 이미지가 하나 이상 있는지 확인. 없으면 하나 activation 자동으로 시켜준다.')
         for item in list_dict_profile_album:
             print(item['active'])
             if item['active'] == "true":
                 check_activated = True
                 break 
-        
         if check_activated == False:
+            print('# 기등록된 이미지가 하나도 Activated되지 않았다면, 하나의 이미지를 Activation 시킨다.')
             if list_dict_profile_album[-1]["discard"] == "false":
-                # print('# 기등록된 이미지가 하나도 Activated되지 않았다면, 마지막 이미지 discard 안되었다면 마지막 이미지를 Activation 시킨다.')
+                print('# 마지막 이미지 discard 안되었다면 마지막 이미지를 Activation 시킨다.')
                 list_dict_profile_album[0]["active"] = "false"
                 list_dict_profile_album[0]["discard"] = "false"
                 list_dict_profile_album[-1]["active"] = "true"
             else:
-                # print('# 기등록된 이미지가 하나도 Activated되지 않았다면 default 이미지를 Activation 시킨다.')
+                print('# 마지막이 discard 되어있다면, default 이미지를 Activation 시킨다.')
                 list_dict_profile_album[0]["active"] = "true"
                 list_dict_profile_album[0]["discard"] = "false"
         else:
-            # print('# 기등록된 이미지가 하나 이상 Activated 되었다면(Default 포함) 마자막 이미지를 Activation 시킨다.')
-            list_dict_profile_album[0]["active"] = "false"
-            list_dict_profile_album[0]["discard"] = "false"
-            list_dict_profile_album[-1]["active"] = "true"
+            print('# 기등록된 이미지가 하나 이상 Activated 되었다면(Default 포함) 마자막 이미지를 Activation 시킨다.')
+            pass
 
         data = {
             'list_dict_profile_album': list_dict_profile_album,
@@ -1601,7 +1644,7 @@ def save_files_in_list_dict_xxx_album(q_xxx_album_selected, files, type_album):
             if file_extension == 'webp':
                 file_extension = 'jpg'
 
-            # # mkv file 변환 one by one
+            # # mkv file 변환 one by one  (적용안함, 시간 너무 오래 소요됨)
             # if file_extension == 'mkv':
             #     file_extension = 'mp4'
             #     input_file_path = temp_file_path
@@ -1728,6 +1771,8 @@ def save_files_in_list_dict_xxx_album(q_xxx_album_selected, files, type_album):
             q = q + 1
 
 
+    
+    
 
     # Get Title
     try:
@@ -1740,6 +1785,8 @@ def save_files_in_list_dict_xxx_album(q_xxx_album_selected, files, type_album):
     
     # 1 앨범에 등록된 파일 리스트 확보
     if type_album == 'actor':
+        # q_actor 찾기
+        q_actor = q_xxx_album_selected
         # print("actor process")
         # print('q_xxx_album_selected.list_dict_profile_album', q_xxx_album_selected.list_dict_profile_album)
         DOWNLOAD_DIR = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_ACTOR)
@@ -1763,6 +1810,8 @@ def save_files_in_list_dict_xxx_album(q_xxx_album_selected, files, type_album):
         num_profile_album_image = len(list_dict_profile_album)
 
     elif type_album == 'picture':
+        # q_actor 찾기
+        q_actor = q_xxx_album_selected.main_actor
         # print("picture process")
         DOWNLOAD_DIR = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_PICTURE)
         if not os.path.exists(DOWNLOAD_DIR):
@@ -1786,6 +1835,8 @@ def save_files_in_list_dict_xxx_album(q_xxx_album_selected, files, type_album):
         num_picture_album_image = len(list_dict_picture_album)
 
     elif type_album == 'manga':
+        # q_actor 찾기
+        q_actor = q_xxx_album_selected.main_actor
         # print("manga process")
         DOWNLOAD_DIR = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_MANGA)
         if not os.path.exists(DOWNLOAD_DIR):
@@ -1820,6 +1871,8 @@ def save_files_in_list_dict_xxx_album(q_xxx_album_selected, files, type_album):
         list_id_manga_in_volume = []
 
     elif type_album == 'video':
+        # q_actor 찾기
+        q_actor = q_xxx_album_selected.main_actor
         # print("video process")
         DOWNLOAD_DIR = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_VIDEO)
         if not os.path.exists(DOWNLOAD_DIR):
@@ -1855,6 +1908,8 @@ def save_files_in_list_dict_xxx_album(q_xxx_album_selected, files, type_album):
         print(f'len(list_dict_video_album) 1: {len(list_dict_video_album)}')
 
     elif type_album == 'music':
+        # q_actor 찾기
+        q_actor = q_xxx_album_selected.main_actor
         # print("music process")
         DOWNLOAD_DIR = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_MUSIC)
         if not os.path.exists(DOWNLOAD_DIR):
@@ -1886,6 +1941,7 @@ def save_files_in_list_dict_xxx_album(q_xxx_album_selected, files, type_album):
         num_music_album_audio = len(list_dict_music_album)
     
     else:
+        q_actor = None
         RELATIVE_PATH_XXX = None
         list_dict_profile_album = None
         list_dict_picture_album = None
@@ -1940,20 +1996,25 @@ def save_files_in_list_dict_xxx_album(q_xxx_album_selected, files, type_album):
         # 타이틀 지정, 저장하기
         try:
             if title:
-                print('# 사용자 입력 title이 있는 경우, 등록된 앨범 개수 + 1을 title 뒤에 추가하여 파일이름을 강제설정')
+
+                print('# 사용자 입력 title이 있는 경우, 액터에 등록된 앨범 개수 + 1을 title 뒤에 추가하여 파일이름을 강제설정')
                 if type_album == 'actor':
-                    list_dict_xxx_album = q_xxx_album_selected.list_dict_profile_album
+                    qs_xxx_album_actor_related = q_xxx_album_selected.list_dict_profile_album
                 elif type_album == 'picture':
-                    list_dict_xxx_album = q_xxx_album_selected.list_dict_picture_album
+                    qs_xxx_album_actor_related = Picture_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
+                    # list_dict_xxx_album = q_xxx_album_selected.list_dict_picture_album
                 elif type_album == 'manga':
+                    qs_xxx_album_actor_related = Manga_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
                     list_dict_xxx_album = q_xxx_album_selected.list_dict_manga_album
                 elif type_album == 'video':
+                    qs_xxx_album_actor_related = Video_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
                     list_dict_xxx_album = q_xxx_album_selected.list_dict_video_album
                 elif type_album == 'music':
+                    qs_xxx_album_actor_related = Music_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
                     list_dict_xxx_album = q_xxx_album_selected.list_dict_music_album
 
-                num_album_item = len(list_dict_xxx_album)    
-                title_item = f'{title}-{num_album_item + p}'
+                num_album_item = len(qs_xxx_album_actor_related)    
+                title_item = f'{title}-{num_album_item }'
                 # 앨범 Title 등록하기
                 register_title_to_album(q_xxx_album_selected, type_album, title_item)
                 print('title_item', title_item)
@@ -2566,10 +2627,28 @@ def save_folder_in_list_dict_xxx_album(q_actor, files, tree, folder_name_str, fi
     # Get Hashcode
     hashcode = q_actor.hashcode
 
+    if file_upload_option_str == 'folder_name_for_nothing':
+        pass 
+    elif file_upload_option_str == 'folder_name_as_actor_name':
+        # title 저장
+        data = {
+            'name': folder_name_str
+        }
+        Actor.objects.filter(id=q_actor.id).update(**data)
+        q_actor.refresh_from_db()
+        pass 
+    elif file_upload_option_str == 'folder_all_files_in_single_album':
+        pass 
+    elif file_upload_option_str == 'folder_each_file_single_album':
+        pass 
+    else:
+        pass
+
     # Step 1 -----------------------------------------------------------------------------------------------------
     # 최상위 폴더 이름으로 Actor 이름 및 동의어 지정/저장
     if q_actor.name is None:
-        # 신규 생성한 Actor이면 최상위 폴더명으로 이름 작성 및 저장
+        print('# 신규 생성한 Actor이면 최상위 폴더명으로 이름 작성 및 저장')
+        print(f'folder_name_str: {folder_name_str}')
         actor_name = folder_name_str 
         file_name_cleaned = text_cleaning(actor_name)  
         # 클리닝된 텍스트 뭉치에서 단어 분리 => 단어 리스트화
@@ -2897,14 +2976,14 @@ id_delete : 'all' / int(selected_dict_id)
 
 
 # Album별 삭제함수
-def delete_profile_item(dict_profile_album, RELATIVE_PATH_XXX):
-    # print('delete_profile_item', dict_profile_album)
+def delete_profile_item(dict_profile_album, selected_vault, subtype_album):
+    print('delete_profile_item', dict_profile_album)
     image_name_original = dict_profile_album["original"]
     image_name_cover = dict_profile_album["cover"]
     image_name_thumbnail = dict_profile_album["thumbnail"]
     if image_name_original != 'default-o.png' :
         if image_name_original not in LIST_DEFAULT_IMAGES:
-            file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_original)
+            file_path_o = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_original)
             if os.path.exists(file_path_o):
                 try:
                     os.remove(file_path_o)
@@ -2912,7 +2991,7 @@ def delete_profile_item(dict_profile_album, RELATIVE_PATH_XXX):
                     pass
     if image_name_cover != 'default-c.png':
         if image_name_cover not in LIST_DEFAULT_IMAGES:
-            file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_cover)
+            file_path_c = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_cover)
             if os.path.exists(file_path_c):
                 try:
                     os.remove(file_path_c)
@@ -2920,7 +2999,7 @@ def delete_profile_item(dict_profile_album, RELATIVE_PATH_XXX):
                     pass
     if image_name_thumbnail != 'default-t.png':
         if image_name_thumbnail not in LIST_DEFAULT_IMAGES:
-            file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_thumbnail)
+            file_path_t = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_thumbnail)
             if os.path.exists(file_path_t):
                 try:
                     os.remove(file_path_t)
@@ -2928,44 +3007,65 @@ def delete_profile_item(dict_profile_album, RELATIVE_PATH_XXX):
                     pass
     # 리스트에서 discard 처리하기
 
-def delete_picture_item(dict_picture_album, RELATIVE_PATH_XXX):
-    # print('delete_picture_item', dict_picture_album)
+def delete_picture_item(dict_picture_album, selected_vault, subtype_album):
+    print(f'delete_picture_item: {dict_picture_album}, selected_vault: {selected_vault}, subtype_album: {subtype_album}')
     image_name_original = dict_picture_album["original"]
     image_name_cover = dict_picture_album["cover"]
     image_name_thumbnail = dict_picture_album["thumbnail"]
     if image_name_original != 'default-o.png' :
         if image_name_original not in LIST_DEFAULT_IMAGES:
-            file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_original)
+            print('original')
+            file_path_o = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_original)
             if os.path.exists(file_path_o):
                 try:
+                    os.chmod(file_path_o, 0o777)  # 권한 부여
                     os.remove(file_path_o)
+                    print(f'삭제성공: {file_path_o}')
                 except:
+                    print(f'삭제 실패')
                     pass
+            else:
+                print("파일없음")
+                pass
     if image_name_cover != 'default-c.png':
         if image_name_cover not in LIST_DEFAULT_IMAGES:
-            file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_cover)
+            print('cover')
+            file_path_c = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_cover)
             if os.path.exists(file_path_c):
                 try:
+                    os.chmod(file_path_c, 0o777)  # 권한 부여
                     os.remove(file_path_c)
+                    print(f'삭제성공: {file_path_c}')
                 except:
+                    print(f'삭제 실패')
                     pass
+            else:
+                print("파일없음")
+                pass
     if image_name_thumbnail != 'default-t.png':
         if image_name_thumbnail not in LIST_DEFAULT_IMAGES:
-            file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_thumbnail)
+            print('thumbnail')
+            file_path_t = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_thumbnail)
             if os.path.exists(file_path_t):
                 try:
+                    os.chmod(file_path_t, 0o777)  # 권한 부여
                     os.remove(file_path_t)
+                    print(f'삭제성공: {file_path_t}')
                 except:
+                    print(f'삭제 실패')
                     pass
+            else:
+                print("파일없음")
+                pass
 
-def delete_manga_item(dict_manga_album, RELATIVE_PATH_XXX):
-    # print('delete_manga_item', dict_manga_album)
+def delete_manga_item(dict_manga_album, selected_vault, subtype_album):
+    print('delete_manga_item', dict_manga_album)
     image_name_original = dict_manga_album["original"]
     image_name_cover = dict_manga_album["cover"]
     image_name_thumbnail = dict_manga_album["thumbnail"]
     if image_name_original != 'default-o.png' :
         if image_name_original not in LIST_DEFAULT_IMAGES:
-            file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_original)
+            file_path_o = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_original)
             if os.path.exists(file_path_o):
                 try:
                     os.remove(file_path_o)
@@ -2973,7 +3073,7 @@ def delete_manga_item(dict_manga_album, RELATIVE_PATH_XXX):
                     pass
     if image_name_cover != 'default-c.png':
         if image_name_cover not in LIST_DEFAULT_IMAGES:
-            file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_cover)
+            file_path_c = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_cover)
             if os.path.exists(file_path_c):
                 try:
                     os.remove(file_path_c)
@@ -2981,15 +3081,15 @@ def delete_manga_item(dict_manga_album, RELATIVE_PATH_XXX):
                     pass
     if image_name_thumbnail != 'default-t.png':
         if image_name_thumbnail not in LIST_DEFAULT_IMAGES:
-            file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_thumbnail)
+            file_path_t = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_thumbnail)
             if os.path.exists(file_path_t):
                 try:
                     os.remove(file_path_t)
                 except:
                     pass
 
-def delete_video_item(dict_video_album, RELATIVE_PATH_XXX):
-    # print('delete_video_item', dict_video_album)
+def delete_video_item(dict_video_album, selected_vault, subtype_album):
+    print('delete_video_item', dict_video_album)
     try:
         image_name_original = dict_video_album["original"]
     except:
@@ -3005,7 +3105,7 @@ def delete_video_item(dict_video_album, RELATIVE_PATH_XXX):
     if image_name_original is not None:
         if image_name_original != 'default-o.png':
             if image_name_original not in LIST_DEFAULT_IMAGES:
-                file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_original)
+                file_path_o = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_original)
                 if os.path.exists(file_path_o):
                     try:
                         os.remove(file_path_o)
@@ -3014,7 +3114,7 @@ def delete_video_item(dict_video_album, RELATIVE_PATH_XXX):
     if image_name_cover is not None:
         if image_name_cover != 'default-c.png':
             if image_name_cover not in LIST_DEFAULT_IMAGES:
-                file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_cover)
+                file_path_c = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_cover)
                 if os.path.exists(file_path_c):
                     try:
                         os.remove(file_path_c)
@@ -3023,7 +3123,7 @@ def delete_video_item(dict_video_album, RELATIVE_PATH_XXX):
     if image_name_thumbnail is not None:
         if image_name_thumbnail != 'default-t.png':
             if image_name_thumbnail not in LIST_DEFAULT_IMAGES:
-                file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_thumbnail)
+                file_path_t = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_thumbnail)
                 if os.path.exists(file_path_t):
                     try:
                         os.remove(file_path_t)
@@ -3032,7 +3132,7 @@ def delete_video_item(dict_video_album, RELATIVE_PATH_XXX):
     # video file 삭제
     file_name_xxx = dict_video_album["video"]
     if file_name_xxx is not None:
-        file_path_xxx = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, file_name_xxx)
+        file_path_xxx = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, file_name_xxx)
         if os.path.exists(file_path_xxx):
             try:
                 os.remove(file_path_xxx)
@@ -3043,21 +3143,21 @@ def delete_video_item(dict_video_album, RELATIVE_PATH_XXX):
     for dict_file_name_still in list_dict_file_name_still:
         if dict_file_name_still not in LIST_DEFAULT_IMAGES:
             file_name_still = dict_file_name_still["path"]
-            file_path_still = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, file_name_still)
+            file_path_still = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, file_name_still)
             if os.path.exists(file_path_still):
                 try:
                     os.remove(file_path_still)
                 except:
                     pass
     
-def delete_music_item(dict_music_album, RELATIVE_PATH_XXX):
-    # print('delete_music_item', dict_music_album)
+def delete_music_item(dict_music_album, selected_vault, subtype_album):
+    print('delete_music_item', dict_music_album)
     image_name_original = dict_music_album["original"]
     image_name_cover = dict_music_album["cover"]
     image_name_thumbnail = dict_music_album["thumbnail"]
     if 'default' not in image_name_original:
         if image_name_original not in LIST_DEFAULT_IMAGES:
-            file_path_o = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_original)
+            file_path_o = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_original)
             if os.path.exists(file_path_o):
                 try:
                     os.remove(file_path_o)
@@ -3065,7 +3165,7 @@ def delete_music_item(dict_music_album, RELATIVE_PATH_XXX):
                     pass
     if 'default' not in image_name_cover:
         if image_name_cover not in LIST_DEFAULT_IMAGES:
-            file_path_c = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_cover)
+            file_path_c = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_cover)
             if os.path.exists(file_path_c):
                 try:
                     os.remove(file_path_c)
@@ -3073,7 +3173,7 @@ def delete_music_item(dict_music_album, RELATIVE_PATH_XXX):
                     pass
     if 'default' not in image_name_thumbnail:
         if image_name_thumbnail not in LIST_DEFAULT_IMAGES:
-            file_path_t = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, image_name_thumbnail)
+            file_path_t = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, image_name_thumbnail)
             if os.path.exists(file_path_t):
                 try:
                     os.remove(file_path_t)
@@ -3082,7 +3182,7 @@ def delete_music_item(dict_music_album, RELATIVE_PATH_XXX):
     # Music 파일 삭제
     file_name_xxx = dict_music_album["source"]
     if file_name_xxx is not None:
-        file_path_xxx = os.path.join(settings.MEDIA_ROOT, RELATIVE_PATH_XXX, file_name_xxx)
+        file_path_xxx = os.path.join(settings.MEDIA_ROOT, selected_vault, subtype_album, file_name_xxx)
         if os.path.exists(file_path_xxx):
             try:
                 os.remove(file_path_xxx)
@@ -3092,7 +3192,7 @@ def delete_music_item(dict_music_album, RELATIVE_PATH_XXX):
 
             
 # Album 파일 삭제하기 함수
-def delete_files_in_list_dict_xxx_album(q_xxx_album_selected, type_album, type_list, id_delete):
+def delete_files_in_list_dict_xxx_album(q_xxx_album_selected, type_album, type_list, id_delete, option_1_str):
     print('################################################### Album 파일 삭제하기 함수')
     """ 
     q_xxx_album_selected: 선택한 앨범 쿼리
@@ -3110,288 +3210,413 @@ def delete_files_in_list_dict_xxx_album(q_xxx_album_selected, type_album, type_l
         except:
             id_delete = None
     
-    # 1 앨범에 등록된 cover 이미지 삭제하기
+    # # 1 앨범에 등록된 cover 이미지 삭제하기
     if type_album == 'actor':
-        RELATIVE_PATH_XXX = RELATIVE_PATH_ACTOR
+        q_actor = q_xxx_album_selected
         list_dict_profile_album = q_xxx_album_selected.list_dict_profile_album
         list_dict_picture_album = None
         list_dict_manga_album = None
         list_dict_video_album = None
         list_dict_music_album = None
-        # print('list_dict_profile_album', list_dict_profile_album)
     elif type_album == 'picture':
-        RELATIVE_PATH_XXX = RELATIVE_PATH_PICTURE
+        q_actor = q_xxx_album_selected.main_actor
         list_dict_profile_album = None
         list_dict_picture_album = q_xxx_album_selected.list_dict_picture_album
         list_dict_manga_album = None
         list_dict_video_album = None
         list_dict_music_album = None
-        # print('list_dict_picture_album', list_dict_picture_album)
     elif type_album == 'manga':
-        RELATIVE_PATH_XXX = RELATIVE_PATH_MANGA
+        q_actor = q_xxx_album_selected.main_actor
         list_dict_profile_album = None
         list_dict_picture_album = None
         list_dict_manga_album = q_xxx_album_selected.list_dict_manga_album
         list_dict_video_album = None
         list_dict_music_album = None
-        # print('list_dict_manga_album', list_dict_manga_album)
     elif type_album == 'video':
-        RELATIVE_PATH_XXX = RELATIVE_PATH_VIDEO
+        q_actor = q_xxx_album_selected.main_actor
         list_dict_profile_album = None
         list_dict_picture_album = q_xxx_album_selected.list_dict_picture_album
         list_dict_manga_album = None
         list_dict_video_album = q_xxx_album_selected.list_dict_video_album
         list_dict_music_album = None
-        print(f'list_dict_picture_album: {list_dict_picture_album} - 4')
-        # print('list_dict_video_album', list_dict_video_album)
     elif type_album == 'music':
-        RELATIVE_PATH_XXX = RELATIVE_PATH_MUSIC
+        q_actor = q_xxx_album_selected.main_actor
         list_dict_profile_album = None
         list_dict_picture_album = q_xxx_album_selected.list_dict_picture_album
         list_dict_manga_album = None
         list_dict_video_album = None
         list_dict_music_album = q_xxx_album_selected.list_dict_music_album
-        # print('list_dict_picture_album', list_dict_picture_album)
-        # print('list_dict_music_album', list_dict_music_album)
     else:
-        RELATIVE_PATH_XXX = None
-        print('no path defined')
+        q_actor = None
+        list_dict_profile_album = None
+        list_dict_picture_album = None
+        list_dict_manga_album = None
+        list_dict_video_album = None
+        list_dict_music_album = None
 
+
+    # Actor 파일 제거
+    def f_delete_query_actor(q_xxx_album_selected):
+        list_dict_profile_album = q_xxx_album_selected.list_dict_profile_album
+        selected_vault = q_xxx_album_selected.selected_vault
+        subtype_album = 'actor'
+
+        if list_dict_profile_album is not None and len(list_dict_profile_album) > 1:
+            for dict_profile_album in list_dict_profile_album:
+                if int(dict_profile_album["id"]) != 0:
+                    if id_delete == 'all':
+                        delete_profile_item(dict_profile_album, selected_vault, subtype_album)
+                        # 리스트에서 discard 처리하기
+                        dict_profile_album['active'] = 'false'
+                        dict_profile_album['discard'] = 'true'
+                    else:
+                        if int(dict_profile_album["id"]) == id_delete:
+                            print('# 지정한 ID만 삭제')
+                            delete_profile_item(dict_profile_album, selected_vault, subtype_album)
+                            # 리스트에서 discard 처리하기
+                            dict_profile_album['active'] = 'false'
+                            dict_profile_album['discard'] = 'true'
+
+    # picture 파일 제거
+    def f_delete_query_picture_album(q_xxx_album_selected):
+        print(f'# picture 파일 제거')
+        list_dict_picture_album = q_xxx_album_selected.list_dict_picture_album
+        selected_vault = q_xxx_album_selected.selected_vault
+        subtype_album = 'picture'
+        for dict_picture_album in list_dict_picture_album :
+            if int(dict_picture_album["id"]) != 0:
+                if id_delete == 'all':
+                    # Default 이미지가 아닌 경우 삭제
+                    delete_picture_item(dict_picture_album, selected_vault, subtype_album)
+                    # 리스트에서 discard 처리하기
+                    dict_picture_album['active'] = 'false'
+                    dict_picture_album['discard'] = 'true'
+                else:
+                    if int(dict_picture_album["id"]) == id_delete:
+                        # 지정한 ID만 삭제
+                        delete_picture_item(dict_picture_album, selected_vault, subtype_album)
+                        # 리스트에서 discard 처리하기
+                        dict_picture_album['active'] = 'false'
+                        dict_picture_album['discard'] = 'true'                      
+
+    # manga 파일 제거
+    def f_delete_query_manga_album(q_xxx_album_selected):
+        list_dict_manga_album = q_xxx_album_selected.list_dict_manga_album
+        selected_vault = q_xxx_album_selected.selected_vault
+        subtype_album = 'manga'
+        for dict_manga_album in list_dict_manga_album :
+            if int(dict_manga_album["id"]) != 0:
+                if id_delete == 'all':
+                    # Default 이미지가 아닌 경우 삭제
+                    delete_manga_item(dict_manga_album, selected_vault, subtype_album)
+                    # 리스트에서 discard 처리하기
+                    dict_manga_album['active'] = 'false'
+                    dict_manga_album['discard'] = 'true'
+                else:
+                    if int(dict_manga_album["id"]) == id_delete:
+                        # 지정한 ID만 삭제
+                        delete_manga_item(dict_manga_album, selected_vault, subtype_album)
+                        # 리스트에서 discard 처리하기
+                        dict_manga_album['active'] = 'false'
+                        dict_manga_album['discard'] = 'true'
+    
+    # video 파일 제거
+    def f_delete_query_video_album(q_xxx_album_selected):
+        list_dict_picture_album = q_xxx_album_selected.list_dict_picture_album
+        list_dict_video_album = q_xxx_album_selected.list_dict_video_album
+        selected_vault = q_xxx_album_selected.selected_vault
+        subtype_album = 'video'
+
+        if list_dict_picture_album is not None and len(list_dict_picture_album) > 0:
+            for dict_picture_album in list_dict_picture_album :
+                if int(dict_picture_album["id"]) != 0:
+                    if id_delete == 'all':
+                        # Default 이미지가 아닌 경우 삭제
+                        delete_picture_item(dict_picture_album, selected_vault, subtype_album)
+                        # 리스트에서 discard 처리하기
+                        dict_picture_album['active'] = 'false'
+                        dict_picture_album['discard'] = 'true'
+                    else:
+                        if int(dict_picture_album["id"]) == id_delete:
+                            # 지정한 ID만 삭제
+                            delete_picture_item(dict_picture_album, selected_vault, subtype_album)
+                            # 리스트에서 discard 처리하기
+                            dict_picture_album['active'] = 'false'
+                            dict_picture_album['discard'] = 'true'
+        
+        if list_dict_video_album is not None and len(list_dict_video_album) > 0:
+            for dict_video_album in list_dict_video_album :
+                print(dict_video_album['id'])
+                if int(dict_video_album["id"]) != 0:
+                    if id_delete == 'all':
+                        # Default 이미지가 아닌 경우 삭제
+                        delete_video_item(dict_video_album, selected_vault, subtype_album)
+                        # 리스트에서 discard 처리하기
+                        dict_video_album['active'] = 'false'
+                        dict_video_album['discard'] = 'true'
+                    else:
+                        if int(dict_video_album["id"]) == id_delete:
+                            # 지정한 ID만 삭제
+                            delete_video_item(dict_video_album, selected_vault, subtype_album)
+                            # 리스트에서 discard 처리하기
+                            dict_video_album['active'] = 'false'
+                            dict_video_album['discard'] = 'true'
+        
+    # music 파일 제거
+    def f_delete_query_music_album(q_xxx_album_selected):
+        list_dict_picture_album = q_xxx_album_selected.list_dict_picture_album
+        list_dict_music_album = q_xxx_album_selected.list_dict_music_album
+        selected_vault = q_xxx_album_selected.selected_vault
+        subtype_album = 'music'
+
+        if list_dict_picture_album is not None and len(list_dict_picture_album) > 0:
+            for dict_picture_album in list_dict_picture_album :
+                if int(dict_picture_album["id"]) != 0:
+                    if id_delete == 'all':
+                        # Default 이미지가 아닌 경우 삭제
+                        delete_picture_item(dict_picture_album, selected_vault, subtype_album)
+                        # 리스트에서 discard 처리하기
+                        dict_picture_album['active'] = 'false'
+                        dict_picture_album['discard'] = 'true'
+                    else:
+                        if int(dict_picture_album["id"]) == id_delete:
+                            # 지정한 ID만 삭제
+                            delete_picture_item(dict_picture_album, selected_vault, subtype_album)
+                            # 리스트에서 discard 처리하기
+                            dict_picture_album['active'] = 'false'
+                            dict_picture_album['discard'] = 'true'
+        
+        if list_dict_music_album is not None and len(list_dict_music_album) > 0:
+            for dict_music_album in list_dict_music_album :
+                print(dict_music_album['id'])
+                if int(dict_music_album["id"]) != 0:
+                    if id_delete == 'all':
+                        delete_music_item(dict_music_album, selected_vault, subtype_album)
+                        # 리스트에서 discard 처리하기
+                        dict_music_album['active'] = 'false'
+                        dict_music_album['discard'] = 'true'
+                    else:
+                        if int(dict_music_album["id"]) == id_delete:
+                            # 지정한 ID만 삭제
+                            delete_music_item(dict_music_album, selected_vault, subtype_album)
+                            # 리스트에서 discard 처리하기
+                            dict_music_album['active'] = 'false'
+                            dict_music_album['discard'] = 'true'
+
+
+    # 삭제하기 시작
     if id_delete is not None:
-        if RELATIVE_PATH_XXX is not None:
-            # Actor 파일 제거
-            if type_album == 'actor' and list_dict_profile_album is not None and len(list_dict_profile_album) > 1:
-                if type_list == 'all' or type_list == 'profile':
-                    for dict_profile_album in list_dict_profile_album:
-                        print(dict_profile_album['id'])
-                        if int(dict_profile_album["id"]) != 0:
-                            if id_delete == 'all':
-                                print('# Default 이미지가 아닌 경우 삭제')
-                                delete_profile_item(dict_profile_album, RELATIVE_PATH_XXX)
-                                # 리스트에서 discard 처리하기
-                                dict_profile_album['active'] = 'false'
-                                dict_profile_album['discard'] = 'true'
-                            else:
-                                if int(dict_profile_album["id"]) == id_delete:
-                                    print('# 지정한 ID만 삭제')
-                                    delete_profile_item(dict_profile_album, RELATIVE_PATH_XXX)
-                                    # 리스트에서 discard 처리하기
-                                    dict_profile_album['active'] = 'false'
-                                    dict_profile_album['discard'] = 'true'
-            # picture 파일 제거
-            if list_dict_picture_album is not None and len(list_dict_picture_album) > 1:
-                if type_list == 'all' or type_list == 'image':
-                    for dict_picture_album in list_dict_picture_album :
-                        print(dict_picture_album['id'])
-                        if int(dict_picture_album["id"]) != 0:
-                            if id_delete == 'all':
-                                # Default 이미지가 아닌 경우 삭제
-                                delete_picture_item(dict_picture_album, RELATIVE_PATH_XXX)
-                                # 리스트에서 discard 처리하기
-                                dict_picture_album['active'] = 'false'
-                                dict_picture_album['discard'] = 'true'
-                            else:
-                                if int(dict_picture_album["id"]) == id_delete:
-                                    # 지정한 ID만 삭제
-                                    delete_picture_item(dict_picture_album, RELATIVE_PATH_XXX)
-                                    # 리스트에서 discard 처리하기
-                                    dict_picture_album['active'] = 'false'
-                                    dict_picture_album['discard'] = 'true'
-            # manga 파일 제거
-            if list_dict_manga_album is not None and len(list_dict_manga_album) > 1:
-                if type_list == 'all' or type_list == 'image':
-                    for dict_manga_album in list_dict_manga_album :
-                        print(dict_manga_album['id'])
-                        if int(dict_manga_album["id"]) != 0:
-                            if id_delete == 'all':
-                                # Default 이미지가 아닌 경우 삭제
-                                delete_manga_item(dict_manga_album, RELATIVE_PATH_XXX)
-                                # 리스트에서 discard 처리하기
-                                dict_manga_album['active'] = 'false'
-                                dict_manga_album['discard'] = 'true'
-                            else:
-                                if int(dict_manga_album["id"]) == id_delete:
-                                    # 지정한 ID만 삭제
-                                    delete_manga_item(dict_manga_album, RELATIVE_PATH_XXX)
-                                    # 리스트에서 discard 처리하기
-                                    dict_manga_album['active'] = 'false'
-                                    dict_manga_album['discard'] = 'true'
-            # Video 파일 제거
-            if list_dict_video_album is not None and len(list_dict_video_album) > 1:
-                if type_list == 'all' or type_list == 'video':
-                    for dict_video_album in list_dict_video_album :
-                        print(dict_video_album['id'])
-                        if int(dict_video_album["id"]) != 0:
-                            if id_delete == 'all':
-                                # Default 이미지가 아닌 경우 삭제
-                                delete_video_item(dict_video_album, RELATIVE_PATH_XXX)
-                                # 리스트에서 discard 처리하기
-                                dict_video_album['active'] = 'false'
-                                dict_video_album['discard'] = 'true'
-                            else:
-                                if int(dict_video_album["id"]) == id_delete:
-                                    # 지정한 ID만 삭제
-                                    delete_video_item(dict_video_album, RELATIVE_PATH_XXX)
-                                    # 리스트에서 discard 처리하기
-                                    dict_video_album['active'] = 'false'
-                                    dict_video_album['discard'] = 'true'
-            # Audio 파일 제거
-            if list_dict_music_album is not None and len(list_dict_music_album) > 1:
-                if type_list == 'all' or type_list == 'audio':
-                    for dict_music_album in list_dict_music_album :
-                        print(dict_music_album['id'])
-                        if int(dict_music_album["id"]) != 0:
-                            if id_delete == 'all':
-                                delete_music_item(dict_music_album, RELATIVE_PATH_XXX)
-                                # 리스트에서 discard 처리하기
-                                dict_music_album['active'] = 'false'
-                                dict_music_album['discard'] = 'true'
-                            else:
-                                if int(dict_music_album["id"]) == id_delete:
-                                    # 지정한 ID만 삭제
-                                    delete_music_item(dict_music_album, RELATIVE_PATH_XXX)
-                                    # 리스트에서 discard 처리하기
-                                    dict_music_album['active'] = 'false'
-                                    dict_music_album['discard'] = 'true'
-
-            
-        # Active 최소 1개 유지, 마지막 이미지를 Activate시킨다. 모두 discard되었으면 default를 되살린다.
-        if id_delete != 'all':
-            if list_dict_profile_album is not None:
-                count = sum(1 for d in list_dict_profile_album if d.get('active') == 'true')
-                if count == 0:
-                    for dict_profile_album in list_dict_profile_album[::-1]:
-                        if dict_profile_album['discard'] == 'false':
-                            dict_profile_album['active'] = 'true'
-                            break
-                        if dict_profile_album['id'] == 0:
-                            dict_profile_album['active'] = 'true'
-                            dict_profile_album['discard'] = 'false'
-            if list_dict_picture_album is not None:
-                count = sum(1 for d in list_dict_picture_album if d.get('active') == 'true')
-                if count == 0:
-                    for dict_picture_album in list_dict_picture_album[::-1]:
-                        if dict_picture_album['discard'] == 'false':
-                            dict_picture_album['active'] = 'true'
-                            break
-                        if dict_picture_album['id'] == 0:
-                            dict_picture_album['active'] = 'true'
-                            dict_picture_album['discard'] = 'false'
-            if list_dict_manga_album is not None:
-                count = sum(1 for d in list_dict_manga_album if d.get('active') == 'true')
-                if count == 0:
-                    for dict_manga_album in list_dict_manga_album[::-1]:
-                        if dict_manga_album['discard'] == 'false':
-                            dict_manga_album['active'] = 'true'
-                            break
-                        if dict_manga_album['id'] == 0:
-                            dict_manga_album['active'] = 'true'
-                            dict_manga_album['discard'] = 'false'
-            if list_dict_music_album is not None:
-                count = sum(1 for d in list_dict_music_album if d.get('active') == 'true')
-                if count == 0:
-                    for dict_music_album in list_dict_music_album[::-1]:
-                        if dict_music_album['discard'] == 'false':
-                            dict_music_album['active'] = 'true'
-                            break
-                        if dict_music_album['id'] == 0:
-                            dict_music_album['active'] = 'true'
-                            dict_music_album['discard'] = 'false'
-                        
-        # Query 저장 프로세스
-        if type_album == 'actor':
-            if id_delete == 'all':
+        # -------------------------------------------------------------------------------------------------   
+        # 삭제하기 위한 쿼리 찾아서 DB에서 파일 삭제하기기
+        if option_1_str == 'true':
+            id_delete == 'all'
+            print(f'삭제하기 option_1_str == {option_1_str}')
+            if q_actor is not None:
+                qs_picture_album_selected = Picture_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
+                if qs_picture_album_selected is not None and len(qs_picture_album_selected) > 0:
+                    for q_picture_album_selected in qs_picture_album_selected:
+                        f_delete_query_picture_album(q_picture_album_selected)  
+                        data = {
+                            'check_discard': True,
+                        }          
+                        Picture_Album.objects.filter(id=q_picture_album_selected.id).update(**data)
+                        q_picture_album_selected.refresh_from_db()
+                qs_manga_album_selected = Manga_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
+                if qs_manga_album_selected is not None and len(qs_manga_album_selected) > 0:
+                    for q_manga_album_selected in qs_manga_album_selected:
+                        f_delete_query_manga_album(q_manga_album_selected)  
+                        data = {
+                            'check_discard': True,
+                        }          
+                        Manga_Album.objects.filter(id=q_manga_album_selected.id).update(**data)
+                        q_manga_album_selected.refresh_from_db()
+                qs_video_album_selected = Video_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
+                if qs_video_album_selected is not None and len(qs_video_album_selected) > 0:
+                    for q_video_album_selected in qs_video_album_selected:
+                        f_delete_query_video_album(q_video_album_selected)
+                        data = {
+                            'check_discard': True,
+                        }          
+                        Video_Album.objects.filter(id=q_video_album_selected.id).update(**data)
+                        q_video_album_selected.refresh_from_db()
+                qs_music_album_selected = Music_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_actor))
+                if qs_music_album_selected is not None and len(qs_music_album_selected) > 0:
+                    for q_music_album_selected in qs_music_album_selected:
+                        f_delete_query_music_album(q_music_album_selected)
+                        data = {
+                            'check_discard': True,
+                        }          
+                        Music_Album.objects.filter(id=q_music_album_selected.id).update(**data)
+                        q_music_album_selected.refresh_from_db()
+                f_delete_query_actor(q_actor)
                 data = {
-                    'list_dict_profile_album': list_dict_profile_album,
                     'check_discard': True,
-                    }
-            else:
-                data = {
-                    'list_dict_profile_album': list_dict_profile_album,
-                    'check_discard': False,
-                    }
-            Actor.objects.filter(id=q_xxx_album_selected.id).update(**data)
-            q_xxx_album_selected.refresh_from_db()
-            # Actor 등록된 앨범에서 Actor 삭제
-            qs_picture_album = Picture_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_xxx_album_selected))
-            qs_video_album = Video_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_xxx_album_selected))
-            qs_music_album = Music_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_xxx_album_selected))
-            if type_list == 'profile':
-                pass
-            elif type_list == 'all':
-                data = {'main_actor': None}
-                if qs_picture_album is not None and len(qs_picture_album) > 0:
-                    for q_picture_album in qs_picture_album:
-                        Picture_Album.objects.filter(id=q_picture_album.id).update(**data)
-                if qs_video_album is not None and len(qs_video_album) > 0:
-                    for q_video_album in qs_video_album:
-                        Video_Album.objects.filter(id=q_video_album.id).update(**data)
-                if qs_music_album is not None and len(qs_music_album) > 0:
-                    for q_music_album in qs_music_album:
-                        Music_Album.objects.filter(id=q_music_album.id).update(**data)
-            else:
-                pass
-            
-        elif type_album == 'picture':
-            if id_delete == 'all':
-                data = {
-                    'list_dict_picture_album': list_dict_picture_album,
-                    'check_discard': True,
-                    }
-            else:
-                data = {
-                    'list_dict_picture_album': list_dict_picture_album,
-                    'check_discard': False,
-                    }
-            Picture_Album.objects.filter(id=q_xxx_album_selected.id).update(**data)
-            q_xxx_album_selected.refresh_from_db()
-        elif type_album == 'manga':
-            if id_delete == 'all':
-                data = {
-                    'list_dict_manga_album': list_dict_manga_album,
-                    'check_discard': True,
-                    }
-            else:
-                data = {
-                    'list_dict_manga_album': list_dict_manga_album,
-                    'check_discard': False,
-                    }
-            Manga_Album.objects.filter(id=q_xxx_album_selected.id).update(**data)
-            q_xxx_album_selected.refresh_from_db()
-        elif type_album == 'video':
-            if id_delete == 'all':
-                data = {
-                    'list_dict_picture_album': list_dict_picture_album,
-                    'list_dict_video_album': list_dict_video_album,
-                    'check_discard': True,
-                    }
-                print(f'list_dict_picture_album: {list_dict_picture_album} - 7')
-            else:
-                data = {
-                    'list_dict_picture_album': list_dict_picture_album,
-                    'list_dict_video_album': list_dict_video_album,
-                    'check_discard': False,
-                    }
-                print(f'list_dict_picture_album: {list_dict_picture_album} - 8')
-            Video_Album.objects.filter(id=q_xxx_album_selected.id).update(**data)
-            q_xxx_album_selected.refresh_from_db()
-        elif type_album == 'music':
-            if id_delete == 'all':
-                data = {
-                    'list_dict_picture_album': list_dict_picture_album,
-                    'list_dict_music_album': list_dict_music_album,
-                    'check_discard': True,
-                    }
-            else:
-                data = {
-                    'list_dict_picture_album': list_dict_picture_album,
-                    'list_dict_music_album': list_dict_music_album,
-                    'check_discard': False,
-                    }
-            Music_Album.objects.filter(id=q_xxx_album_selected.id).update(**data)
-            q_xxx_album_selected.refresh_from_db()
+                }          
+                Actor.objects.filter(id=q_actor.id).update(**data)
+                q_actor.refresh_from_db()
+        
         else:
-            print('no path defined')
+            print(f'삭제하기 option_1_str == {option_1_str}, is_delete == {id_delete}')
+            if type_album == 'actor':
+                if type_list == 'all' or type_list == 'profile':
+                    f_delete_query_actor(q_xxx_album_selected)
+            else:
+                if list_dict_picture_album is not None and len(list_dict_picture_album) > 1:
+                    if type_list == 'all' or type_list == 'image':
+                        f_delete_query_picture_album(q_xxx_album_selected)
+
+                if list_dict_manga_album is not None and len(list_dict_manga_album) > 1:
+                    if type_list == 'all' or type_list == 'image':
+                        f_delete_query_manga_album(q_xxx_album_selected)
+
+                if list_dict_video_album is not None and len(list_dict_video_album) > 1:
+                    if type_list == 'all' or type_list == 'video':
+                        f_delete_query_video_album(q_xxx_album_selected)
+                
+                if list_dict_music_album is not None and len(list_dict_music_album) > 1:
+                    if type_list == 'all' or type_list == 'audio':
+                        f_delete_query_music_album(q_xxx_album_selected)
+
+            # -------------------------------------------------------------------------------------------------     
+            # Active 최소 1개 유지, 마지막 이미지를 Activate시킨다. 모두 discard되었으면 default를 되살린다.
+            
+            if id_delete != 'all':
+                if list_dict_profile_album is not None:
+                    count = sum(1 for d in list_dict_profile_album if d.get('active') == 'true')
+                    if count == 0:
+                        for dict_profile_album in list_dict_profile_album[::-1]:
+                            if dict_profile_album['discard'] == 'false':
+                                dict_profile_album['active'] = 'true'
+                                break
+                            if dict_profile_album['id'] == 0:
+                                dict_profile_album['active'] = 'true'
+                                dict_profile_album['discard'] = 'false'
+                if list_dict_picture_album is not None:
+                    count = sum(1 for d in list_dict_picture_album if d.get('active') == 'true')
+                    if count == 0:
+                        for dict_picture_album in list_dict_picture_album[::-1]:
+                            if dict_picture_album['discard'] == 'false':
+                                dict_picture_album['active'] = 'true'
+                                break
+                            if dict_picture_album['id'] == 0:
+                                dict_picture_album['active'] = 'true'
+                                dict_picture_album['discard'] = 'false'
+                if list_dict_manga_album is not None:
+                    count = sum(1 for d in list_dict_manga_album if d.get('active') == 'true')
+                    if count == 0:
+                        for dict_manga_album in list_dict_manga_album[::-1]:
+                            if dict_manga_album['discard'] == 'false':
+                                dict_manga_album['active'] = 'true'
+                                break
+                            if dict_manga_album['id'] == 0:
+                                dict_manga_album['active'] = 'true'
+                                dict_manga_album['discard'] = 'false'
+                if list_dict_music_album is not None:
+                    count = sum(1 for d in list_dict_music_album if d.get('active') == 'true')
+                    if count == 0:
+                        for dict_music_album in list_dict_music_album[::-1]:
+                            if dict_music_album['discard'] == 'false':
+                                dict_music_album['active'] = 'true'
+                                break
+                            if dict_music_album['id'] == 0:
+                                dict_music_album['active'] = 'true'
+                                dict_music_album['discard'] = 'false'
+
+            # -------------------------------------------------------------------------------------------------   
+            # DB 업데이트
+            if type_album == 'actor':
+                if id_delete == 'all':
+                    data = {
+                        'list_dict_profile_album': list_dict_profile_album,
+                        'check_discard': True,
+                        }
+                else:
+                    data = {
+                        'list_dict_profile_album': list_dict_profile_album,
+                        'check_discard': False,
+                        }
+                Actor.objects.filter(id=q_xxx_album_selected.id).update(**data)
+                q_xxx_album_selected.refresh_from_db()
+                # Actor 등록된 앨범에서 Actor 삭제
+                qs_picture_album = Picture_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_xxx_album_selected))
+                qs_video_album = Video_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_xxx_album_selected))
+                qs_music_album = Music_Album.objects.filter(Q(check_discard=False) & Q(main_actor=q_xxx_album_selected))
+                if type_list == 'profile':
+                    pass
+                elif type_list == 'all':
+                    data = {'main_actor': None}
+                    if qs_picture_album is not None and len(qs_picture_album) > 0:
+                        for q_picture_album in qs_picture_album:
+                            Picture_Album.objects.filter(id=q_picture_album.id).update(**data)
+                    if qs_video_album is not None and len(qs_video_album) > 0:
+                        for q_video_album in qs_video_album:
+                            Video_Album.objects.filter(id=q_video_album.id).update(**data)
+                    if qs_music_album is not None and len(qs_music_album) > 0:
+                        for q_music_album in qs_music_album:
+                            Music_Album.objects.filter(id=q_music_album.id).update(**data)
+                else:
+                    pass
+                
+            elif type_album == 'picture':
+                if id_delete == 'all':
+                    data = {
+                        'list_dict_picture_album': list_dict_picture_album,
+                        'check_discard': True,
+                        }
+                else:
+                    data = {
+                        'list_dict_picture_album': list_dict_picture_album,
+                        'check_discard': False,
+                        }
+                Picture_Album.objects.filter(id=q_xxx_album_selected.id).update(**data)
+                q_xxx_album_selected.refresh_from_db()
+            elif type_album == 'manga':
+                if id_delete == 'all':
+                    data = {
+                        'list_dict_manga_album': list_dict_manga_album,
+                        'check_discard': True,
+                        }
+                else:
+                    data = {
+                        'list_dict_manga_album': list_dict_manga_album,
+                        'check_discard': False,
+                        }
+                Manga_Album.objects.filter(id=q_xxx_album_selected.id).update(**data)
+                q_xxx_album_selected.refresh_from_db()
+            elif type_album == 'video':
+                if id_delete == 'all':
+                    data = {
+                        'list_dict_picture_album': list_dict_picture_album,
+                        'list_dict_video_album': list_dict_video_album,
+                        'check_discard': True,
+                        }
+                    print(f'list_dict_picture_album: {list_dict_picture_album} - 7')
+                else:
+                    data = {
+                        'list_dict_picture_album': list_dict_picture_album,
+                        'list_dict_video_album': list_dict_video_album,
+                        'check_discard': False,
+                        }
+                    print(f'list_dict_picture_album: {list_dict_picture_album} - 8')
+                Video_Album.objects.filter(id=q_xxx_album_selected.id).update(**data)
+                q_xxx_album_selected.refresh_from_db()
+            elif type_album == 'music':
+                if id_delete == 'all':
+                    data = {
+                        'list_dict_picture_album': list_dict_picture_album,
+                        'list_dict_music_album': list_dict_music_album,
+                        'check_discard': True,
+                        }
+                else:
+                    data = {
+                        'list_dict_picture_album': list_dict_picture_album,
+                        'list_dict_music_album': list_dict_music_album,
+                        'check_discard': False,
+                        }
+                Music_Album.objects.filter(id=q_xxx_album_selected.id).update(**data)
+                q_xxx_album_selected.refresh_from_db()
+            else:
+                print('no path defined')
     else:
         print('id_delete is not valid')
     return True

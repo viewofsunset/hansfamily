@@ -374,6 +374,9 @@
 
                     check_switch_manga_new_volume_update_only: false,
                     check_switch_manga_complete_hide: false,
+
+                    // actor
+                    check_switch_actor_delete_with_related_album_as_well: false,
                     
                     // music player
                     check_music_player_expand: true,
@@ -832,12 +835,11 @@
                     this.progress_max = 100
                     this.progress_min = 0
                     this.show_progress = false
-                    // this.data_actor = {}
-                    // this.selected_actor_id = ''
-
+                    
                     this.status_cover_image_change = false
                     this.status_profile_album_picture_remove = false 
                     this.status_create = false
+                    this.check_switch_actor_delete_with_related_album_as_well = false
 
                     $("#id_actor_update_input_text_name").val("");
                     $("#id_actor_update_input_date_birthday").val("");
@@ -908,6 +910,7 @@
                     
                     this.status_create_picture_album_by_actor_id = false 
                     this.status_create = false 
+                    this.check_switch_actor_delete_with_related_album_as_well = false
 
                     this.progress_value = 0
                     this.progress_max = 100
@@ -962,9 +965,7 @@
                     this.input_info_site_url = ''
                     this.input_text_tag = ''
                     this.files = ''
-                    // this.data_manga = {}
-                    // this.selected_manga_album_id = ''
-
+                    
                     $("#id_manga_update_input_text_title").val("");
                     $("#id_manga_update_input_text_studio").val("");
                     $("#id_manga_update_input_date_released").val("");
@@ -977,6 +978,7 @@
                     this.status_create_manga_album_by_actor_id = false 
                     this.status_manga_update_checkbox_covoer_image_update = false
                     this.status_create = false 
+                    this.check_switch_actor_delete_with_related_album_as_well = false
 
                     this.progress_value = 0
                     this.progress_max = 100
@@ -1043,9 +1045,7 @@
                     this.input_streaming_video_url = ''
                     this.selected_site_name_video_info = 'blank'
                     this.selected_video_album_video_id = 0
-                    // this.data_video = {}
-                    // this.selected_video_album_id = ''
-                    
+                                        
                     $("#id_video_update_input_text_title").val("");
                     $("#id_video_update_input_text_studio").val("");
                     $("#id_video_update_input_date_released").val("");
@@ -1059,6 +1059,7 @@
                     this.status_video_gallery_item_display_screenshot = true                                        
                     this.status_create_video_album_by_actor_id = false 
                     this.status_create = false 
+                    this.check_switch_actor_delete_with_related_album_as_well = false
                     
                     this.progress_value = 0
                     this.progress_max = 100
@@ -1106,9 +1107,7 @@
                     this.input_info_site_url = ''
                     this.input_text_tag = ''
                     this.files = ''
-                    // this.data_music = {}
-                    // this.selected_music_album_id = ''
-
+                    
                     $("#id_music_update_input_text_title").val("");
                     $("#id_music_update_input_text_studio").val("");
                     $("#id_music_update_input_date_released").val("");
@@ -1117,9 +1116,9 @@
                     $("#id_music_update_input_text_tag").val("");
                     $("#id_music_update_input_files_upload").val("");
                     
-                    
                     this.status_create_music_album_by_actor_id = false 
                     this.status_create = false 
+                    this.check_switch_actor_delete_with_related_album_as_well = false
 
                     this.progress_value = 0
                     this.progress_max = 100
@@ -1586,461 +1585,6 @@
 
 
 
-
-
-
-
-
-                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                //
-                //                                                  Create Form
-                //
-                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                
-
-                // Actor 생성시 Album 선택
-
-                // 토글버튼으로 키워드 선택을 통한 앨범 필터링
-                f_toggle_select_collected_keywords_from_title_selected(keyword_collected) {
-                    const index = this.list_collected_keywords_from_title_selected.indexOf(keyword_collected);
-                    if (index > -1) {
-                        this.list_collected_keywords_from_title_selected.splice(index, 1);
-                    }
-                    else {
-                        this.list_collected_keywords_from_title_selected.push(keyword_collected);
-                    }
-                    console.log('list_collected_keywords_from_title_selected', this.list_collected_keywords_from_title_selected)
-
-                    this.input_text_name = this.list_collected_keywords_from_title_selected.join(' ')
-                    
-                    axios.post('/hans_ent_actor_update_modal/', {
-                        'button': 'select_keyword',
-                        'list_collected_keywords_from_title_selected': this.list_collected_keywords_from_title_selected,
-                    }, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'X-CSRFToken': "{{ csrf_token }}"
-                    }
-                    })  
-                    .then((response) => {
-                        this.list_xxx_category = response.data['LIST_ACTOR_CATEGORY']
-                        this.data_actor = response.data['selected_serialized_data_actor']
-                        this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
-
-                        this.list_serialized_data_picture_album_collected = response.data['list_serialized_data_picture_album_collected']
-                        this.list_serialized_data_manga_album_collected = response.data['list_serialized_data_manga_album_collected']
-                        this.list_serialized_data_video_album_collected = response.data['list_serialized_data_video_album_collected']
-                        this.list_serialized_data_music_album_collected = response.data['list_serialized_data_music_album_collected']
-                    })
-                    .catch(() => {
-                        console.log('Error! f_hans_ent_actor_update_modal_open')
-                    })
-                },
-
-                // Dictionary 길이가 0인가 1 이상인가를 판단해줌
-                f_check_dict_xxx_album_collected_item_empty(obj) {
-                    if (Object.keys(obj).length === 0) {
-                        return true;
-                    }
-                    return Object.keys(obj).every(key => obj[key] == null);
-                },
-
-                // Actor 생성시 추가할 Picture Album ID List에 넣기 빼기
-                f_toggle_select_collected_picture_album_from_title_selected(dict_picture_album_collected_id) {
-                    const index2 = this.list_selected_picture_album_for_actor_create.indexOf(dict_picture_album_collected_id);
-                    if (index2 > -1) {
-                        this.list_selected_picture_album_for_actor_create.splice(index2, 1);
-                    }
-                    else {
-                        this.list_selected_picture_album_for_actor_create.push(dict_picture_album_collected_id);
-                    }
-                    console.log('list_selected_picture_album_for_actor_create', this.list_selected_picture_album_for_actor_create)
-                },
-
-                // Actor 생성시 추가할 Video Album ID List에 넣기 빼기
-                f_toggle_select_collected_video_album_from_title_selected(dict_video_album_collected_id) {
-                    const index2 = this.list_selected_video_album_for_actor_create.indexOf(dict_video_album_collected_id);
-                    if (index2 > -1) {
-                        this.list_selected_video_album_for_actor_create.splice(index2, 1);
-                    }
-                    else {
-                        this.list_selected_video_album_for_actor_create.push(dict_video_album_collected_id);
-                    }
-                    console.log('list_selected_video_album_for_actor_create', this.list_selected_video_album_for_actor_create)
-                },
-
-                // Actor 생성시 추가할 Music Album ID List에 넣기 빼기
-                f_toggle_select_collected_music_album_from_title_selected(dict_music_album_collected_id) {
-                    const index2 = this.list_selected_music_album_for_actor_create.indexOf(dict_music_album_collected_id);
-                    if (index2 > -1) {
-                        this.list_selected_music_album_for_actor_create.splice(index2, 1);
-                    }
-                    else {
-                        this.list_selected_music_album_for_actor_create.push(dict_music_album_collected_id);
-                    }
-                    console.log('list_selected_music_album_for_actor_create', this.list_selected_music_album_for_actor_create)
-                },
-
-                
-                // 필터링 후 표시된 앨범에 대해 전체 선택 or 전체 선택 해제
-                f_toggle_select_all_displayed_album_from_title_selected() {
-                    this.status_select_all_album_displayed = !this.status_select_all_album_displayed
-
-                    if (this.list_selected_picture_album_for_actor_create.length === 0) {
-                        // If list_b is empty, fill it with the IDs from list_a
-                        this.list_selected_picture_album_for_actor_create = this.list_serialized_data_picture_album_collected.map(item => item.id);
-                    } else {
-                        // Otherwise, empty list_b
-                        this.list_selected_picture_album_for_actor_create = [];
-                    }
-
-                    if (this.list_selected_video_album_for_actor_create.length === 0) {
-                        // If list_b is empty, fill it with the IDs from list_a
-                        this.list_selected_video_album_for_actor_create = this.list_serialized_data_video_album_collected.map(item => item.id);
-                    } else {
-                        // Otherwise, empty list_b
-                        this.list_selected_video_album_for_actor_create = [];
-                    }
-
-                    if (this.list_selected_music_album_for_actor_create.length === 0) {
-                        // If list_b is empty, fill it with the IDs from list_a
-                        this.list_selected_music_album_for_actor_create = this.list_serialized_data_music_album_collected.map(item => item.id);
-                    } else {
-                        // Otherwise, empty list_b
-                        this.list_selected_music_album_for_actor_create = [];
-                    }
-                },
-
-                
-
-
-                // Actor Create
-                async f_actor_create_form() {
-                    console.log('11111111111111111111111111111111111111111111111111111111111111111')
-                    console.log('!!!!!!!!!! ##############  this.selected_actor_id', this.selected_actor_id)
-                    console.log('!!!!!!!!!! ##############  this.input_text_name', this.input_text_name)
-                    console.log('!!!!!!!!!! ##############  this.file_upload_option', this.file_upload_option)
-                    
-                    let formData = new FormData();
-                    formData.append('file_upload_option', this.file_upload_option)
-                    formData.append('folder_upload_option', this.folder_upload_option)
-                    if (this.files != null && this.files !='') {
-                        const firstFilePath = this.files[0].webkitRelativePath;
-                        this.folderName = firstFilePath.split("/")[0]; // Extract folder name from the path
-                        formData.append("folder_name", this.folderName);
-                        for (let i = 0; i < this.files.length; i++) {
-                            formData.append('files', this.files[i]);
-                            formData.append('paths', this.files[i].webkitRelativePath);
-                    }} else {
-                        console.log('No files!')
-                    }
-
-                    formData.append('button', 'create_or_update');
-                    formData.append('selected_actor_id', 'none')
-                    formData.append('input_text_name', this.input_text_name)
-                    formData.append('input_text_synonyms', this.input_text_synonyms)
-                    formData.append('input_date_birthday', this.input_date_birthday)
-                    formData.append('input_number_height', this.input_number_height)
-                    formData.append('selected_site_name_actor_info', this.selected_site_name_actor_info)
-                    formData.append('selected_filtering_category_id', this.selected_filtering_category_id)
-                    formData.append('list_selected_picture_album_for_actor_create', this.list_selected_picture_album_for_actor_create)
-                    formData.append('list_selected_video_album_for_actor_create', this.list_selected_video_album_for_actor_create)
-                    formData.append('list_selected_music_album_for_actor_create', this.list_selected_music_album_for_actor_create)
-                    
-                    this.show_progress = true;
-
-                    if (this.input_text_name == '' && this.file_upload_option == 'folder_name_for_nothing' ) {
-                        alert("이름을 입력하지 않았습니다.");
-                        this.show_progress = false;
-                        this.status_create = false
-                    } else {
-                        console.log('Actor Create Form Submitted')
-                        // $('#app_hans_ent_actor_create_modal').modal('hide')
-                        try {
-                            await axios.post('/hans_ent_actor_update_modal/', formData, {
-                            headers: {
-                                'Content-Type': 'multipart/form-data',
-                                'X-CSRFToken': "{{ csrf_token }}"
-                            },
-                            onUploadProgress: progressEvent => {
-                            this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
-                            })
-                            .then((response) => {
-                                $('#app_hans_ent_actor_create_modal').modal('hide')
-                                this.show_progress = false;
-
-                                console.log('Actor Created!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ')
-                                this.data_actor = response.data['selected_serialized_data_actor']
-                                console.log("@@@@@@@@@@@@@@@@@@@@@@@@@ this.data_actor", this.data_actor)
-                                this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
-                                                       
-                                if (Object.keys(this.data_actor).length > 0 ) {
-                                    this.status_create = false
-                                } else {
-                                    this.status_create = true
-                                }
-                               
-                                this.f_refreshData_actor_list()
-                                $('#app_hans_ent_actor_update_modal').modal('show')
-                                console.log('f_actor_create_form')
-                            })
-                            alert('Actor Created Successfully');
-                        } catch (error) {
-                            console.error('Error uploading images:', error);
-                        }
-                    }
-                },
-
-                // Picture Album Create
-                async f_picture_album_create_form() {
-                    console.log('########### status_create_picture_album_by_actor_id', this.status_create_picture_album_by_actor_id)
-                    console.log('############ file_upload_option', this.file_upload_option)
-
-                    let formData = new FormData();
-                    formData.append('file_upload_option', this.file_upload_option)
-                    if (this.files != null && this.files !='') {
-                        const firstFilePath = this.files[0].webkitRelativePath;
-                        this.folderName = firstFilePath.split("/")[0]; // Extract folder name from the path
-                        formData.append("folder_name", this.folderName);
-                        for (let i = 0; i < this.files.length; i++) {
-                            formData.append('files', this.files[i]);
-                    }} else {
-                        console.log('No files!')
-                    }
-                    formData.append('button', 'create_or_update');
-                    formData.append('selected_picture_album_id', 'none')
-                    // if (this.status_create_picture_album_by_actor_id === true) {
-                    //     formData.append('selected_actor_id', this.selected_actor_id)    
-                    // }
-                    formData.append('selected_actor_id', this.selected_actor_id);
-                    formData.append('input_text_title', this.input_text_title)
-                    formData.append('input_text_studio', this.input_text_studio)
-                    formData.append('input_date_released', this.input_date_released)
-                    formData.append('input_text_tag', this.input_text_tag)
-                    formData.append('selected_filtering_category_id', this.selected_filtering_category_id)
-                    this.show_progress = true;
-                    
-                    try {
-                        await axios.post('/hans_ent_picture_album_update_modal/', formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                            'X-CSRFToken': "{{ csrf_token }}"
-                        },
-                        onUploadProgress: progressEvent => {
-                        this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
-                        })
-                        .then((response) => {
-                            this.f_reset_data_picture_album_create_form()
-                            $('#app_hans_ent_picture_album_create_modal').modal('hide')
-
-                            this.data_actor = response.data['selected_serialized_data_actor']
-                            this.data_picture = response.data['selected_serialized_data_picture_album']
-                            
-                            console.log('actor ------------------------- 3', this.data_actor)
-                            console.log('picture ------------------------- 3', this.data_picture)
-
-                            this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
-                            this.f_selected_serialized_json_data_parsing_picture(this.data_picture)
-                                                            
-                            if (Object.keys(this.data_picture).length > 0 ) {
-                                this.status_create = false
-                            } else {
-                                this.status_create = true
-                            }
-                            
-                            $('#app_hans_ent_picture_album_update_modal').modal('show')
-                            console.log('f_picture_album_create_form')
-                        })
-                        alert('Picture Album Created Successfully');
-                    } catch (error) {
-                        console.error('Error f_picture_album_create_form:', error);
-                    }
-                
-                },
-
-                // Manga Album Create
-                async f_manga_album_create_form() {
-                    console.log('########### status_create_manga_album_by_actor_id', this.status_create_manga_album_by_actor_id)
-                    let formData = new FormData();
-                    formData.append('button', 'create_or_update');
-                    formData.append('selected_manga_album_id', 'none')
-                    if (this.status_create_manga_album_by_actor_id === true) {
-                        formData.append('selected_actor_id', this.selected_actor_id)    
-                    }
-                    formData.append('input_text_title', this.input_text_title)
-                    formData.append('input_text_studio', this.input_text_studio)
-                    formData.append('input_date_released', this.input_date_released)
-                    formData.append('input_text_tag', this.input_text_tag)
-                    formData.append('selected_filtering_category_id', this.selected_filtering_category_id)
-                    this.show_progress = true;
-
-                    if (this.input_text_title != '') {
-                        console.log('Manga Album Create Form Submitted')
-                        try {
-                            await axios.post('/hans_ent_manga_album_update_modal/', formData, {
-                            headers: {
-                                'Content-Type': 'multipart/form-data',
-                                'X-CSRFToken': "{{ csrf_token }}"
-                            },
-                            onUploadProgress: progressEvent => {
-                            this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
-                            })
-                            .then((response) => {
-                                this.f_reset_data_manga_album_create_form()
-                                this.f_hide_all_modals_hans_ent()
-
-                                this.data_actor = response.data['selected_serialized_data_actor']
-                                this.data_manga = response.data['selected_serialized_data_manga_album']
-
-                                this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
-                                this.f_selected_serialized_json_data_parsing_manga(this.data_manga)
-                                                                
-                                if (Object.keys(this.data_manga).length > 0 ) {
-                                    this.status_create = false
-                                } else {
-                                    this.status_create = true
-                                }
-
-                               
-                                $('#app_hans_ent_manga_album_update_modal').modal('show')
-                                console.log('f_manga_album_create_form')
-                            })
-                            alert('Manga Album Created Successfully');
-                        } catch (error) {
-                            console.error('Error f_manga_album_create_form:', error);
-                        }
-                    } else {
-                        alert("타이틀을 입력하지 않았습니다.");
-                        this.show_progress = false;
-                        this.status_create = false
-                    }
-                },
-                
-                // Video Album Create
-                async f_video_album_create_form() {
-                    console.log('########### status_create_video_album_by_actor_id', this.status_create_video_album_by_actor_id)
-                    console.log('############ file_upload_option', this.file_upload_option)
-                    
-                    let formData = new FormData();
-                    formData.append('file_upload_option', this.file_upload_option)
-                    formData.append('folder_upload_option', this.folder_upload_option)
-                    if (this.files != null && this.files !='') {
-                        const firstFilePath = this.files[0].webkitRelativePath;
-                        this.folderName = firstFilePath.split("/")[0]; // Extract folder name from the path
-                        formData.append("folder_name", this.folderName);
-                        for (let i = 0; i < this.files.length; i++) {
-                            formData.append('files', this.files[i]);
-                    }} else {
-                        console.log('No files!')
-                    }
-                    formData.append('button', 'create_or_update');
-                    formData.append('selected_video_album_id', 'none')
-                    if (this.status_create_video_album_by_actor_id === true) {
-                        formData.append('selected_actor_id', this.selected_actor_id)    
-                    }
-                    formData.append('selected_site_name_video_info', this.selected_site_name_video_info)
-                    formData.append('input_text_title', this.input_text_title)
-                    formData.append('input_text_studio', this.input_text_studio)
-                    formData.append('input_date_released', this.input_date_released)
-                    formData.append('input_text_tag', this.input_text_tag)
-                    formData.append('selected_filtering_category_id', this.selected_filtering_category_id)
-                    formData.append('input_streaming_video_url', this.input_streaming_video_url)
-                    
-                    this.show_progress = true;
-
-                    try {
-                        await axios.post('/hans_ent_video_album_update_modal/', formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                            'X-CSRFToken': "{{ csrf_token }}"
-                        },
-                        onUploadProgress: progressEvent => {
-                        this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
-                        })
-                        .then((response) => {
-                            this.f_reset_data_video_album_create_form()
-                            this.f_hide_all_modals_hans_ent()
-
-                            this.data_actor = response.data['selected_serialized_data_actor']
-                            this.data_video = response.data['selected_serialized_data_video_album']
-                            
-                            this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
-                            this.f_selected_serialized_json_data_parsing_video(this.data_video)
-                    
-                            if (Object.keys(this.data_video).length > 0 ) {
-                                this.status_create = false
-                            } else {
-                                this.status_create = true
-                            }
-                            $('#app_hans_ent_video_album_update_modal').modal('show')
-                            console.log('f_video_album_create_form')
-                        })
-                        alert('Video Album Created Successfully');
-                    } catch (error) {
-                        console.error('Error f_video_album_create_form:', error);
-                    }
-                    
-                },
-
-                // Music Album Create
-                async f_music_album_create_form() {
-                    console.log('########### status_create_music_album_by_actor_id', this.status_create_music_album_by_actor_id)
-                    let formData = new FormData();
-                    formData.append('button', 'create_or_update');
-                    formData.append('selected_music_album_id', 'none')
-                    if (this.status_create_music_album_by_actor_id === true) {
-                        formData.append('selected_actor_id', this.selected_actor_id)    
-                    }
-                    formData.append('input_text_title', this.input_text_title)
-                    formData.append('input_text_studio', this.input_text_studio)
-                    formData.append('input_date_released', this.input_date_released)
-                    formData.append('input_text_tag', this.input_text_tag)
-                    formData.append('selected_filtering_category_id', this.selected_filtering_category_id)
-                    this.show_progress = true;
-
-                    if (this.input_text_title != '') {
-                        try {
-                            await axios.post('/hans_ent_music_album_update_modal/', formData, {
-                            headers: {
-                                'Content-Type': 'multipart/form-data',
-                                'X-CSRFToken': "{{ csrf_token }}"
-                            },
-                            onUploadProgress: progressEvent => {
-                            this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
-                            })
-                            .then((response) => {
-                                this.f_reset_data_music_album_create_form()
-                                this.f_hide_all_modals_hans_ent()
-
-                                this.data_actor = response.data['selected_serialized_data_actor']
-                                this.data_music = response.data['selected_serialized_data_music_album']
-                                
-                                this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
-                                this.f_selected_serialized_json_data_parsing_music(this.data_music)
-                        
-                                if (Object.keys(this.data_music).length > 0 ) {
-                                    this.status_create = false
-                                } else {
-                                    this.status_create = true
-                                }
-                                $('#app_hans_ent_music_album_update_modal').modal('show')
-                                console.log('f_music_album_create_form')
-                            })
-                            alert('Picture Album Created Successfully');
-                        } catch (error) {
-                            console.error('Error f_music_album_create_form:', error);
-                        }
-                    } else {
-                        alert("타이틀을 입력하지 않았습니다.");
-                        this.show_progress = false;
-                        this.status_create = false
-                    }
-                },
-                
 
 
 
@@ -2923,12 +2467,7 @@
                         console.log('Error! f_hans_ent_picture_album_gallery_select_image_for_order_top')
                     })
                 },
-
-
-                
-
-
-                
+              
 
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Manga Album 
@@ -3751,6 +3290,501 @@
 
 
 
+
+
+
+
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+                //                                                  Create Form
+                //
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+
+                // Actor 생성시 Album 선택
+
+                // 토글버튼으로 키워드 선택을 통한 앨범 필터링
+                f_toggle_select_collected_keywords_from_title_selected(keyword_collected) {
+                    const index = this.list_collected_keywords_from_title_selected.indexOf(keyword_collected);
+                    if (index > -1) {
+                        this.list_collected_keywords_from_title_selected.splice(index, 1);
+                    }
+                    else {
+                        this.list_collected_keywords_from_title_selected.push(keyword_collected);
+                    }
+                    console.log('list_collected_keywords_from_title_selected', this.list_collected_keywords_from_title_selected)
+
+                    this.input_text_name = this.list_collected_keywords_from_title_selected.join(' ')
+                    
+                    axios.post('/hans_ent_actor_update_modal/', {
+                        'button': 'select_keyword',
+                        'list_collected_keywords_from_title_selected': this.list_collected_keywords_from_title_selected,
+                    }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    }
+                    })  
+                    .then((response) => {
+                        this.list_xxx_category = response.data['LIST_ACTOR_CATEGORY']
+                        this.data_actor = response.data['selected_serialized_data_actor']
+                        this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
+
+                        this.list_serialized_data_picture_album_collected = response.data['list_serialized_data_picture_album_collected']
+                        this.list_serialized_data_manga_album_collected = response.data['list_serialized_data_manga_album_collected']
+                        this.list_serialized_data_video_album_collected = response.data['list_serialized_data_video_album_collected']
+                        this.list_serialized_data_music_album_collected = response.data['list_serialized_data_music_album_collected']
+                    })
+                    .catch(() => {
+                        console.log('Error! f_hans_ent_actor_update_modal_open')
+                    })
+                },
+
+                // Dictionary 길이가 0인가 1 이상인가를 판단해줌
+                f_check_dict_xxx_album_collected_item_empty(obj) {
+                    if (Object.keys(obj).length === 0) {
+                        return true;
+                    }
+                    return Object.keys(obj).every(key => obj[key] == null);
+                },
+
+                // Actor 생성시 추가할 Picture Album ID List에 넣기 빼기
+                f_toggle_select_collected_picture_album_from_title_selected(dict_picture_album_collected_id) {
+                    const index2 = this.list_selected_picture_album_for_actor_create.indexOf(dict_picture_album_collected_id);
+                    if (index2 > -1) {
+                        this.list_selected_picture_album_for_actor_create.splice(index2, 1);
+                    }
+                    else {
+                        this.list_selected_picture_album_for_actor_create.push(dict_picture_album_collected_id);
+                    }
+                    console.log('list_selected_picture_album_for_actor_create', this.list_selected_picture_album_for_actor_create)
+                },
+
+                // Actor 생성시 추가할 Video Album ID List에 넣기 빼기
+                f_toggle_select_collected_video_album_from_title_selected(dict_video_album_collected_id) {
+                    const index2 = this.list_selected_video_album_for_actor_create.indexOf(dict_video_album_collected_id);
+                    if (index2 > -1) {
+                        this.list_selected_video_album_for_actor_create.splice(index2, 1);
+                    }
+                    else {
+                        this.list_selected_video_album_for_actor_create.push(dict_video_album_collected_id);
+                    }
+                    console.log('list_selected_video_album_for_actor_create', this.list_selected_video_album_for_actor_create)
+                },
+
+                // Actor 생성시 추가할 Music Album ID List에 넣기 빼기
+                f_toggle_select_collected_music_album_from_title_selected(dict_music_album_collected_id) {
+                    const index2 = this.list_selected_music_album_for_actor_create.indexOf(dict_music_album_collected_id);
+                    if (index2 > -1) {
+                        this.list_selected_music_album_for_actor_create.splice(index2, 1);
+                    }
+                    else {
+                        this.list_selected_music_album_for_actor_create.push(dict_music_album_collected_id);
+                    }
+                    console.log('list_selected_music_album_for_actor_create', this.list_selected_music_album_for_actor_create)
+                },
+
+                
+                // 필터링 후 표시된 앨범에 대해 전체 선택 or 전체 선택 해제
+                f_toggle_select_all_displayed_album_from_title_selected() {
+                    this.status_select_all_album_displayed = !this.status_select_all_album_displayed
+
+                    if (this.list_selected_picture_album_for_actor_create.length === 0) {
+                        // If list_b is empty, fill it with the IDs from list_a
+                        this.list_selected_picture_album_for_actor_create = this.list_serialized_data_picture_album_collected.map(item => item.id);
+                    } else {
+                        // Otherwise, empty list_b
+                        this.list_selected_picture_album_for_actor_create = [];
+                    }
+
+                    if (this.list_selected_video_album_for_actor_create.length === 0) {
+                        // If list_b is empty, fill it with the IDs from list_a
+                        this.list_selected_video_album_for_actor_create = this.list_serialized_data_video_album_collected.map(item => item.id);
+                    } else {
+                        // Otherwise, empty list_b
+                        this.list_selected_video_album_for_actor_create = [];
+                    }
+
+                    if (this.list_selected_music_album_for_actor_create.length === 0) {
+                        // If list_b is empty, fill it with the IDs from list_a
+                        this.list_selected_music_album_for_actor_create = this.list_serialized_data_music_album_collected.map(item => item.id);
+                    } else {
+                        // Otherwise, empty list_b
+                        this.list_selected_music_album_for_actor_create = [];
+                    }
+                },
+
+                
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Actor Create
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                async f_actor_create_form() {
+                    console.log('11111111111111111111111111111111111111111111111111111111111111111')
+                    console.log('!!!!!!!!!! ##############  this.selected_actor_id', this.selected_actor_id)
+                    console.log('!!!!!!!!!! ##############  this.input_text_name', this.input_text_name)
+                    console.log('!!!!!!!!!! ##############  this.file_upload_option', this.file_upload_option)
+                    
+                    let formData = new FormData();
+                    formData.append('file_upload_option', this.file_upload_option)
+                    formData.append('folder_upload_option', this.folder_upload_option)
+                    if (this.files != null && this.files !='') {
+                        const firstFilePath = this.files[0].webkitRelativePath;
+                        this.folderName = firstFilePath.split("/")[0]; // Extract folder name from the path
+                        formData.append("folder_name", this.folderName);
+                        for (let i = 0; i < this.files.length; i++) {
+                            formData.append('files', this.files[i]);
+                            formData.append('paths', this.files[i].webkitRelativePath);
+                    }} else {
+                        console.log('No files!')
+                    }
+
+                    formData.append('button', 'create_or_update');
+                    formData.append('selected_actor_id', 'none')
+                    formData.append('input_text_name', this.input_text_name)
+                    formData.append('input_text_synonyms', this.input_text_synonyms)
+                    formData.append('input_date_birthday', this.input_date_birthday)
+                    formData.append('input_number_height', this.input_number_height)
+                    formData.append('selected_site_name_actor_info', this.selected_site_name_actor_info)
+                    formData.append('selected_filtering_category_id', this.selected_filtering_category_id)
+                    formData.append('list_selected_picture_album_for_actor_create', this.list_selected_picture_album_for_actor_create)
+                    formData.append('list_selected_video_album_for_actor_create', this.list_selected_video_album_for_actor_create)
+                    formData.append('list_selected_music_album_for_actor_create', this.list_selected_music_album_for_actor_create)
+                    
+                    this.show_progress = true;
+
+                    if (this.input_text_name == '' && this.file_upload_option == 'folder_name_for_nothing' ) {
+                        alert("이름을 입력하지 않았습니다.");
+                        this.show_progress = false;
+                        this.status_create = false
+                    } else {
+                        console.log('Actor Create Form Submitted')
+                        // $('#app_hans_ent_actor_create_modal').modal('hide')
+                        try {
+                            await axios.post('/hans_ent_actor_update_modal/', formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                                'X-CSRFToken': "{{ csrf_token }}"
+                            },
+                            onUploadProgress: progressEvent => {
+                            this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
+                            })
+                            .then((response) => {
+                                $('#app_hans_ent_actor_create_modal').modal('hide')
+                                this.show_progress = false;
+
+                                console.log('Actor Created!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ')
+                                this.data_actor = response.data['selected_serialized_data_actor']
+                                console.log('data_actor ------------------------- 1', this.data_actor)
+                                this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
+                                                       
+                                if (Object.keys(this.data_actor).length > 0 ) {
+                                    this.status_create = false
+                                } else {
+                                    this.status_create = true
+                                }
+                               
+                                $('#app_hans_ent_actor_update_modal').modal('show')
+                                console.log('Success!, f_actor_create_form')
+                            })
+                            alert('Actor Created Successfully');
+                        } catch (error) {
+                            console.error('Error uploading images:', error);
+                        }
+                    }
+                },
+
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Picture Album Create
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                async f_picture_album_create_form() {
+                    console.log('########### status_create_picture_album_by_actor_id', this.status_create_picture_album_by_actor_id)
+                    console.log('############ file_upload_option', this.file_upload_option)
+
+                    let formData = new FormData();
+                    formData.append('file_upload_option', this.file_upload_option)
+                    if (this.files != null && this.files !='') {
+                        const firstFilePath = this.files[0].webkitRelativePath;
+                        this.folderName = firstFilePath.split("/")[0]; // Extract folder name from the path
+                        formData.append("folder_name", this.folderName);
+                        for (let i = 0; i < this.files.length; i++) {
+                            formData.append('files', this.files[i]);
+                    }} else {
+                        console.log('No files!')
+                    }
+                    formData.append('button', 'create_or_update');
+                    formData.append('selected_picture_album_id', 'none')
+                    // if (this.status_create_picture_album_by_actor_id === true) {
+                    //     formData.append('selected_actor_id', this.selected_actor_id)    
+                    // }
+                    formData.append('selected_actor_id', this.selected_actor_id);
+                    formData.append('input_text_title', this.input_text_title)
+                    formData.append('input_text_studio', this.input_text_studio)
+                    formData.append('input_date_released', this.input_date_released)
+                    formData.append('input_text_tag', this.input_text_tag)
+                    formData.append('selected_filtering_category_id', this.selected_filtering_category_id)
+                    this.show_progress = true;
+                    
+                    try {
+                        await axios.post('/hans_ent_picture_album_update_modal/', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                            'X-CSRFToken': "{{ csrf_token }}"
+                        },
+                        onUploadProgress: progressEvent => {
+                        this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
+                        })
+                        .then((response) => {
+                            this.f_reset_data_picture_album_create_form()
+                            $('#app_hans_ent_picture_album_create_modal').modal('hide')
+
+                            this.data_actor = response.data['selected_serialized_data_actor']
+                            this.data_picture = response.data['selected_serialized_data_picture_album']
+                            console.log('data_actor ------------------------- 2', this.data_actor)
+                            console.log('data_picture ------------------------- 2', this.data_picture)
+                            this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
+                            this.f_selected_serialized_json_data_parsing_picture(this.data_picture)
+                                                            
+                            if (Object.keys(this.data_picture).length > 0 ) {
+                                this.status_create = false
+                            } else {
+                                this.status_create = true
+                            }
+                            
+                            $('#app_hans_ent_picture_album_update_modal').modal('show')
+                            console.log('Success!, f_picture_album_create_form')
+                        })
+                        alert('Picture Album Created Successfully');
+                    } catch (error) {
+                        console.error('Error f_picture_album_create_form:', error);
+                    }
+                
+                },
+
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Manga Album Create
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                async f_manga_album_create_form() {
+                    console.log('########### status_create_manga_album_by_actor_id', this.status_create_manga_album_by_actor_id)
+                    let formData = new FormData();
+                    formData.append('button', 'create_or_update');
+                    formData.append('selected_manga_album_id', 'none')
+                    if (this.status_create_manga_album_by_actor_id === true) {
+                        formData.append('selected_actor_id', this.selected_actor_id)    
+                    }
+                    formData.append('input_text_title', this.input_text_title)
+                    formData.append('input_text_studio', this.input_text_studio)
+                    formData.append('input_date_released', this.input_date_released)
+                    formData.append('input_text_tag', this.input_text_tag)
+                    formData.append('selected_filtering_category_id', this.selected_filtering_category_id)
+                    this.show_progress = true;
+
+                    if (this.input_text_title != '') {
+                        console.log('Manga Album Create Form Submitted')
+                        try {
+                            await axios.post('/hans_ent_manga_album_update_modal/', formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                                'X-CSRFToken': "{{ csrf_token }}"
+                            },
+                            onUploadProgress: progressEvent => {
+                            this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
+                            })
+                            .then((response) => {
+                                this.f_reset_data_manga_album_create_form()
+                                this.f_hide_all_modals_hans_ent()
+
+                                this.data_actor = response.data['selected_serialized_data_actor']
+                                this.data_manga = response.data['selected_serialized_data_manga_album']
+                                console.log('data_actor ------------------------- 3', this.data_actor)
+                                console.log('data_manga ------------------------- 3', this.data_manga)
+                                this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
+                                this.f_selected_serialized_json_data_parsing_manga(this.data_manga)
+                                                                
+                                if (Object.keys(this.data_manga).length > 0 ) {
+                                    this.status_create = false
+                                } else {
+                                    this.status_create = true
+                                }
+
+                               
+                                $('#app_hans_ent_manga_album_update_modal').modal('show')
+                                console.log('Success!, f_manga_album_create_form')
+                            })
+                            alert('Manga Album Created Successfully');
+                        } catch (error) {
+                            console.error('Error f_manga_album_create_form:', error);
+                        }
+                    } else {
+                        alert("타이틀을 입력하지 않았습니다.");
+                        this.show_progress = false;
+                        this.status_create = false
+                    }
+                },
+                
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Video Album Create
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                async f_video_album_create_form() {
+                    console.log('########### status_create_video_album_by_actor_id', this.status_create_video_album_by_actor_id)
+                    console.log('############ file_upload_option', this.file_upload_option)
+                    
+                    let formData = new FormData();
+                    formData.append('file_upload_option', this.file_upload_option)
+                    formData.append('folder_upload_option', this.folder_upload_option)
+                    if (this.files != null && this.files !='') {
+                        const firstFilePath = this.files[0].webkitRelativePath;
+                        this.folderName = firstFilePath.split("/")[0]; // Extract folder name from the path
+                        formData.append("folder_name", this.folderName);
+                        for (let i = 0; i < this.files.length; i++) {
+                            formData.append('files', this.files[i]);
+                    }} else {
+                        console.log('No files!')
+                    }
+                    formData.append('button', 'create_or_update');
+                    formData.append('selected_video_album_id', 'none')
+                    if (this.status_create_video_album_by_actor_id === true) {
+                        formData.append('selected_actor_id', this.selected_actor_id)    
+                    }
+                    formData.append('selected_site_name_video_info', this.selected_site_name_video_info)
+                    formData.append('input_text_title', this.input_text_title)
+                    formData.append('input_text_studio', this.input_text_studio)
+                    formData.append('input_date_released', this.input_date_released)
+                    formData.append('input_text_tag', this.input_text_tag)
+                    formData.append('selected_filtering_category_id', this.selected_filtering_category_id)
+                    formData.append('input_streaming_video_url', this.input_streaming_video_url)
+                    
+                    this.show_progress = true;
+
+                    try {
+                        await axios.post('/hans_ent_video_album_update_modal/', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                            'X-CSRFToken': "{{ csrf_token }}"
+                        },
+                        onUploadProgress: progressEvent => {
+                        this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
+                        })
+                        .then((response) => {
+                            this.f_reset_data_video_album_create_form()
+                            $('#app_hans_ent_video_album_create_modal').modal('hide')
+
+                            this.data_actor = response.data['selected_serialized_data_actor']
+                            this.data_video = response.data['selected_serialized_data_video_album']
+                            console.log('data_actor ------------------------- 4', this.data_actor)
+                            console.log('data_video ------------------------- 4', this.data_video)
+                            this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
+                            this.f_selected_serialized_json_data_parsing_video(this.data_video)
+                    
+                            if (Object.keys(this.data_video).length > 0 ) {
+                                this.status_create = false
+                            } else {
+                                this.status_create = true
+                            }
+                            $('#app_hans_ent_video_album_update_modal').modal('show')
+                            console.log('Success! f_video_album_create_form')
+                        })
+                        alert('Video Album Created Successfully');
+                    } catch (error) {
+                        console.error('Error! f_video_album_create_form:', error);
+                    }
+                    
+                },
+
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Music Album Create
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                async f_music_album_create_form() {
+                    console.log('########### status_create_music_album_by_actor_id', this.status_create_music_album_by_actor_id)
+                    let formData = new FormData();
+                    formData.append('button', 'create_or_update');
+                    formData.append('selected_music_album_id', 'none')
+                    if (this.status_create_music_album_by_actor_id === true) {
+                        formData.append('selected_actor_id', this.selected_actor_id)    
+                    }
+                    formData.append('input_text_title', this.input_text_title)
+                    formData.append('input_text_studio', this.input_text_studio)
+                    formData.append('input_date_released', this.input_date_released)
+                    formData.append('input_text_tag', this.input_text_tag)
+                    formData.append('selected_filtering_category_id', this.selected_filtering_category_id)
+                    this.show_progress = true;
+
+                    if (this.input_text_title != '') {
+                        try {
+                            await axios.post('/hans_ent_music_album_update_modal/', formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                                'X-CSRFToken': "{{ csrf_token }}"
+                            },
+                            onUploadProgress: progressEvent => {
+                            this.progress_value = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))}
+                            })
+                            .then((response) => {
+                                this.f_reset_data_music_album_create_form()
+                                this.f_hide_all_modals_hans_ent()
+
+                                this.data_actor = response.data['selected_serialized_data_actor']
+                                this.data_music = response.data['selected_serialized_data_music_album']
+                                console.log('data_actor ------------------------- 5', this.data_actor)
+                                console.log('data_music ------------------------- 5', this.data_music)
+                                this.f_selected_serialized_json_data_parsing_actor(this.data_actor)
+                                this.f_selected_serialized_json_data_parsing_music(this.data_music)
+                        
+                                if (Object.keys(this.data_music).length > 0 ) {
+                                    this.status_create = false
+                                } else {
+                                    this.status_create = true
+                                }
+                                $('#app_hans_ent_music_album_update_modal').modal('show')
+                                console.log('f_music_album_create_form')
+                            })
+                            alert('Picture Album Created Successfully');
+                        } catch (error) {
+                            console.error('Error f_music_album_create_form:', error);
+                        }
+                    } else {
+                        alert("타이틀을 입력하지 않았습니다.");
+                        this.show_progress = false;
+                        this.status_create = false
+                    }
+                },
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3788,7 +3822,9 @@
                 },
 
 
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Actor Update
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 async f_actor_update_form() {
                     let formData = new FormData();
                     formData.append('file_upload_option', this.file_upload_option)
@@ -3845,7 +3881,10 @@
                     }
                 },
                 
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Picture Album Update
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 async f_picture_album_update_form() {
                     let formData = new FormData();
                     console.log('upload files!')
@@ -3896,7 +3935,10 @@
                     }
                 },
 
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Manga Album Update
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 async f_manga_album_update_form() {
                     let formData = new FormData();
                     console.log('upload files!')
@@ -3943,7 +3985,10 @@
                     }
                 },
 
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Video Album Update
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 async f_video_album_update_form() {
                     let formData = new FormData();
                     console.log('upload files!')
@@ -3990,7 +4035,10 @@
                     }
                 },
 
+
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Music Album Update
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 async f_music_album_update_form() {
                     let formData = new FormData();
                     console.log('upload files!')
@@ -4166,8 +4214,33 @@
 
                
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                // Cover Image 변경 및 삭제
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+                //                                                Cover Image 변경 및 삭제
+                //
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 // Actor 
@@ -4228,10 +4301,6 @@
                 f_select_picture_as_cover_picture_album(event) {
                     this.selected_picture_album_picture_id = event
                     this.selected_picture_album_id = this.data_picture.id
-                    // console.log('event', event)
-                    // console.log('data_picture_id', this.data_picture.id)
-                    // console.log('selected_picture_album_id', this.selected_picture_album_id)
-                    // console.log('selected_picture_album_picture_id', this.selected_picture_album_picture_id)
                     axios.post('/hans_ent_picture_album_update_modal/', {
                         'button': 'change_picture_album_cover_image',
                         'selected_picture_album_id': this.selected_picture_album_id,
@@ -4554,10 +4623,53 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                // Album 삭제
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+                //                                                      Album 삭제
+                //
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 
+
+                // Actor 삭제시 연관된 앨범 모두 지우기 / Actor만 지우기
+                f_check_switch_actor_delete_with_related_album_as_well(event) {
+                    this.check_switch_actor_delete_with_related_album_as_well != event.target.value
+                    console.log('check_switch_actor_delete_with_related_album_as_well:', event.target.value)
+                },
 
                 // Actor
                 f_select_actor_to_delete(event) {
@@ -4569,6 +4681,7 @@
                         axios.post('/hans_ent_actor_update_modal/', {
                             'selected_actor_id': event,
                             'button': 'remove_actor',
+                            'option_1': this.check_switch_actor_delete_with_related_album_as_well,
                         }, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
@@ -4598,6 +4711,7 @@
                         axios.post('/hans_ent_picture_album_update_modal/', {
                             'button': 'remove_picture_album',
                             'selected_picture_album_id': this.selected_picture_album_id,
+                            'option_1': this.check_switch_actor_delete_with_related_album_as_well,
                         }, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
@@ -4628,6 +4742,7 @@
                         axios.post('/hans_ent_manga_album_update_modal/', {
                             'button': 'remove_manga_album',
                             'selected_manga_album_id': this.selected_manga_album_id,
+                            'option_1': this.check_switch_actor_delete_with_related_album_as_well,
                         }, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
@@ -4684,6 +4799,7 @@
                             'button': 'remove_video_album',
                             'selected_video_album_id': this.selected_video_album_id,
                             'selected_video_album_video_id': this.selected_video_album_video_id,
+                            'option_1': this.check_switch_actor_delete_with_related_album_as_well,
                         }, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
@@ -4741,6 +4857,7 @@
                             'button': 'remove_music_album',
                             'selected_music_album_id': this.selected_music_album_id,
                             'selected_music_album_music_id': this.selected_music_album_music_id,
+                            'option_1': this.check_switch_actor_delete_with_related_album_as_well,
                         }, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
@@ -4767,14 +4884,23 @@
 
 
 
+
+
+
+
+
+
+
                 
+
+
                 
                 
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //
-                // List 화면 Multi Selection Functions
+                //                                               List 화면 Multi Selection Functions
                 //
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5167,8 +5293,35 @@
                 
                 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                // 추가 기능 수행
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+                //                                                   추가 기능 수행
+                //
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 
                 f_input_number_total_crawling_page(event) {
@@ -5528,8 +5681,29 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                // Scraping Album
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+                //                                                     Scraping Album
+                //
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 
 
@@ -5832,8 +6006,41 @@
                 },
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                // Video / Audio Source Handling
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+                //                                           Video / Audio Source Handling
+                //
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 onVideoEnded() {
@@ -6329,8 +6536,48 @@
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                // 리스트 검색 및 정렬 Start
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+                //                                                  리스트 검색 및 정렬 Start
+                //
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 f_selectCategory(event) {
@@ -6870,14 +7117,52 @@
                     })
                 },
 
+
+                // Actor 삭제시 연관된 앨범 모두 지우기 / Actor만 지우기
+                f_check_switch_actor_delete_with_related_album_as_well(event) {
+                    this.check_switch_actor_delete_with_related_album_as_well != event.target.value
+                    console.log('check_switch_actor_delete_with_related_album_as_well:', event.target.value)
+                },
+
+
                 
                 
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                // 리스트 검색 및 정렬 End
+                // 
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 
 
             },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             computed: {
 
@@ -7072,6 +7357,40 @@
              
         }).mount('#app_hans_ent')
 
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
         document.addEventListener('DOMContentLoaded', function () {
         var modalElement = document.getElementById('app_hans_ent_picture_album_create_modal');
         if (modalElement) {
@@ -7094,18 +7413,15 @@
 
         // Picture Album
         $('#app_hans_ent_picture_album_create_modal').on('hidden.bs.modal', function () {
-            // app_hans_ent.f_reset_data_picture_album_create_form()
             app_hans_ent.f_refreshData_picture_album_list()
 	    });
         $('#app_hans_ent_picture_album_update_modal').on('hidden.bs.modal', function () {
-            // app_hans_ent.f_reset_data_picture_album_update_form()
             app_hans_ent.f_refreshData_picture_album_list()
 	    });
         $('#app_hans_ent_picture_album_profile_modal').on('hidden.bs.modal', function () {
             app_hans_ent.f_refreshData_picture_album_list()
 	    });
         $('#app_hans_ent_picture_album_gallery_modal').on('hidden.bs.modal', function () {
-            // app_hans_ent.f_reset_data_picture_album_gallery_modal()
             app_hans_ent.f_refreshData_picture_album_list()
 	    });
         $('#app_hans_ent_picture_album_gallery_fullscreen_modal').on('hidden.bs.modal', function () {
@@ -7114,10 +7430,9 @@
 
         // Manga Album
         $('#app_hans_ent_manga_album_create_modal').on('hidden.bs.modal', function () {
-            app_hans_ent.f_reset_data_manga_album_create_form()
+            app_hans_ent.f_refreshData_manga_album_list()
 	    });
         $('#app_hans_ent_manga_album_update_modal').on('hidden.bs.modal', function () {
-            app_hans_ent.f_reset_data_manga_album_update_form()
             app_hans_ent.f_refreshData_manga_album_list()
 	    });
         $('#app_hans_ent_manga_album_profile_modal').on('hidden.bs.modal', function () {
@@ -7127,7 +7442,6 @@
             app_hans_ent.f_refreshData_manga_album_list()
 	    });
         $('#app_hans_ent_manga_album_gallery_fullscreen_modal').on('hidden.bs.modal', function () {
-            app_hans_ent.f_reset_data_manga_album_gallery_fullscreen()
             app_hans_ent.f_refreshData_manga_album_list()
 	    });
         $('#app_hans_ent_manga_album_scraping_modal').on('hidden.bs.modal', function () {
@@ -7137,11 +7451,9 @@
         
         // Video Album
         $('#app_hans_ent_video_album_create_modal').on('hidden.bs.modal', function () {
-            app_hans_ent.f_reset_data_video_album_create_form()
             app_hans_ent.f_refreshData_video_album_list()
 	    });
         $('#app_hans_ent_video_album_update_modal').on('hidden.bs.modal', function () {
-            app_hans_ent.f_reset_data_video_album_update_form()
             app_hans_ent.f_refreshData_video_album_list()
 	    });
         $('#app_hans_ent_video_album_profile_modal').on('hidden.bs.modal', function () {
@@ -7150,20 +7462,20 @@
         $('#app_hans_ent_video_album_gallery_modal').on('hidden.bs.modal', function () {
             console.log('video modal closed!!!!!!!!')
             app_hans_ent.f_remove_video_source()
-            app_hans_ent.f_reset_data_video_album_gallery()
+            app_hans_ent.f_refreshData_video_album_list()
         });
         
         // Music Album
         $('#app_hans_ent_music_album_create_modal').on('hidden.bs.modal', function () {
             console.log('hahahaha')
-            app_hans_ent.f_reset_data_music_album_create_form()
+            app_hans_ent.f_refreshData_music_album_list()
 	    });
         $('#app_hans_ent_music_album_update_modal').on('hidden.bs.modal', function () {
-            app_hans_ent.f_reset_data_music_album_update_form()
             app_hans_ent.f_refreshData_music_album_list()
 	    });
         $('#app_hans_ent_music_album_gallery_modal').on('hidden.bs.modal', function () {
             app_hans_ent.f_remove_audio_source()
+            app_hans_ent.f_refreshData_music_album_list()
         });
         $('#app_hans_ent_music_album_profile_modal').on('hidden.bs.modal', function () {
             app_hans_ent.f_refreshData_music_album_list()
@@ -7172,6 +7484,31 @@
 
     </script>
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

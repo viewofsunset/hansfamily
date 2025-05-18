@@ -1825,7 +1825,6 @@ def hans_ent_test_function(request):
                 hashcode = q_video_album.hashcode
                 # 검색할 디렉토리와 문자열
                 
-
                 list_matched_file_names = []
                 # Print all file paths
                 if len(file_names) > 0:
@@ -1838,9 +1837,7 @@ def hans_ent_test_function(request):
                             list_matched_file_names.append(name_str)
                 
                 if len(list_matched_file_names) == 0:
-                    # print('i', i)
-                    # print('q_video_album delete', q_video_album.id)
-                    delete_files_in_list_dict_xxx_album(q_video_album, 'video', 'all', 'all') 
+                    delete_files_in_list_dict_xxx_album(q_video_album, 'video', 'all', 'all', 'false') 
                     i = i + 1
             print('i', i)
 
@@ -1993,7 +1990,7 @@ def hans_ent_actor_list(request):
             qs_actor = Actor.objects.filter(id__in=list_actor_id_for_checkbox_selection)
             if qs_actor is not None and len(qs_actor) > 0:
                 for q_actor_selected in qs_actor:
-                    delete_files_in_list_dict_xxx_album(q_actor_selected, 'actor', 'all', 'all')  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
+                    delete_files_in_list_dict_xxx_album(q_actor_selected, 'actor', 'all', 'all', 'true')  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
                
         
        
@@ -2397,6 +2394,11 @@ def hans_ent_actor_update_modal(request):
         list_selected_video_album_for_actor_create_str = None if list_selected_video_album_for_actor_create_str in LIST_STR_NONE_SERIES else list_selected_video_album_for_actor_create_str
         list_selected_music_album_for_actor_create_str = None if list_selected_music_album_for_actor_create_str in LIST_STR_NONE_SERIES else list_selected_music_album_for_actor_create_str
         
+        option_1_str = request.POST.get('option_1')
+        option_1_str = None if option_1_str in LIST_STR_NONE_SERIES else option_1_str
+        
+
+        
         # 선택된 Picture 앨범에서 Actor 찾기 및 앨범 별 대표 이미지 확보
         if list_selected_picture_album_for_actor_create_str is not None:
             list_selected_picture_album_for_actor_create = list_selected_picture_album_for_actor_create_str.split(',')
@@ -2524,13 +2526,20 @@ def hans_ent_actor_update_modal(request):
                 print('delete options selected 3:', 'profile')
                 print('delete options selected 4:', selected_profile_album_picture_id)
                 if q_actor is not None:
-                    delete_files_in_list_dict_xxx_album(q_actor, 'actor', 'profile', selected_profile_album_picture_id)
+                    delete_files_in_list_dict_xxx_album(q_actor, 'actor', 'profile', selected_profile_album_picture_id, 'false')
         
         # 모델 통으로 삭제하기
         if request.POST.get('button') == 'remove_actor':
             print('# 앨범 통으로 삭제하기', q_actor)
             if q_actor is not None:
-                delete_files_in_list_dict_xxx_album(q_actor, 'actor', 'all', 'all')  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
+                '''
+                    삭제할 쿼리(q_actor, q_picture_album, q_video_album 등 ),
+                    삭제할 album 종류(actor, picture, video, music 중 택 1),
+                    삭제할 파일 종류(프로필 이미지, 이미지, 비디오 파일, 등)('all', or 'profile' or 'image', or 'video' 등)
+                    삭제할 리스트 내 아이디('all' or int(id)) 
+                    Option: Actor와 연결된 모든 앨범 삭제하기 ('true' / 'false')
+                '''
+                delete_files_in_list_dict_xxx_album(q_actor, 'actor', 'all', 'all', option_1_str)  
             
             data = {
                 'actor_selected': None,
@@ -2929,10 +2938,10 @@ def hans_ent_actor_update_modal(request):
             file_upload_option_str = None if file_upload_option_str in LIST_STR_NONE_SERIES else file_upload_option_str
 
             print('folder_name_str', folder_name_str)
+            print('file_upload_option_str', file_upload_option_str)
 
             if folder_name_str is not None:
-                print(f'****************************************** 1')
-                print('q_actor 1', q_actor)
+                print(f'폴더 업로드인 경우.****************************************** 1')
                 tree = {}
 
                 for file_obj, relative_path in zip(files, paths):
@@ -2953,10 +2962,9 @@ def hans_ent_actor_update_modal(request):
                     save_folder_in_list_dict_xxx_album(q_actor, files, tree, folder_name_str, file_upload_option_str)
                 
             else:
-                print(f'****************************************** 2')
+                print(f'파일 업로드인 경우****************************************** 2')
                 type_album = 'actor'
                 if files is not None and len(files) > 0:
-                    print('q_actor 2', q_actor)
                     save_files_in_list_dict_xxx_album(q_actor, files, type_album)
 
             # Actor Profile용 이미지 수집하기
@@ -3210,7 +3218,7 @@ def hans_ent_picture_album_list(request):
                             type_album = 'picture'
                             type_list = 'all'
                             id_delete = 'all'
-                            delete_files_in_list_dict_xxx_album(item, type_album, type_list, id_delete)
+                            delete_files_in_list_dict_xxx_album(item, type_album, type_list, id_delete, 'false')
                         i = i + 1
                 # items.exclude(id=items.first().id).delete()
             pass
@@ -3223,7 +3231,7 @@ def hans_ent_picture_album_list(request):
             qs_picture_album = Picture_Album.objects.filter(id__in=list_picture_album_id_for_checkbox_selection)
             if qs_picture_album is not None and len(qs_picture_album) > 0:
                 for q_picture_album_selected in qs_picture_album:
-                    delete_files_in_list_dict_xxx_album(q_picture_album_selected, 'picture', 'all', 'all')  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
+                    delete_files_in_list_dict_xxx_album(q_picture_album_selected, 'picture', 'all', 'all', 'true')  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
                
 
         jsondata = {}
@@ -3913,8 +3921,11 @@ def hans_ent_picture_album_update_modal(request):
         input_info_site_name_str = None if input_info_site_name_str in LIST_STR_NONE_SERIES else input_info_site_name_str
         input_info_site_url_str = None if input_info_site_url_str in LIST_STR_NONE_SERIES else input_info_site_url_str
 
-        print('************* selected_actor_id_str', selected_actor_id_str)
-        print('selected_picture_album_id_str', selected_picture_album_id_str)
+        option_1_str = request.POST.get('option_1')
+        option_1_str = None if option_1_str in LIST_STR_NONE_SERIES else option_1_str
+
+        # print('************* selected_actor_id_str', selected_actor_id_str)
+        # print('selected_picture_album_id_str', selected_picture_album_id_str)
 
         # 선택된 모델 정보 획득
         if selected_actor_id_str is not None and selected_actor_id_str != '':
@@ -4002,13 +4013,13 @@ def hans_ent_picture_album_update_modal(request):
             if selected_picture_album_picture_id_str is not None and selected_picture_album_picture_id_str != '':
                 selected_picture_album_picture_id = int(selected_picture_album_picture_id_str)
                 if q_picture_album_selected is not None:
-                    delete_files_in_list_dict_xxx_album(q_picture_album_selected, 'picture', 'image', selected_picture_album_picture_id)
+                    delete_files_in_list_dict_xxx_album(q_picture_album_selected, 'picture', 'image', selected_picture_album_picture_id, 'false')
 
         # 앨범 통으로 삭제하기
         if request.POST.get('button') == 'remove_picture_album':
-            print('# 앨범 통으로 삭제하기', q_picture_album_selected)
             if q_picture_album_selected is not None:
-                delete_files_in_list_dict_xxx_album(q_picture_album_selected, 'picture', 'all', 'all')  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
+                print(f'# 앨범 통으로 삭제하기: {q_picture_album_selected}, option_1_str: {option_1_str}')
+                delete_files_in_list_dict_xxx_album(q_picture_album_selected, 'picture', 'all', 'all', option_1_str)  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
             return redirect('hans-ent-picture-album-list')
 
         # 앨범 커버 이미지 변경하기
@@ -4997,8 +5008,11 @@ def hans_ent_manga_album_update_modal(request):
         input_info_site_name_str = None if input_info_site_name_str in LIST_STR_NONE_SERIES else input_info_site_name_str
         input_info_site_url_str = None if input_info_site_url_str in LIST_STR_NONE_SERIES else input_info_site_url_str
 
-        print('selected_actor_id_str', selected_actor_id_str)
-        print('selected_manga_album_id_str', selected_manga_album_id_str)
+        option_1_str = request.POST.get('option_1')
+        option_1_str = None if option_1_str in LIST_STR_NONE_SERIES else option_1_str
+
+        # print('selected_actor_id_str', selected_actor_id_str)
+        # print('selected_manga_album_id_str', selected_manga_album_id_str)
 
         # 선택된 모델 정보 획득
         if selected_actor_id_str is not None and selected_actor_id_str != '':
@@ -5032,13 +5046,13 @@ def hans_ent_manga_album_update_modal(request):
             if selected_manga_album_manga_id_str is not None and selected_manga_album_manga_id_str != '':
                 selected_manga_album_manga_id = int(selected_manga_album_manga_id_str)
                 if q_manga_album_selected is not None:
-                    delete_files_in_list_dict_xxx_album(q_manga_album_selected, 'manga', 'image', selected_manga_album_manga_id)
+                    delete_files_in_list_dict_xxx_album(q_manga_album_selected, 'manga', 'image', selected_manga_album_manga_id, 'false')
 
         # 앨범 통으로 삭제하기
         if request.POST.get('button') == 'remove_manga_album':
             print('# 앨범 통으로 삭제하기', q_manga_album_selected)
             if q_manga_album_selected is not None:
-                delete_files_in_list_dict_xxx_album(q_manga_album_selected, 'manga', 'all', 'all')  ## album 종류(actor, manga, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
+                delete_files_in_list_dict_xxx_album(q_manga_album_selected, 'manga', 'all', 'all', option_1_str)  ## album 종류(actor, manga, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
             return redirect('hans-ent-manga-album-list')
 
         # 앨범 커버 이미지 변경하기
@@ -5886,7 +5900,7 @@ def hans_ent_video_album_list(request):
             qs_video_album = Video_Album.objects.filter(id__in=list_video_album_id_for_checkbox_selection)
             if qs_video_album is not None and len(qs_video_album) > 0:
                 for q_video_album_selected in qs_video_album:
-                    delete_files_in_list_dict_xxx_album(q_video_album_selected, 'video', 'all', 'all')  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
+                    delete_files_in_list_dict_xxx_album(q_video_album_selected, 'video', 'all', 'all', 'true')  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
                
         # Data Serialization
         jsondata = {}
@@ -6147,11 +6161,14 @@ def hans_ent_video_album_update_modal(request):
         file_upload_option_str = None if file_upload_option_str in LIST_STR_NONE_SERIES else file_upload_option_str
         folder_upload_option_str = None if folder_upload_option_str in LIST_STR_NONE_SERIES else folder_upload_option_str
         
-        print('selected_actor_id_str', selected_actor_id_str)
-        print('selected_video_album_id_str', selected_video_album_id_str)
-        print('folder_name_str', folder_name_str)
-        print('file_upload_option_str', file_upload_option_str)
-        print('folder_upload_option_str', folder_upload_option_str)
+        option_1_str = request.POST.get('option_1')
+        option_1_str = None if option_1_str in LIST_STR_NONE_SERIES else option_1_str
+
+        # print('selected_actor_id_str', selected_actor_id_str)
+        # print('selected_video_album_id_str', selected_video_album_id_str)
+        # print('folder_name_str', folder_name_str)
+        # print('file_upload_option_str', file_upload_option_str)
+        # print('folder_upload_option_str', folder_upload_option_str)
 
         # 선택된 모델 정보 획득
         if selected_actor_id_str is not None and selected_actor_id_str != '':
@@ -6455,7 +6472,7 @@ def hans_ent_video_album_update_modal(request):
             if selected_video_album_picture_id_str is not None and selected_video_album_picture_id_str != '':
                 selected_video_album_picture_id = int(selected_video_album_picture_id_str)
                 if q_video_album_selected is not None:
-                    delete_files_in_list_dict_xxx_album(q_video_album_selected, 'video', 'image', selected_video_album_picture_id)  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
+                    delete_files_in_list_dict_xxx_album(q_video_album_selected, 'video', 'image', selected_video_album_picture_id, 'false')  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
                     
         # 비디오 앨범 비디오 삭제하기(선택한 비디오만)
         if request.POST.get('button') == 'remove_video_album_video':
@@ -6463,13 +6480,13 @@ def hans_ent_video_album_update_modal(request):
             if selected_video_album_video_id_str is not None and selected_video_album_video_id_str != '':
                 selected_video_album_video_id = int(selected_video_album_video_id_str)
                 if q_video_album_selected is not None:
-                    delete_files_in_list_dict_xxx_album(q_video_album_selected, 'video','video', selected_video_album_video_id)  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
+                    delete_files_in_list_dict_xxx_album(q_video_album_selected, 'video','video', selected_video_album_video_id, 'false')  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
 
         # 비디오 앨범 통으로 삭제하기
         if request.POST.get('button') == 'remove_video_album':
             print('# 비디오 앨범 통으로 삭제하기', q_video_album_selected)
             if q_video_album_selected is not None:
-                delete_files_in_list_dict_xxx_album(q_video_album_selected, 'video', 'all', 'all')  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
+                delete_files_in_list_dict_xxx_album(q_video_album_selected, 'video', 'all', 'all', option_1_str)  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
             return redirect('hans-ent-video-album-list')
 
         # 업로드 타이틀 정보 저장하기
@@ -6903,6 +6920,7 @@ def hans_ent_video_album_update_modal(request):
                         else:
                             save_files_in_list_dict_xxx_album(q_video_album_selected, new_files, type_album='video')
                             if q_video_album_selected.main_actor is not None:
+                                print('--------------------------- cover 이미지 actor에 등록하기')
                                 try:
                                     collect_images_from_registered_video_album_for_actor_profile_cover_image(q_video_album_selected.main_actor)
                                 except:
@@ -6916,6 +6934,7 @@ def hans_ent_video_album_update_modal(request):
                         if files is not None and len(files) > 0:
                             save_files_in_list_dict_xxx_album(q_video_album_selected, files, type_album='video')
                             if q_video_album_selected.main_actor is not None:
+                                print('--------------------------- cover 이미지 actor에 등록하기')
                                 try:
                                     collect_images_from_registered_video_album_for_actor_profile_cover_image(q_video_album_selected.main_actor)
                                 except:
@@ -6932,6 +6951,7 @@ def hans_ent_video_album_update_modal(request):
                     if files is not None and len(files) > 0:
                         save_files_in_list_dict_xxx_album(q_video_album_selected, files, type_album='video')
                         if q_video_album_selected.main_actor is not None:
+                            print('--------------------------- cover 이미지 actor에 등록하기')
                             try:
                                 collect_images_from_registered_video_album_for_actor_profile_cover_image(q_video_album_selected.main_actor)
                             except:
@@ -7427,6 +7447,9 @@ def hans_ent_music_album_update_modal(request):
         selected_music_sub_type_str = None if selected_music_sub_type_str in LIST_STR_NONE_SERIES else selected_music_sub_type_str
         selected_filtering_category_id_str = None if selected_filtering_category_id_str in LIST_STR_NONE_SERIES else selected_filtering_category_id_str
 
+        option_1_str = request.POST.get('option_1')
+        option_1_str = None if option_1_str in LIST_STR_NONE_SERIES else option_1_str
+
         folder_name_str = request.POST.get('folder_name')
         folder_name_str = None if folder_name_str in LIST_STR_NONE_SERIES else folder_name_str
         input_info_site_name_str = request.POST.get('input_info_site_name')
@@ -7487,7 +7510,7 @@ def hans_ent_music_album_update_modal(request):
             if selected_music_album_picture_id_str is not None and selected_music_album_picture_id_str != '':
                 selected_music_album_picture_id = int(selected_music_album_picture_id_str)
                 if q_music_album_selected is not None:
-                    delete_files_in_list_dict_xxx_album(q_music_album_selected, 'music', 'image', selected_music_album_picture_id)
+                    delete_files_in_list_dict_xxx_album(q_music_album_selected, 'music', 'image', selected_music_album_picture_id, 'false')
 
         # 뮤직 앨범 오디오 삭제하기(선택한 오디오만)
         if request.POST.get('button') == 'remove_music_album_music':
@@ -7495,13 +7518,13 @@ def hans_ent_music_album_update_modal(request):
             if selected_music_album_music_id_str is not None and selected_music_album_music_id_str != '':
                 selected_music_album_music_id = int(selected_music_album_music_id_str)
                 if q_music_album_selected is not None:
-                    delete_files_in_list_dict_xxx_album(q_music_album_selected, 'music', 'audio', selected_music_album_music_id)
+                    delete_files_in_list_dict_xxx_album(q_music_album_selected, 'music', 'audio', selected_music_album_music_id, 'false')
 
         # 뮤직 앨범 통으로 삭제하기
         if request.POST.get('button') == 'remove_music_album':
             print('# 앨범 통으로 삭제하기', q_music_album_selected)
             if q_music_album_selected is not None:
-                delete_files_in_list_dict_xxx_album(q_music_album_selected, 'music', 'all', 'all')  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
+                delete_files_in_list_dict_xxx_album(q_music_album_selected, 'music', 'all', 'all', option_1_str)  ## album 종류(actor, picture, video, music 중 택 1), 싱글 쿼리, 삭제종류('all' or int(id)) 
             return redirect('hans-ent-music-album-list')
 
         
